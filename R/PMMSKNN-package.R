@@ -1,0 +1,60 @@
+#'@importFrom brokenstick brokenstick get_knots
+#'@importFrom reshape2    melt
+#'@importFrom broom       tidy
+#'@importFrom gamlss      gamlss centiles.pred cs pb gamlss.control
+#'@importFrom gamlss.dist BCCGo BCPEo BCTo GA NO
+#'@importFrom dplyr       bind_rows filter filter_ mutate %>% group_by
+#'                        n select select_ left_join distinct distinct_
+#'                        summarise summarise_ arrange arrange_ 
+#'                        rename rename_ bind_cols full_join ntile do 
+#'                        if_else row_number group_by_ slice ungroup
+#'                        tibble mutate_
+#'@importFrom data.table  data.table rbindlist
+#'@importFrom cowplot     plot_grid get_legend
+#'@importFrom DescTools   MedianCI
+#'@importFrom lme4        lmer
+#'@importFrom merTools    predictInterval
+#'@importFrom tidyr       spread
+#'@importFrom tidyselect  contains matches
+#'@importFrom rlang       .data := parse_quosure
+#'@importFrom ggplot2     aes aes_string facet_wrap geom_abline 
+#'                        geom_boxplot geom_hline geom_line geom_point
+#'                        geom_pointrange geom_text ggplot geom_smooth
+#'                        scale_colour_manual theme theme_bw
+#'                        xlab xlim ylab ylim annotate guide_legend
+#'                        labs
+#'@importFrom MASS        stepAIC mvrnorm
+#'@importFrom doParallel  registerDoParallel 
+#'@importFrom doSNOW      registerDoSNOW 
+#'@importFrom parallel    makeCluster
+#'@importFrom foreach     foreach %dopar%
+#'@importFrom stats       as.formula complete.cases cor formula
+#'                        glm lm median  na.omit pnorm poisson 
+#'                        predict setNames update median rchisq
+#'                        model.matrix coef quantile fitted
+#'@importFrom utils       head str
+NULL
+
+globalVariables(c(".","fitmed", "fitpois"))
+
+#' \pkg{PMMSKNN}: Curve Matching Validation Tools for Knee Surgery Outcomes.
+#'
+#' INSERT HERE DESCRIPTION OF THE PACKAGE 
+#'
+#' @section PMMSKNN functions:
+#' The main functions are:
+#' \tabular{ll}{
+#'   \code{preproc()}        \tab Preprocess the data\cr
+#'   \code{loocv_function()} \tab Evaluate statistical properties\cr
+#'   \code{plot_cal()}       \tab Create calibration plots}
+#' @docType package
+#' @name PMMSKNN-pkg
+#' @seealso \code{\link{brokenstick}}
+#' @note
+#' Development of this package was kindly supported by 
+#' FUNDER under THIS GRANT NUMBER
+#' @references
+#' Kittelson et al. (2019). \emph{Development and testing of a 
+#' neighbors-based prediction for physical function after total 
+#' knee arthroplasty}. In preparation.
+NULL

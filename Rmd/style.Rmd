@@ -1,0 +1,81 @@
+---
+title: "Suggestions on programming style"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+These are comments on `pcr 0.2.0` meant to improve readability and robustness of the package.
+
+## Length of functions
+
+The main functions `preproc()` and `loocv_function()` are both very long, which makes it difficult to test. 
+
+Suggestion: Break down to functions spanning not more than 20-30 lines of R code, that do just one.
+
+## Style
+
+There are sometimes eclcectic mixes of styles. For example, the start of 
+`loocvperf()` is
+
+```r
+  data.frame(
+    zscore = sapply(loocv_res, function(x) { 
+      rbindlist(x$zscore, idcol="id") %>%
+        left_join(
+          train_o %>% dplyr::select(.data$id) %>%
+            rename(patient_id = .data$id) %>%
+            cbind(., id=seq(1,nrow(train_o))) 
+        )%>% 
+        ...
+```
+
+It is hard to see where the code block ends, and what it does. There 
+is a mix of a return value (`data.frame`), tidyverse style `dplyr` commands, a 
+`data.table` function, an input data frame called `loocv_res`, the standard R data frame selection `$`, a data frame `x` which is actually equal `loocv_res`, a `function()` definition and it's hard to see where it end, an `sapply()` function, a `cbind()` function that is better replaced by it `bind_cols()`, piping operators `%>%` that appear at inconsistent places and inconsistent spacing. That's a lot to swallow. 
+
+Suggestions: Do not try to do everything at once, but first create the necessary components before using them, use a consistent style (`tidyverse`), with preferably not more than four indentation levels. Try avoiding the `data$varname` construction, and use `dplyr` syntax consistently throughout.
+
+## Length of code lines
+
+Many input lines (especially in `loocv_function()`) have more than 100 characters, which then wrap around on smaller screens, which makes the code an annoying read. 
+
+Suggestion: Set your right margin to 70, and only exceed incidentally by a few characters.
+
+## Function names and arguments
+
+The function names are not very descriptive of what they do. Many 
+functions take as arguments only specialized lists created by previous functions. Unless you know how the structure and the naming conventions used in the special lists, it is difficult to interpret what exactly the function needs, and what it does. 
+
+Suggestions: Use `verb_noun()` naming for functions, e.g. `plot_calibration()`,  `calculate_model_performance()`, and so on. Try to adhere to standard argument names like `data`, and 
+use documented `class` objects if you need to transfer a list of results 
+from one function to the other.
+
+## Duplication of code
+
+`loocv_function()` contains large duplicated blocks, so reading and maintaing code becomes challenging. 
+
+Suggestion: Code each functionality with one set of code, e.g., in one specialized function.
+
+## Comments
+
+Suggestion: Place each comment on a separate line, just before the block to 
+which it applies. Do not outcomment code (but delete). Do not put comments
+at the end of the code line.
+
+
+## Unit level testing
+
+Suggestions: Add `testthat` test for (short) functions that test for missing arguments, missing data, zeroes, and so on, and include these test in the development runs.
+
+## Scripts
+
+Current scripts that call the functions often attempt to address multiple scenarios. 
+
+Suggestions: It is better to create many scripts, one for each analysis, and state at the beginning what it does. The script should be able to run 
+from a fresh start. Duplication of code over different scripts is allowed (of course), but try to minimize duplication by using a one or two high-level functions. Use [Rscript](https://support.rstudio.com/hc/en-us/articles/218012917-How-to-run-R-scripts-from-the-command-line) to test in batch mode.
+
+
+
+
+

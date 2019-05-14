@@ -1,0 +1,38 @@
+Package: PMMSKNN
+Title: Curve Matching Validation Tools for Knee Surgery Outcomes
+Version: 0.2.0.9001
+Authors@R: c(
+    person("Chong", "Kim", email = "chong.kim@ucdenver.edu", role = c("aut", "cre")),
+    person("Kathryn", "Colborn", email = "katryn.colborn@ucdenver.edu", role = "aut"),
+    person("Timothy", "Loar", email = "timothy.loar@ucdenver.edu", role = "aut"),
+    person("Andrew", "Kittelson", email = "andrew.kittelson@ucdenver.edu", role = "aut"),
+    person("Stef", "van Buuren", email = "stef.vanbuuren@tno.nl", role = "aut"))
+Description: This package provides tools for validating curve matching 
+    methodology applied to predict trajectories of Knee Surgery Outcomes 
+    for patients.
+Depends: R (>= 3.5.0)
+Imports: reshape2,
+         broom,
+         brokenstick, 
+         dplyr,
+         tidyr,
+         tidyselect,
+         gamlss,
+         gamlss.dist,
+         rlang,
+         ggplot2,
+         MASS,
+         cowplot, 
+         DescTools,
+         lme4,
+         merTools,
+         data.table,
+         doParallel,
+         doSNOW,
+         parallel,
+         stats,
+         foreach
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
