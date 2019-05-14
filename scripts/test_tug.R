@@ -2,14 +2,14 @@
 # Filename      : C.K.
 # Purpose       : Test out new functions in PMMSKNN package
 # Date created  : somedate
-# Last modified : Mon 13 May 2019 10:11:26 PM MDT
+# Last modified : Tue 14 May 2019 09:42:52 AM MDT
 # Created by    : C.K.
 # Modified by   : ck1
 # }}}
 
 # Load Libraries {{{
 library("pacman")
-p_load(PMMSKNN, readxl, dplyr)
+p_load(PMMSKNN, readxl, dplyr, here)
 # }}}
 
 # Load Data and Wrangle {{{
@@ -75,7 +75,6 @@ test_proc <- preproc(
 # RUN LOOCV on Training {{{
 
 # LOOCV: Non Parallel {{{
-debug(loocv_function)
 fin <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
@@ -112,7 +111,7 @@ fin <- loocv_function(
 fin <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(15:100),
+  nearest_n = c(15:17),
   # enter training and testing post operative and fitted y90 dataset
   train_post = test_proc$train_post,
   ord_data = test_proc$train_o,
@@ -141,7 +140,7 @@ fin <- loocv_function(
   
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
-  dist_fam = gamlss.dist::BCCGo)
+  dist_fam = gamlss.dist::NO)
 
 # }}}
 
@@ -162,11 +161,22 @@ plot_cal(plotobj = fin, test_proc = test_proc, obs_dist = "median", loocv = FALS
 # Performance Measures {{{
 
 # Internal Validation {{{
-loocvperf(fin$loocv_res, test_proc$train_o)
+loocvperf(fin$loocv_res, 
+          test_proc$train_o, 
+          bias="raw",
+          nearest_n=fin$loocv_score$nearest_n) 
 # }}}
 
 # External Validation {{{
 extvalid(fin, test_proc)
+# }}}
+
+# Inspection of fin object {{{
+
+fin %>% str(max.level = 2)
+fin$pred_res$iqrcoverage
+# there are many NA values in predicting the coverage for test set... NOT GOOD!
+
 # }}}
 
 # }}}
