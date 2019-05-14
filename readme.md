@@ -1,8 +1,8 @@
-# Patient Reference Chart for Knee Surgery Recovery 
+# Predictive Mean Matched Sequential K-Nearest Neighbor 
 
 ## Introduction
 
-The purpose of the this repository is to provide a method for determining the trajectory of Knee Surgery Outcomes for patients. The repository also contains a shiny-application for providers to utilize in practice.
+The purpose of the this repository is to provide a method for determining the trajectory of Knee Surgery Outcomes for patients based on obtaining predictions for patients using a 'patient-like-me' algorithm (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pubmed/20676226)). 
 
 ## Data
 
