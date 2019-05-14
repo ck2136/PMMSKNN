@@ -1,8 +1,7 @@
 #' Calculate bias, coverage and CI width for neighbors-based prediction
 #' 
 #' The function calculate three frequency-based parameters to 
-#' demonstate statistical quality of the neighbors-based prediction.
-#' The parameters are bias, coverage and the 50% prediction interval 
+#' demonstate statistical quality of the neighbors-based prediction.  #' The parameters are bias, coverage and the 50% prediction interval 
 #' width.
 #' @param ref   Fitted gamlss object from \code{\link{fitrefgamlss}}
 #' @param nearest Numeric vector with number of matches per scenario

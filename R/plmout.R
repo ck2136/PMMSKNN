@@ -75,12 +75,12 @@ plmout <- function(
 
         if(!is.data.frame(zsc)) {
             message('Something wrong with Z-SCORE prediction. Prediction not included')
-            perfout$zsc_list[[i]] <- data.frame(zsc = NA,
+            perfout$zscore[[i]] <- data.frame(zsc = NA,
                                           test_id = traintestmatchdf[traintestmatchdf$train_id %in% ord_data$id[c(i)], "test_id"],
                                           time = NA
             )
         } else {
-            perfout$zsc_list[[i]] <- zsc
+            perfout$zscore[[i]] <- zsc
         }
 
         # -- IQR values
@@ -162,13 +162,13 @@ plmout <- function(
         if(!is.data.frame(zsc)) {
 
             message('Something wrong with Z-SCORE prediction. Prediction not included')
-            perfout$zsc_list[[i]] <- data.frame(zsc = NA,
+            perfout$zscore[[i]] <- data.frame(zsc = NA,
                                           train_id = ord_data$id[c(i)],
                                           time = NA
             )
 
         } else {
-            perfout$zsc_list[[i]] <-  zsc
+            perfout$zscore[[i]] <-  zsc
         }
 
         message(paste0("Getting MLE  predictions: "))
