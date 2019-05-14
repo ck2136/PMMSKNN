@@ -1,11 +1,20 @@
-# File:             test_tug.R
-# Objective:        Test out new functions in pcr package
+# FILEINFO {{{
+# Filename      : C.K.
+# Purpose       : Test out new functions in PMMSKNN package
+# Date created  : somedate
+# Last modified : Mon 13 May 2019 10:11:26 PM MDT
+# Created by    : C.K.
+# Modified by   : ck1
+# }}}
 
-library("pcr")
-library("readxl") # read original data
-library("dplyr") # ez data manipulation
+# Load Libraries {{{
+library("pacman")
+p_load(PMMSKNN, readxl, dplyr)
+# }}}
 
+# Load Data and Wrangle {{{
 data(tug_full)
+
 # load only the TUG dataset
 full  <- tug_full
 
@@ -30,7 +39,7 @@ full <- full %>%
 
 # Train and Test split for all TKA outcomes: create 
 set.seed(1234)
-full <- pcr:::baselinemk(full, "patient_id", "time")
+full <- PMMSKNN:::baselinemk(full, "patient_id", "time")
 
 # make sure there aren't any missing data and etc
 summary(full) ;  sapply(full, function(x) {
@@ -38,48 +47,45 @@ summary(full) ;  sapply(full, function(x) {
 
 full <- full %>%
     distinct(patient_id, time, .keep_all=TRUE)
+# }}}
 
-
-#- - - - - - - - - - - - - - - - - - - - - - - - - - #
-## Run the Long LOOCV Training Set Matchem Up!
-#- - - - - - - - - - - - - - - - - - - - - - - - - - #
-
-##extract fitted values for the linear model (PREOP only here)
-#-- preprocess train and test data: involves
-#1. Taking training post data and running broken stick to get y90 or yNU where NU is value chosen
-#2. Processes test data set so that yNU is matched with training data
-#3. The matched test and train data according to yNU is used to later match the personalized predicted gamlss
+# PREPROCESS DATA {{{
+## extract fitted values for the linear model (PREOP only here)
+#-- preprocess train and test data involves:
+###   1. Taking training post data and running broken stick to get y90 or yNU where NU is value chosen
+###   2. Processes test data set so that yNU is matched with training data
+###   3. The matched test and train data according to yNU is used to later match the personalized predicted gamlss
 
 test_proc <- preproc(
-                dff=full,  # specify full dataset name
+                dff=full,                 # specify full dataset name
                 split_var = 'train_test', # train test split variable
-                trainval = 1, # training set value
-                testval = 2, # test set value
+                trainval = 1,             # training set value
+                testval = 2,              # test set value
                 knots_exp = c(0, 14, 50, 90), # Specify broken stick knots
-                out_time = 90,  # specify which timepoint to use 
-                outcome = "tug", # specify outcome variable name
-                time_var = "time", # specify time variable name
-                pat_id = "patient_id", # specify patient id variable name
+                out_time = 90,            # specify which timepoint to use 
+                outcome = "tug",          # specify outcome variable name
+                time_var = "time",        # specify time variable name
+                pat_id = "patient_id",    # specify patient id variable name
                 varlist = c("age","gender","bmi","b_tug"), # specify list of covariates for pmm
-                filter_exp = "time > 3"               
+                filter_exp = "time > 3"   # Filter observations that will be included
 )
 
-# - - - - - - - - - - - - - - -#
-# TRAINING DATA: LOOCV Result Non-Parallel
-# - - - - - - - - - - - - - - -#
+# }}}
 
-# Call loocv_function
+# RUN LOOCV on Training {{{
+
+# LOOCV: Non Parallel {{{
+debug(loocv_function)
 fin <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(15:17),
+  nearest_n = c(13:14),
   # enter training and testing post operative and fitted y90 dataset
   train_post = test_proc$train_post,
   ord_data = test_proc$train_o,
   test_post = test_proc$test_post,
   test_o = test_proc$test_o,
   # Specify outcome variable and time variable name
-  parallel = 3,
   outcome = "tug",
   time_elapsed = "time",
   interval = 10,
@@ -97,12 +103,11 @@ fin <- loocv_function(
   
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
-  dist_fam = gamlss.dist::BCCGo)
+  dist_fam = gamlss.dist::NO)
 
+# }}}
 
-# - - - - - - - - - - - - - - -#
-# TRAINING DATA: LOOCV Result Parallel
-# - - - - - - - - - - - - - - -#
+# LOOCV: Parallel {{{
 
 fin <- loocv_function(
   
@@ -138,29 +143,30 @@ fin <- loocv_function(
   #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::BCCGo)
 
-# - - - - - - - - - - - - - - - - - - - - #
-# Plots: Calibration, Bias/RMSE and Coverage
-# - - - - - - - - - - - - - - - - - - - - #
+# }}}
 
-#-- Bias, Cov, Pred
+# }}}
+
+# Plots {{{
+
+# Bias, Cov, Pred {{{
 plot_cal(plotobj = fin, test_proc = test_proc, obs_dist = "median")
+# }}}
 
-# Calibration plot
+# Calibration {{{
 plot_cal(plotobj = fin, test_proc = test_proc, obs_dist = "median", loocv = FALSE)
+# }}}
 
-# - - - - - - - - - - - - - - - - - - - - #
-# Plots: Reference vs patient level 
-# - - - - - - - - - - - - - - - - - - - - #
+# }}}
 
+# Performance Measures {{{
 
-# - - - - - - - - - - - - - - - - - - - - #
-# Internal Validation Performance Measures
-# - - - - - - - - - - - - - - - - - - - - #
-
+# Internal Validation {{{
 loocvperf(fin$loocv_res, test_proc$train_o)
+# }}}
 
-# - - - - - - - - - - - - - - - - - - - - #
-# External Validation Performance Measures
-# - - - - - - - - - - - - - - - - - - - - #
-
+# External Validation {{{
 extvalid(fin, test_proc)
+# }}}
+
+# }}}
