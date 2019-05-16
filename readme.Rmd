@@ -42,6 +42,7 @@ devtools::install_local('.')
 
 ## Example workflow
 
+### Load Libraries and TUG data
 ```{r loadlibs}
 library("pacman")
 p_load(PMMSKNN, readxl, dplyr, here, magrittr)
@@ -49,6 +50,7 @@ data(tug_full) ## example tug data
 
 ```
 
+### Wrangle TUG data
 ```{r wrangledata}
 # load only the TUG dataset
 full  <- tug_full
@@ -76,11 +78,82 @@ full <- full %>%
 set.seed(1234)
 full <- PMMSKNN:::baselinemk(full, "patient_id", "time")
 
-# Need 
+# Need to have distinct patient id's for the full data
 full %<>%
     distinct(patient_id, time, .keep_all=TRUE)
 ```
 
+### preproc() creates matched test/train based on PMM
+```{r preprocfunc}
+test_proc <- preproc(
+                dff=full,                 # specify full dataset name
+                split_var = 'train_test', # train test split variable
+                trainval = 1,             # training set value
+                testval = 2,              # test set value
+                knots_exp = c(0, 14, 50, 90), # Specify broken stick knots
+                out_time = 90,            # specify which timepoint to use 
+                outcome = "tug",          # specify outcome variable name
+                time_var = "time",        # specify time variable name
+                pat_id = "patient_id",    # specify patient id variable name
+                varlist = c("age","gender","bmi","b_tug"), # specify list of covariates for pmm
+                filter_exp = "time > 3"   # Filter observations that will be included
+)
+test_proc %>% str(max.level=1)
+```
+
+### LOOCV: loocv_function() calculates performance measure 
+```{r loocvfunc, eval=FALSE}
+res <- loocv_function(
+  
+  # specify number or vector of numbers from {1,...,total number of patients in training data} 
+  nearest_n = c(13:14),
+  # enter training and testing post operative and fitted y90 dataset
+  train_post = test_proc$train_post,
+  ord_data = test_proc$train_o,
+  test_post = test_proc$test_post,
+  test_o = test_proc$test_o,
+  # Specify outcome variable and time variable name
+  outcome = "tug",
+  time_elapsed = "time",
+  interval = 10,
+
+  # Specify number of cores for parallel processing
+  parallel=3,
+  
+  # Specify use of cubic spline or not
+  cs=TRUE,
+  
+  # specify degrees of freedom use or not
+  dfspec=TRUE,
+  
+  # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
+  # specify power transformation of location (ptr_m)
+  d_f_m=3, ptr_m=0.5,
+  d_f_s=1,
+  
+  # Specify distribution for location, scale and shape 
+  #dist_fam = gamlss.dist::NO)
+  dist_fam = gamlss.dist::NO)
+```
+```{r, echo=FALSE}
+res <- readRDS("/srv/shiny-server/prc_app_rep/data/fin_BCCGo_5_400_cs_dfspec_tug_type0.RDS")
+```
+
+### Plots: plot_cal() returns a plot of the performance measures from the LOOCV 
+
+
+```{r plotloocv}
+plot_cal(plotobj = res, test_proc = test_proc, 
+         obs_dist = "median")
+```
+
+### Plots: plot_cal() also returns plot of the calibration 
+
+```{r plotcal}
+plot_cal(plotobj = res, test_proc = test_proc,
+         obs_dist = "median", loocv = FALSE)  
+      ## Note: specify loocv = FALSE 
+```
 
 
 ## Authors
