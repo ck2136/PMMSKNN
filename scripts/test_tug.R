@@ -2,7 +2,7 @@
 # Filename      : C.K.
 # Purpose       : Test out new functions in PMMSKNN package
 # Date created  : somedate
-# Last modified : Tue 14 May 2019 09:42:52 AM MDT
+# Last modified : Thu 16 May 2019 02:21:31 PM MDT
 # Created by    : C.K.
 # Modified by   : ck1
 # }}}
@@ -15,6 +15,7 @@ p_load(PMMSKNN, readxl, dplyr, here)
 # Load Data and Wrangle {{{
 data(tug_full)
 
+## Wrangle Steup {{{
 # load only the TUG dataset
 full  <- tug_full
 
@@ -47,6 +48,8 @@ summary(full) ;  sapply(full, function(x) {
 
 full <- full %>%
     distinct(patient_id, time, .keep_all=TRUE)
+## }}}
+
 # }}}
 
 # PREPROCESS DATA {{{
