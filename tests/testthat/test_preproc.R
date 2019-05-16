@@ -2,7 +2,7 @@
 # Filename      : test_preproc.R
 # Purpose       : testing the output of preproc()
 # Date created  : Tue 14 May 2019 07:08:51 PM MDT
-# Last modified : Tue 14 May 2019 09:19:46 PM MDT
+# Last modified : Thu 16 May 2019 07:24:48 AM MDT
 # Created by    : ck1
 # Modified by   : ck1
 # }}}
@@ -10,7 +10,7 @@ context("Preprocessing Data")
 
 # Load Libs and data  {{{
 library("pacman")
-p_load(PMMSKNN)
+p_load(PMMSKNN,testthat)
 data(tug_full)
 # }}}
 
