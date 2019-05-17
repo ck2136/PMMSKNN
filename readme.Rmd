@@ -104,7 +104,7 @@ test_proc %>% str(max.level=1)
 - Depending on the `knots_exp` specified and the `out_time` time chosen, there will likely be warnings about parameter estimation within the `brokenstick()` algorithm. Here is where the researcher needs to consider the appropriate values for the variable in terms of clinical relevance and the data at hand.
 
 ### LOOCV: loocv_function() calculates performance measure 
-```{r loocvfunc, results='hide'}
+```{r loocvfunc, results='hide',warning=FALSE, message=FALSE}
 res <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
