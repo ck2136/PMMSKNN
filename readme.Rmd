@@ -137,52 +137,19 @@ res <- loocv_function(
   #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::NO)
 ```
-```{r loocvfuncjustcode, eval=FALSE}
-res <- loocv_function(
-  
-  # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(13:14),
-  # enter training and testing post operative and fitted y90 dataset
-  train_post = test_proc$train_post,
-  ord_data = test_proc$train_o,
-  test_post = test_proc$test_post,
-  test_o = test_proc$test_o,
-  # Specify outcome variable and time variable name
-  outcome = "tug",
-  time_elapsed = "time",
-  interval = 10,
-
-  # Specify number of cores for parallel processing
-  parallel=3,
-  
-  # Specify use of cubic spline or not
-  cs=TRUE,
-  
-  # specify degrees of freedom use or not
-  dfspec=TRUE,
-  
-  # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
-  # specify power transformation of location (ptr_m)
-  d_f_m=3, ptr_m=0.5,
-  d_f_s=1,
-  
-  # Specify distribution for location, scale and shape 
-  #dist_fam = gamlss.dist::NO)
-  dist_fam = gamlss.dist::NO)
-```
 
 
 ### Plots: plot_cal() returns a plot of the performance measures from the LOOCV 
 
 
-```{r plotloocv}
+```{r plotloocv, warning=FALSE, message=FALSE}
 plot_cal(plotobj = res, test_proc = test_proc, 
          obs_dist = "median")
 ```
 
 ### Plots: plot_cal() also returns plot of the calibration 
 
-```{r plotcal}
+```{r plotcal, warnings=FALSE, message=FALSE}
 plot_cal(plotobj = res, test_proc = test_proc,
          obs_dist = "median", loocv = FALSE)  
       ## Note: specify loocv = FALSE 
