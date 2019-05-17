@@ -38,7 +38,7 @@ predZsc <- function(
         # get predicted values using centles.pred()
         # - - - - - - - - - - - - - - - - - - - - - - #
         for(x in traintestmatchdf[traintestmatchdf$train_id %in% ord_data$id[c(i)], "test_id"]){
-            message(paste0("PREDICTING FOR TEST = ",x))
+            #message(paste0("PREDICTING FOR TEST = ",x))
             testpred <- testpred %>% 
                 bind_rows(
                           data.frame(
