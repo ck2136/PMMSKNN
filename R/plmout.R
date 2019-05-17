@@ -171,7 +171,7 @@ plmout <- function(
             perfout$zscore[[i]] <-  zsc
         }
 
-        message(paste0("Getting MLE  predictions: "))
+        #message(paste0("Getting MLE  predictions: "))
 
         # - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - #
         # code for storing either LOOCV result or extracting prediction #
