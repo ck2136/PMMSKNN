@@ -10,7 +10,7 @@ knitr::opts_chunk$set(collapse=TRUE, comment="##", fig.retina=2, fig.path = "REA
 
 ## Introduction
 
-The purpose of the this repository is to provide a method for determining the trajectory of Knee Surgery Outcomes for patients based on obtaining predictions for patients using a 'patient-like-me' algorithm (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pubmed/20676226)). 
+The purpose of the this repository is to provide a method for determining the trajectory of Knee Surgery Outcomes for patients based on obtaining predictions for patients using a 'patient-like-me' algorithm (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pubmed/20676226) (SKNN)). We extend the SKNN approach by matching similar patients using the [predictive mean matching](https://amstat.tandfonline.com/doi/abs/10.1080/07350015.1988.10509663).
 
 ## Data
 
@@ -18,7 +18,7 @@ The data is coming from patient information recorded in the UC Health system (RE
 
 ## Code for Analysis
 
-/code folder contains the analysis code and there a scripts in the /script folder. Testing on TUG data set is done with `test_tug.R`. The main prediction method is using the R package [brokenstick](https://github.com/stefvanbuuren/brokenstick), along with [predictive mean matching](https://books.google.com/books?hl=en&lr=&id=rM8eSRUYYHYC&oi=fnd&pg=PA442&dq=%22predictive+mean+matching%22++rubin&ots=OM-74mXZoX&sig=H-tIcTl7xqIfbgumXuHBktBTfkQ#v=onepage&q=%22predictive%20mean%20matching%22%20%20rubin&f=false) and [gamlss](https://www.gamlss.com/). Currently the code is under development to work within the [caret](https://github.com/topepo/caret) and [mlr](https://github.com/mlr-org/mlr) packages. 
+[code folder](https://github.com/ck2136/PMMSKNN/tree/master/code) contains the analysis code and there a scripts in the [script folder](https://github.com/ck2136/PMMSKNN/tree/master/scripts). Testing on [TUG data set](https://github.com/ck2136/PMMSKNN/blob/master/data/tug_full.rda) is done with [`test_tug.R`](https://github.com/ck2136/PMMSKNN/tree/master/tests/testthat). The main prediction method is using the R package [brokenstick](https://github.com/stefvanbuuren/brokenstick), along with [predictive mean matching](https://books.google.com/books?hl=en&lr=&id=rM8eSRUYYHYC&oi=fnd&pg=PA442&dq=%22predictive+mean+matching%22++rubin&ots=OM-74mXZoX&sig=H-tIcTl7xqIfbgumXuHBktBTfkQ#v=onepage&q=%22predictive%20mean%20matching%22%20%20rubin&f=false) and [gamlss](https://www.gamlss.com/). Currently the code is under development to work within the [caret](https://github.com/topepo/caret) and [mlr](https://github.com/mlr-org/mlr) packages. 
 
 ## Installation/Compilation Tip
 
@@ -35,7 +35,7 @@ R CMD Install PMMSKNN
 
 - There will be dependencies that should be resolved if installation isn't done through the standard R method (in R):
 ```
-ddvtools::install_github("stefvanbuuren/brokenstick")
+devtools::install_github("stefvanbuuren/brokenstick")
 devtools::install_deps('.')
 devtools::install_local('.')
 ```
@@ -101,8 +101,10 @@ test_proc <- preproc(
 test_proc %>% str(max.level=1)
 ```
 
+- Depending on the `knots_exp` specified and the `out_time` time chosen, there will likely be warnings about parameter estimation within the `brokenstick()` algorithm. Here is where the researcher needs to consider the appropriate values for the variable in terms of clinical relevance and the data at hand.
+
 ### LOOCV: loocv_function() calculates performance measure 
-```{r loocvfunc, eval=FALSE}
+```{r loocvfunc, results='hide'}
 res <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
@@ -135,9 +137,40 @@ res <- loocv_function(
   #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::NO)
 ```
-```{r, echo=FALSE}
-res <- readRDS("/srv/shiny-server/prc_app_rep/data/fin_BCCGo_5_400_cs_dfspec_tug_type0.RDS")
+```{r loocvfuncjustcode, eval=FALSE}
+res <- loocv_function(
+  
+  # specify number or vector of numbers from {1,...,total number of patients in training data} 
+  nearest_n = c(13:14),
+  # enter training and testing post operative and fitted y90 dataset
+  train_post = test_proc$train_post,
+  ord_data = test_proc$train_o,
+  test_post = test_proc$test_post,
+  test_o = test_proc$test_o,
+  # Specify outcome variable and time variable name
+  outcome = "tug",
+  time_elapsed = "time",
+  interval = 10,
+
+  # Specify number of cores for parallel processing
+  parallel=3,
+  
+  # Specify use of cubic spline or not
+  cs=TRUE,
+  
+  # specify degrees of freedom use or not
+  dfspec=TRUE,
+  
+  # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
+  # specify power transformation of location (ptr_m)
+  d_f_m=3, ptr_m=0.5,
+  d_f_s=1,
+  
+  # Specify distribution for location, scale and shape 
+  #dist_fam = gamlss.dist::NO)
+  dist_fam = gamlss.dist::NO)
 ```
+
 
 ### Plots: plot_cal() returns a plot of the performance measures from the LOOCV 
 
