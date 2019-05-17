@@ -120,7 +120,7 @@ test_proc %>% str(max.level=1)
 res <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(13:14),
+  nearest_n = c(35:37),
   # enter training and testing post operative and fitted y90 dataset
   train_post = test_proc$train_post,
   ord_data = test_proc$train_o,
@@ -129,7 +129,6 @@ res <- loocv_function(
   # Specify outcome variable and time variable name
   outcome = "tug",
   time_elapsed = "time",
-  interval = 10,
 
   # Specify number of cores for parallel processing
   parallel=3,
@@ -146,78 +145,78 @@ res <- loocv_function(
   d_f_s=1,
   
   # Specify distribution for location, scale and shape 
-  #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::NO)
-## PREDICTING FOR TEST = 408
-## PREDICTING FOR TEST = 443
-## PREDICTING FOR TEST = 604
-## PREDICTING FOR TEST = 450
-## PREDICTING FOR TEST = 492
-## PREDICTING FOR TEST = 536
-## Current count is: 1
-## PREDICTING FOR TEST = 516
-## PREDICTING FOR TEST = 595
-## PREDICTING FOR TEST = 564
-## Current count is: 11
-## Current count is: 21
-## Current count is: 31
-## PREDICTING FOR TEST = 565
-## Current count is: 41
-## Current count is: 51
-## PREDICTING FOR TEST = 411
-## Current count is: 61
-## PREDICTING FOR TEST = 574
-## Current count is: 71
-## PREDICTING FOR TEST = 493
-## PREDICTING FOR TEST = 541
-## Current count is: 81
 ## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
 ##  used to achieve 'safe' predictions 
 ## 
-## Current count is: 91
-## PREDICTING FOR TEST = 531
-## Current count is: 101
-## Current count is: 111
-## PREDICTING FOR TEST = 520
-## Current count is: 121
-## Current count is: 131
-## Current count is: 141
-## Current count is: 151
-## Current count is: 161
-## Current count is: 171
-## Current count is: 181
-## Current count is: 191
-## Current count is: 201
-## PREDICTING FOR TEST = 434
-## Current count is: 211
-## Current count is: 221
-## Current count is: 231
-## Current count is: 241
-## PREDICTING FOR TEST = 423
-## Current count is: 251
-## Current count is: 261
-## Current count is: 271
-## Current count is: 281
-## Current count is: 291
-## PREDICTING FOR TEST = 478
-## Current count is: 301
-## Current count is: 311
-## PREDICTING FOR TEST = 476
-## Current count is: 321
-## Current count is: 331
-## PREDICTING FOR TEST = 563
-## Current count is: 341
-## PREDICTING FOR TEST = 468
-## PREDICTING FOR TEST = 433
-## Current count is: 351
-## PREDICTING FOR TEST = 526
-## Current count is: 361
-## Current count is: 371
-## Current count is: 381
-## PREDICTING FOR TEST = 473
-## PREDICTING FOR TEST = 420
-## PREDICTING FOR TEST = 461
-## Current count is: 391
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
+
+## Warning in predict.gamlss(obj, what = "sigma", newdata = newx, type = "response", : There is a discrepancy  between the original and the re-fit 
+##  used to achieve 'safe' predictions 
+## 
 ```
 
 ### Plots: plot\_cal() returns a plot of the performance measures from the LOOCV

@@ -2,7 +2,7 @@
 # Filename      : C.K.
 # Purpose       : Test out new functions in PMMSKNN package
 # Date created  : somedate
-# Last modified : Fri 17 May 2019 07:55:34 AM MDT
+# Last modified : Fri 17 May 2019 08:54:16 AM MDT
 # Created by    : C.K.
 # Modified by   : ck1
 # }}}
@@ -114,7 +114,7 @@ fin <- loocv_function(
 fin <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(15:17),
+  nearest_n = c(35:37),
   # enter training and testing post operative and fitted y90 dataset
   train_post = test_proc$train_post,
   ord_data = test_proc$train_o,

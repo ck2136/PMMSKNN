@@ -108,7 +108,7 @@ test_proc %>% str(max.level=1)
 res <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(13:14),
+  nearest_n = c(35:37),
   # enter training and testing post operative and fitted y90 dataset
   train_post = test_proc$train_post,
   ord_data = test_proc$train_o,
@@ -117,7 +117,6 @@ res <- loocv_function(
   # Specify outcome variable and time variable name
   outcome = "tug",
   time_elapsed = "time",
-  interval = 10,
 
   # Specify number of cores for parallel processing
   parallel=3,
@@ -134,7 +133,6 @@ res <- loocv_function(
   d_f_s=1,
   
   # Specify distribution for location, scale and shape 
-  #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::NO)
 ```
 
