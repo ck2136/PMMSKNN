@@ -235,85 +235,11 @@ plot_cal(plotobj = res, test_proc = test_proc,
 plot_cal(plotobj = res, test_proc = test_proc,
          obs_dist = "median", loocv = FALSE)  
 ## [1] "creating training calibration plot"
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-## Warning: Unknown or uninitialised column: 'zsc'.
-## Warning in min(plotdf$zsc, na.rm = TRUE): no non-missing arguments to min;
-## returning Inf
-## Warning: Unknown or uninitialised column: 'zsc'.
-## Warning in max(plotdf$zsc, na.rm = TRUE): no non-missing arguments to max;
-## returning -Inf
 ## [1] "creating testing calibration plot"
 ## [1] "creating temp and test matching data"
 ## [1] "binding with decile"
 ## [1] "filt df made in test"
-## Warning in plot_func(plotobj = plotobj, train = FALSE, test_proc =
-## test_proc, : NA's present in group
 ## [1] "Predicting TUG values"
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-
-## Warning: 'tidy.numeric' is deprecated.
-## See help("Deprecated")
-## Warning: Unknown or uninitialised column: 'zsc'.
-## Warning in min(plotdf$zsc, na.rm = TRUE): no non-missing arguments to min;
-## returning Inf
-## Warning: Unknown or uninitialised column: 'zsc'.
-## Warning in max(plotdf$zsc, na.rm = TRUE): no non-missing arguments to max;
-## returning -Inf
-## Warning in extvalid(plotobj, test_proc): NA values in precision
-## Warning in extvalid(plotobj, test_proc): NA values in coverage
-## Warning: Removed 1 rows containing missing values (geom_pointrange).
 ```
 
 <img src="README_figs/README-plotcal-1.png" width="672" />

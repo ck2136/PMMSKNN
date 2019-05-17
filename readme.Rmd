@@ -149,7 +149,7 @@ plot_cal(plotobj = res, test_proc = test_proc,
 
 ### Plots: plot_cal() also returns plot of the calibration 
 
-```{r plotcal, warnings=FALSE, message=FALSE}
+```{r plotcal, warning=FALSE, message=FALSE}
 plot_cal(plotobj = res, test_proc = test_proc,
          obs_dist = "median", loocv = FALSE)  
       ## Note: specify loocv = FALSE 
