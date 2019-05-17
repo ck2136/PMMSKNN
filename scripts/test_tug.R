@@ -2,7 +2,7 @@
 # Filename      : C.K.
 # Purpose       : Test out new functions in PMMSKNN package
 # Date created  : somedate
-# Last modified : Thu 16 May 2019 02:21:31 PM MDT
+# Last modified : Fri 17 May 2019 07:55:34 AM MDT
 # Created by    : C.K.
 # Modified by   : ck1
 # }}}
@@ -144,6 +144,15 @@ fin <- loocv_function(
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
   dist_fam = gamlss.dist::NO)
+
+# }}}
+
+# test_that() {{{
+
+test_that("LOOCV performance list created" , {
+             expect_that(names(fin), equals(c("pred_res","loocv_res","loocv_score","nearest_n")))
+             expect_false(is.null(fin$nearest_n))
+})
 
 # }}}
 
