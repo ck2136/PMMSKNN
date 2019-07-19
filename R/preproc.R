@@ -20,7 +20,7 @@
 #' @param modelselect A logical specifying ...
 #' @param \dots Not used.
 #' @param m          Number of repititions of obtaining \eqn{\dot{y}}
-#' @return A list with five components.
+#' @return A list with six components.
 #' @export
 preproc <- function(dff,
                     split_var = 'train_test',
@@ -247,6 +247,7 @@ preproc <- function(dff,
 
     return(list(train_post = post_train_df, 
                 train_o =  train_ordered,
+                reg_df = alldf,
                 reg_obj = pmm,
                 test_post = post_test_df, 
                 test_o =  test_ordered)
