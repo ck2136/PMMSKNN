@@ -5,12 +5,12 @@ Predictive Mean Matched Sequential K-Nearest Neighbor
 Introduction
 ------------
 
-The purpose of the this repository is to provide a method for determining the trajectory of any longitudinal outcomes based on obtaining predictions using a extension of a nearest neighbors algorithm described by Dr. Alemi (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2911789/) (SKNN)). We extend the SKNN approach by matching similar patients using the [predictive mean matching](https://amstat.tandfonline.com/doi/abs/10.1080/07350015.1988.10509663). We illustrate the use the `PMMSKNN` pacakge below briefly using the `ChichWeight` data.
+The purpose of the this repository is to provide a method for determining the trajectory of any longitudinal outcomes based on obtaining predictions using a extension of a nearest neighbors algorithm described by Dr. Alemi (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2911789/) (SKNN)). We extend the SKNN approach by matching similar patients using the [predictive mean matching](https://amstat.tandfonline.com/doi/abs/10.1080/07350015.1988.10509663). We illustrate the use the `PMMSKNN` pacakge below briefly using the `ChickWeight` data.
 
 Data
 ----
 
-The following illustration uses the `ChichWeight` data that exists within `base R`.
+The following illustration uses the `ChickWeight` data that exists within `base R`.
 
 Algorithms Employed
 -------------------
