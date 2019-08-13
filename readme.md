@@ -5,17 +5,17 @@ Predictive Mean Matched Sequential K-Nearest Neighbor
 Introduction
 ------------
 
-The purpose of the this repository is to provide a method for determining the trajectory of Knee Surgery Outcomes for patients based on obtaining predictions for patients using a 'patient-like-me' algorithm (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pubmed/20676226) (SKNN)). We extend the SKNN approach by matching similar patients using the [predictive mean matching](https://amstat.tandfonline.com/doi/abs/10.1080/07350015.1988.10509663).
+The purpose of the this repository is to provide a method for determining the trajectory of any longitudinal outcomes based on obtaining predictions using a extension of a nearest neighbors algorithm described by Dr. Alemi (a.k.a. [sequential k-nearest neighbor](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2911789/) (SKNN)). We extend the SKNN approach by matching similar patients using the [predictive mean matching](https://amstat.tandfonline.com/doi/abs/10.1080/07350015.1988.10509663). We illustrate the use the `PMMSKNN` pacakge below briefly using the `ChichWeight` data.
 
 Data
 ----
 
-The data is coming from patient information recorded in the UC Health system (REDCap).
+The following illustration uses the `ChichWeight` data that exists within `base R`.
 
-Code for Analysis
------------------
+Algorithms Employed
+-------------------
 
-[code folder](https://github.com/ck2136/PMMSKNN/tree/master/code) contains the analysis code and there a scripts in the [script folder](https://github.com/ck2136/PMMSKNN/tree/master/scripts). Testing on [TUG data set](https://github.com/ck2136/PMMSKNN/blob/master/data/tug_full.rda) is done with [`test_tug.R`](https://github.com/ck2136/PMMSKNN/tree/master/tests/testthat). The main prediction method is using the R package [brokenstick](https://github.com/stefvanbuuren/brokenstick), along with [predictive mean matching](https://books.google.com/books?hl=en&lr=&id=rM8eSRUYYHYC&oi=fnd&pg=PA442&dq=%22predictive+mean+matching%22++rubin&ots=OM-74mXZoX&sig=H-tIcTl7xqIfbgumXuHBktBTfkQ#v=onepage&q=%22predictive%20mean%20matching%22%20%20rubin&f=false) and [gamlss](https://www.gamlss.com/). Currently the code is under development to work within the [caret](https://github.com/topepo/caret) and [mlr](https://github.com/mlr-org/mlr) packages.
+The main prediction method is using the `R` package [brokenstick](https://github.com/stefvanbuuren/brokenstick), along with [predictive mean matching](https://books.google.com/books?hl=en&lr=&id=rM8eSRUYYHYC&oi=fnd&pg=PA442&dq=%22predictive+mean+matching%22++rubin&ots=OM-74mXZoX&sig=H-tIcTl7xqIfbgumXuHBktBTfkQ#v=onepage&q=%22predictive%20mean%20matching%22%20%20rubin&f=false) and [gamlss](https://www.gamlss.com/). Currently the code is under development to work within the [caret](https://github.com/topepo/caret) and [mlr](https://github.com/mlr-org/mlr) packages.
 
 Installation/Compilation Tip
 ----------------------------
@@ -38,49 +38,50 @@ Installation/Compilation Tip
 Example workflow
 ----------------
 
-### Load Libraries and TUG data
+### Load Libraries and the `ChickWeight` data
 
 ``` r
 library("pacman")
-p_load(PMMSKNN, readxl, dplyr, here, magrittr)
-data(tug_full) ## example tug data
+p_load(PMMSKNN, dplyr, here)
+data("ChickWeight") ## example tug data
 ```
 
-### Wrangle TUG data
+### Wrangle ChickWeight data
 
 ``` r
 # load only the TUG dataset
-full  <- tug_full
+full  <- ChickWeight %>%
+  rename(
+    patient_id = 3,
+    time = 2
+  )
 
-# need to exclude the above patients
-# exclude also time > 200
-full <- full %>%
-    #filter(!patient_id %in% exclude$patient_id & time < 200)
-    filter(time < 200) %>%
-    mutate(gender = as.factor(gender))
-
-# Select patient id's that have TUG < 2 or > 70 after time > 3 
-exclude <- full %>% filter(tug < 2 | (tug > 70 & time > 3)) %>% dplyr::select(patient_id) %>%
-    bind_rows(
-              # need to exclude patients that have no post operative time beyond 2 from the train pre and possibly test pre because if people don't have post operative time in test it doesn't make sense
-              full %>%
-                  group_by(patient_id) %>%
-                  filter(max(time) < 3) %>%
-                  distinct(patient_id))
-
-full <- full %>%
-    filter(!patient_id %in% exclude$patient_id & time < 200)
-
-# Train and Test split for all TKA outcomes: create 
+# Train and Test split for all weight outcome: create 
 set.seed(1234)
 full <- PMMSKNN:::baselinemk(full, "patient_id", "time")
 
-# Need to have distinct patient id's for the full data
+# Select 10 first patients as the test case
 full %<>%
-    distinct(patient_id, time, .keep_all=TRUE)
+  mutate(
+    patient_id = as.numeric(as.character(patient_id)),
+    train_test = ifelse(patient_id %in% c(1,2,20, 30, 40), 2, 1),
+    Diet = as.numeric(as.character(Diet))
+  ) %>% 
+  # Need to have distinct patient id's for the full data
+  distinct(patient_id, time, .keep_all=TRUE)
+  
+# Check the structure of the dataset
+full %>% str
+## 'data.frame':    578 obs. of  6 variables:
+##  $ weight    : num  42 51 59 64 76 93 106 125 149 171 ...
+##  $ time      : num  0 2 4 6 8 10 12 14 16 18 ...
+##  $ patient_id: num  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Diet      : num  1 1 1 1 1 1 1 1 1 1 ...
+##  $ baseline  : num  1 0 0 0 0 0 0 0 0 0 ...
+##  $ train_test: num  2 2 2 2 2 2 2 2 2 2 ...
 ```
 
-### preproc() creates matched test/train based on PMM
+### preproc() creates matched test/train based on Predictive Mean Matching (PMM)
 
 ``` r
 test_proc <- preproc(
@@ -88,33 +89,34 @@ test_proc <- preproc(
                 split_var = 'train_test', # train test split variable
                 trainval = 1,             # training set value
                 testval = 2,              # test set value
-                knots_exp = c(0, 14, 50, 90), # Specify broken stick knots
-                out_time = 90,            # specify which timepoint to use 
-                outcome = "tug",          # specify outcome variable name
+                knots_exp = c(0, 4, 8, 16), # Specify broken stick knots
+                out_time = 16,            # specify which timepoint to use 
+                outcome = "weight",          # specify outcome variable name
                 time_var = "time",        # specify time variable name
                 pat_id = "patient_id",    # specify patient id variable name
-                varlist = c("age","gender","bmi","b_tug"), # specify list of covariates for pmm
-                filter_exp = "time > 3"   # Filter observations that will be included
+                varlist = c("Diet") # specify list of covariates for pmm
+                #filter_exp = "Time > 2"   # Filter observations that will be included
 )
 ## time is not an integer! converting to integer! May need to check if this makes sense!
-## Warning: number of observations (=1325) <= number of random effects
-## (=1990) for term (0 + x1 + x2 + x3 + x4 + x5 | subjid); the random-effects
-## parameters and the residual variance (or scale parameter) are probably
-## unidentifiable
-## boundary (singular) fit: see ?isSingular
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl =
+## control$checkConv, : unable to evaluate scaled gradient
+## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl =
+## control$checkConv, : Model failed to converge: degenerate Hessian with 2
+## negative eigenvalues
 test_proc %>% str(max.level=1)
-## List of 5
-##  $ train_post:Classes 'tbl_df', 'tbl' and 'data.frame':  1325 obs. of  9 variables:
-##  $ train_o   :'data.frame':  398 obs. of  8 variables:
-##  $ reg_obj   :List of 13
+## List of 6
+##  $ train_post:'data.frame':  473 obs. of  6 variables:
+##  $ train_o   :'data.frame':  45 obs. of  8 variables:
+##  $ reg_df    :'data.frame':  45 obs. of  6 variables:
+##  $ reg_obj   :List of 12
 ##   ..- attr(*, "class")= chr "lm"
-##  $ test_post :Classes 'tbl_df', 'tbl' and 'data.frame':  602 obs. of  9 variables:
-##  $ test_o    :Classes 'tbl_df', 'tbl' and 'data.frame':  201 obs. of  8 variables:
+##  $ test_post :'data.frame':  55 obs. of  6 variables:
+##  $ test_o    :'data.frame':  5 obs. of  8 variables:
 ```
 
 -   Depending on the `knots_exp` specified and the `out_time` time chosen, there will likely be warnings about parameter estimation within the `brokenstick()` algorithm. Here is where the researcher needs to consider the appropriate values for the variable in terms of clinical relevance and the data at hand.
 
-### LOOCV: loocv\_function() calculates performance measure
+### LOOCV: `loocv_function()` calculates performance measure
 
 ``` r
 res <- loocv_function(
@@ -127,7 +129,7 @@ res <- loocv_function(
   test_post = test_proc$test_post,
   test_o = test_proc$test_o,
   # Specify outcome variable and time variable name
-  outcome = "tug",
+  outcome = "weight",
   time_elapsed = "time",
 
   # Specify number of cores for parallel processing
@@ -148,7 +150,7 @@ res <- loocv_function(
   dist_fam = gamlss.dist::NO)
 ```
 
-### Plots: plot\_cal() returns a plot of the performance measures from the LOOCV
+### Plots: `plot_cal()` returns a plot of the performance measures from the LOOCV
 
 ``` r
 plot_cal(plotobj = res, test_proc = test_proc, 
@@ -157,10 +159,12 @@ plot_cal(plotobj = res, test_proc = test_proc,
 
 <img src="README_figs/README-plotloocv-1.png" width="672" />
 
-### Plots: plot\_cal() also returns plot of the calibration
+### Plots: `plot_cal()` also returns plot of the calibration
 
 ``` r
-plot_cal(plotobj = res, test_proc = test_proc,
+plot_cal(plotobj = res, 
+         test_proc = test_proc,
+         outcome = "weight",
          obs_dist = "median", loocv = FALSE)  
 ## [1] "creating training calibration plot"
 ## [1] "creating testing calibration plot"
