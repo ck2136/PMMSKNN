@@ -2,8 +2,6 @@
 
 export(baselinemk)
 export(calplotDFgen)
-export(create_person_data)
-export(create_testdata)
 export(extractIdbyBias)
 export(extractIdbyPerf)
 export(extvalid)
