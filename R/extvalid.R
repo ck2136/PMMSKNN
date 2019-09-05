@@ -2,7 +2,9 @@
 #' 
 #' @param loocvobj An object produced by \code{\link{loocv_function}}
 #' @param test_proc An object produced by \code{\link{preproc}}
-#' @return A vector of length 3
+#' 
+#' @return A data frame that contains columns of performance measures. The performance measures include difference in prediction (bias), root mean square error (rmse), difference in z-score (zscore), 50% coverage probability (Probability that predictions are included in the inter-quartile range (i.e. 25% to 75%))
+#' 
 #' @export
 extvalid <- function(loocvobj,
                      test_proc){

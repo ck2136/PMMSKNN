@@ -1,4 +1,4 @@
-#' Calculate Performance (bias, coverage, and precision) from linear mixed model
+#' Calculate Performance (bias, coverage, and precision) based on fitting a linear Mixed Model to longitudinal data
 #' 
 #' Creates Data Frame:
 #' \enumerate{
@@ -12,11 +12,12 @@
 #' included.
 #' @param test      A dataframe of testing observations with \code{outcome} column
 #' included.
-#' @param parallel  Boolean value indicating whether or not to use parallel computing.
+#' @param parallel  Boolean value (i.e. \code{TRUE/FALSE}) indicating whether or not to use parallel computing.
 #' Default is set to FALSE. If \code{true}, then uses multicore capability.
 #' @param outcome   A column name (i.e. string type) indicating \code{outcome} column
-#' @return          A data frame with components ..., or an object of class 
-#' \code{ggplot} [??]
+#' 
+#' @return          A list of data frames. 1) \code{perfsum}: Data frame that summarizes the performance based on a variety of variance/confidence interval estimation of LMM; 2) \code{predictInterval1, predictInterval1a, predictInterval1b}: List of two data frames that contain the prediction (95% CI) for training and testing data; 3) \code{bootMerpar, bootMersp}: List of two data frames that contain the prediction (95% CI) for training and testing data using bootMer package
+#' 
 #' @export
 perfCalcLMM <- function(
         fit, # lmer model from training

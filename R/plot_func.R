@@ -1,4 +1,4 @@
-#' Plot function under plot_cal() function
+#' Generate Calibration Plot for Training or Testing Data 
 #' 
 #' Creates two types of plots.
 #' \enumerate{
@@ -9,21 +9,31 @@
 #'   \item \emph{Calibration plots} showing the distribution of the 
 #'   observed outcomes at several predicted values. Separate plots
 #'   are made for the training and test data.}
-#' @param plotobj An object produced by \code{\link{loocv_function}}
-#' @param test_proc -
-#' @param train -
-#' @param outcome Name of the outcome variable
-#' @param filt Logical indicating ...
+#'   
+#' @param plotobj   - An object produced by \code{\link{loocv_function}}
+#' @param test_proc - Preprocessed object from \code{\link{preproc}}
+#' @param train     - Logical indicating whether or not to generate
+#' calibration plot for training set. Default is \code{TRUE}.
+#' @param outcome   - Name of the outcomes variable (type=string)
+#' @param filt Logical (\code{TRUE/FALSE}) indicating whether or not to
+#' filter the data in terms of performance values. This would be useful
+#' if the user would want to exclude certain values in presenting the data
 #' @param filter_exp - String. For filtering possible values of bias, precision, and coverage values that are out of range. (e.g. \code{"bias < 1.5"})
-#' @param pred_sum -
-#' @param obs_dist -
+#' @param pred_sum  - String value representing the summary used to depict
+#' the predictions within the calibration. Usually \code{pred_sum = 'mean'} 
+#' or \code{pred_sum = 'median'} would be a good choice to depict the 
+#' summary statistic of predicted values across the deciles of observed values
+#' @param obs_dist - String value representing the summary used to depict
+#' the observed value within the calibration plot. 
+#' Usually \code{pred_sum = 'median'} woud be a good choice to depict the 
+#' deciles of observed values in the calibration plot.
 #' @param iqrfull - Dataframe containing gamlss predictions which triggers the plotting of 
 #' reference model prediction on the same plot as that of the patient like me 
 #' predictions.
-#' values onto the calibration plot
-#' @param \dots Not used
-#' @return A list with components ..., or an object of class 
-#' \code{ggplot} [??]
+#' @param \dots   - For specifying plotting options.
+#' 
+#' @return An object of class \code{ggplot} that outputs a calibration plot of observed vs. deciles of predicted values for training or testing data depending on \code{train=}.
+#' 
 #' @export
 plot_func <- function(plotobj = plotobj, 
                       train = TRUE, 
@@ -409,9 +419,13 @@ plot_func <- function(plotobj = plotobj,
     } else {
       
       dffitmed <- filtdf %>%
+        dplyr::select(-train_id) %>%
+        dplyr::rename(
+          patient_id = test_id
+          ) %>%
         group_by(.data$dec) %>%
         do(fitmed = MedianCI(.[,outcome][[1]], conf.level= 0.95,
-                             method = "exact", R = 10000, na.rm = TRUE))
+                             method = "boot", R = 10000, na.rm = TRUE))
       #do(fitpois = glm(tug ~ 1, data= .))
       
       dfmedcoef <- tidy(dffitmed, fitmed)

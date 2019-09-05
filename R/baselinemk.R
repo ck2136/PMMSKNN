@@ -7,13 +7,16 @@
 #' closest value to 0 then assign that as baseline = 1 
 #' while the other potential values will be assigne -1. 
 #'
-#' @param dftotf data frame to create baseline column.
+#' @param dftotf data frame to transform (i.e. data frame where a new column - baseline column - will be added).
 #'   The data frame must contain specified `pat_id` and
 #'   `time_var`.
 #' @param pat_id string of characters representing the column
 #'   of patient id.
 #' @param time_var string of characters representing the column
 #'   of time.
+#'   
+#' @return A data frame that contains a new `baseline` column indicating the baseline observation (i.e. row).
+#' 
 #' @export
 baselinemk <- function(dftotf,
                        pat_id = "patient_id",

@@ -655,6 +655,20 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
 
                             # store mean of the n coverage in vector
                             coveragevec95a[cnt]<-mean(bias$coverage)
+                            #-- store Testing C50
+                            dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                                #train_post[train_post$patient_id == ord_data$id[c(i)],c("patient_id",time_elapsed,outcome)] %>% 
+                                left_join(
+                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                          by = "time"
+                                )
+
+                            #-- store Training C50
+                            dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
+                                left_join(
+                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                          by = "time"
+                                )
 
                             #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
                             precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
@@ -692,6 +706,8 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     # Get rid of NA or NULL values that are created
                     nn_arr <- list(
                                    #                          Filter(Negate(is.null),Filter(Negate(is.null), fin)),
+                                   dfList,
+                                   dfList_test,
                                    Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
                                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
                                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
@@ -706,7 +722,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     # name the list objects
                     message(paste0("Assigning names"))
                     #names(All_list) <- c("bias","iqrcoverage","coverage95c","coverage95m","iqr","rmse", "dropped_cases")
-                    names(nn_arr) <- c("bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
+                    names(nn_arr) <- c("dfList","dfList_test","bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
                 }
                 nn_arr
 
@@ -1157,6 +1173,28 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
 
                                     # store mean of the n coverage in vector
                                     coveragevec95a[cnt]<-mean(bias$coverage)
+                                    #-- store Testing C50
+                                    dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                                        #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
+                                        left_join(
+                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                                  by = "time"
+                                        )
+                                        #left_join(
+                                                     #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,patient_id]) ,
+                                                     #by = "patient_id"
+                                        #)
+
+                                    #-- store Training C50
+                                    dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i,patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
+                                        left_join(
+                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                                  by = "time"
+                                        )
+                                        #left_join(
+                                                     #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,]) ,
+                                                     #by = "patient_id"
+                                        #)
 
                                     #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
                                     precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
@@ -1194,6 +1232,8 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             # Get rid of NA or NULL values that are created
                             All_list <- list(
                                              #                          Filter(Negate(is.null),Filter(Negate(is.null), fin)),
+                                             dfList,
+                                             dfList_test,
                                              Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
                                              Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
                                              Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
@@ -1208,7 +1248,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             # name the list objects
                             message(paste0("Assigning names"))
                             #names(All <- list) <- c("bias","iqrcoverage","coverage95c","coverage95m","iqr","rmse", "dropped <- cases")
-                            names(All_list) <- c("bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
+                            names(All_list) <- c("dfList","dfList_test","bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
 
                             message(paste0("Putting in the list in array slot: ",n))
                             # store the result of the n nearest <- n result

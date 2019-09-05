@@ -1,10 +1,17 @@
 #' Match Testing Data Generating Function: create matched trainig and testing pair data
 #' 
-#' @param test_o        dataset. Testing data with patient_id ordered from \code{\link{preproc}}. 
-#' @param ord_data      dataset. Training data with patient_id ordered from \code{\link{preproc}}. 
-#' @param mtype         Integer value indicating matching type. Default is set to 1 which follows the
-#'  matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. 
-#' @return              A vector of patient id numbers
+#' @param test_o  Data frame. Specifically, testing data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
+#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
+#' then \code{x$test_o} would be used for this parameter.
+#' @param ord_data Data frame. Specifically, training data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
+#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
+#' then \code{x$train_o} would be used for this parameter.
+#' @param mtype - Integer value indicating matching type. Default is set to 1 which follows the
+#' matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. \code{mtype} values are 
+#' from \code{0} to \code{4}
+#' 
+#' @return              A vector of (patient) id numbers
+#' 
 #' @export
 matchTestDataGen <- function(
                               test_o=test_o, 

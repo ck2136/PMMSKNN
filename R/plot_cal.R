@@ -9,29 +9,34 @@
 #'   \item \emph{Calibration plots} showing the distribution of the 
 #'   observed outcomes at several predicted values. Separate plots
 #'   are made for the training and test data.}
-#' @param plotobj An object produced by \code{\link{loocv_function}}
+#'   
+#' @param plotobj   - An object produced by \code{\link{loocv_function}}
 #' @param test_proc - Preprocessed object from \code{\link{preproc}}
-#' @param outcome Name of the outcome variable
-#' @param filt Logical indicating ...
-#' @param pred_sum -
-#' @param obs_dist -
+#' @param outcome   - Name of the outcomes variable (type=string)
+#' @param filt Logical (\code{TRUE/FALSE}) indicating whether or not to
+#' filter the data in terms of performance values. This would be useful
+#' if the user would want to exclude certain values in presenting the data
+#' @param pred_sum  - String value representing the summary used to depict
+#' the predictions within the calibration. Usually \code{pred_sum = 'mean'} 
+#' or \code{pred_sum = 'median'} would be a good choice to depict the 
+#' summary statistic of predicted values across the deciles of observed values
+#' @param obs_dist - String value representing the summary used to depict
+#' the observed value within the calibration plot. 
+#' Usually \code{pred_sum = 'median'} woud be a good choice to depict the 
+#' deciles of observed values in the calibration plot.
 #' @param loocv Logical indicating the type of plot: 
 #' Model performance plot (if \code{loocv = TRUE}, default), 
 #' or or calibration plot (if \code{loocv = FALSE}). 
-#' @param filter_exp -
-#' @param plot_cal_zscore - Logical indicating whether to plot zscore calibration 
-#' @param wtotplot - Logical indicating wehter to include a weighted total score plot
-#' that indicates the optimal n match based on equally weighting bias, coverage and 
-#' precision
-#' @param plotvals - Logical indicating whether to plot bias, coverage, and precision
-#' values onto the calibration plot
-#' @param iqrfull - Dataframe containing gamlss predictions which triggers the plotting of 
-#' reference model prediction on the same plot as that of the patient like me 
-#' predictions.
-#' values onto the calibration plot
-#' @param \dots Not used
-#' @return A list with components ..., or an object of class 
-#' \code{ggplot} [??]
+#' @param filter_exp - String. For filtering possible values of bias, precision, and coverage values that are out of range. (e.g. \code{"bias < 1.5"})
+#' @param plot_cal_zscore - Logical (\code{TRUE/FALSE}) indicating whether to plot zscore calibration 
+#' @param wtotplot - Logical (\code{TRUE/FALSE}) indicating wehter to include a weighted total score plot
+#' that indicates the optimal n match based on equally weighting bias, coverage and precision
+#' @param plotvals - Logical (\code{TRUE/FALSE}) indicating whether to plot bias, coverage, and precision values onto the calibration plot
+#' @param iqrfull - Dataframe containing gamlss predictions which triggers the plotting of reference model prediction on the same plot as that of the patient like me predictions.
+#' @param \dots   - For specifying plotting options.
+#' 
+#' @return An object of class \code{ggplot} that outputs a calibration plot of observed vs. deciles of predicted values.
+#' 
 #' @export
 plot_cal <- function(plotobj,
                      test_proc=test_proc,

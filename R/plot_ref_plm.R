@@ -1,4 +1,4 @@
-#' Plot reference and patient like me plot
+#' Plot reference and personalized plot
 #' 
 #' Creates two plots.
 #' \enumerate{
@@ -8,21 +8,23 @@
 #'   outcome of matched patients along with the selected patients' predicted
 #'   centile curve. 
 #'   }
-#' @param plotobj An object produced by \code{\link{loocv_function}}
-#' @param test_proc - An object produced by \code{\link{preproc}}
-#' @param outcome Name of the outcome variable
-#' @param time_var Name of the time variable
-#' @param patnum Integer value of the patient number to plot alongside
+#'   
+#' @param plotobj   - An object produced by \code{\link{loocv_function}}
+#' @param test_proc - Preprocessed object from \code{\link{preproc}}
+#' @param outcome   - Name of the outcomes variable (type=string)
+#' @param time_var  - Name of the time variable. (type=string)
+#' @param patnum    - Integer value of the patient number to plot alongside
 #' the population reference chart
-#' @param dist object of gamlss.dist specifying the distribution for gamlss
-#' @param df_m  Number representing the degrees of freedome for the location parameter
-#' @param df_s  Number representing the degrees of freedome for the sigma parameter
-#' @param df_n  Number representing the degrees of freedome for the nu parameter
-#' @param df_t  Number representing the degrees of freedome for the tau parameter
-#' @param xvalues  Vector of values for the prediction centile to be plotted
-#' @param \dots Not used
-#' @return A list with components ..., or an object of class 
-#' \code{ggplot} [??]
+#' @param dist  - Object of \code{\link{gamlss.dist}} specifying the distribution for gamlss
+#' @param df_m - Numeric value that specifies the degrees of freedom for the cubic spline specified for the mean parameter of the distribution specified according to \code{dist_fam}
+#' @param df_s - Numeric value that specifies the degrees of freedom for the cubic spline specified for the scale parameter of the distribution specified according to \code{dist_fam}
+#' @param df_n - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\nu} parameter, of the distribution specified according to \code{dist_fam}
+#' @param df_t - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\tau} parameter, of the distribution specified according to \code{dist_fam}
+#' @param xvalues - Vector of values for the prediction centile to be plotted
+#' @param \dots   - Options to specify in the \code{ggplot()} function used for plotting the reference and personalized plot
+#' 
+#' @return An object of class \code{ggplot} that outputs a gamlss predition curve for the population and a personalized plot in terms of predicted values over time.
+#' 
 #' @export
 plot_ref_plm <- function(plotobj,
                      test_proc=test_proc,

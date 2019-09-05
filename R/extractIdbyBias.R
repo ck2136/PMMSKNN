@@ -1,8 +1,10 @@
-#' Extract ID by Bias: extracts ID value from loocv and percentile based on bias
+#' Extract ID by Bias: extracts ID value from loocv object based on the percentile of bias value of individuals
 #' 
 #' @param loocvObj   object from \code{\link{loocv_function}}. 
 #' @param perc       Floating point value indicating N/100 percentile ID to look for.
+#' 
 #' @return           A numeric value of patient id number 
+#' 
 #' @export
 
 extractIdbyBias <- function(loocvObj, perc){
