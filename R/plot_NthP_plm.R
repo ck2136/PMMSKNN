@@ -9,24 +9,27 @@
 #'   along with matched individuals and gamlss centile curves for the
 #'   upper N-th vector value specified
 #'   }
-#' @param plotobj An object produced by \code{\link{loocv_function}}
-#' @param test_proc - An object produced by \code{\link{preproc}}
-#' @param outcome Name of the outcome variable
-#' @param time_var Name of the time variable
-#' @param nvec  vector of two proportions (e.g. \code{nvec = c(0.2,0.8)}).
+#'   
+#' @param plotobj   - An object produced by \code{\link{loocv_function}}
+#' @param test_proc - Preprocessed object from \code{\link{preproc}}
+#' @param outcome   - Name of the outcomes variable (type=string)
+#' @param time_var  - Name of the time variable. (type=string)
+#' @param nvec      - Vector of two proportions (e.g. \code{nvec = c(0.2,0.8)}).
 #' These values indicate the lower and upper n-th percentile/100 person to plot.
 #' @param mtype - Integer value indicating matching type. Default is set to 1 which follows the
-#'  matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. 
-#' @param n     Integer representing number of matches.
-#' @param dist object of gamlss.dist specifying the distribution for gamlss
-#' @param df_m  Number representing the degrees of freedome for the location parameter
-#' @param df_s  Number representing the degrees of freedome for the sigma parameter
-#' @param df_n  Number representing the degrees of freedome for the nu parameter
-#' @param df_t  Number representing the degrees of freedome for the tau parameter
-#' @param xvalues  Vector of values for the prediction centile to be plotted
-#' @param \dots Not used
-#' @return A list with components ..., or an object of class 
-#' \code{ggplot} [??]
+#' matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. \code{mtype} values are 
+#' from \code{0} to \code{4}
+#' @param n     - Integer representing number of matches.
+#' @param dist  - Object of \code{\link{gamlss.dist}} specifying the distribution for gamlss
+#' @param df_m - Numeric value that specifies the degrees of freedom for the cubic spline specified for the mean parameter of the distribution specified according to \code{dist_fam}
+#' @param df_s - Numeric value that specifies the degrees of freedom for the cubic spline specified for the scale parameter of the distribution specified according to \code{dist_fam}
+#' @param df_n - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\nu} parameter, of the distribution specified according to \code{dist_fam}
+#' @param df_t - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\tau} parameter, of the distribution specified according to \code{dist_fam}
+#' @param xvalues - Vector of values for the prediction centile to be plotted
+#' @param \dots   - Options to specify in the plotting of the percentile curves.
+#' 
+#' @return An object of class \code{ggplot} that outputs a gamlss predition curve for 2 individuals in terms of their predicted values over time.
+#' 
 #' @export
 plot_NthP_plm <- function(plotobj,
                      test_proc=test_proc,

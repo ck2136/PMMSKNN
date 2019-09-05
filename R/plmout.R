@@ -1,31 +1,36 @@
 #' Obtaining output of updated patient level model predictions 
 #' 
 #' The function primarily takes the output of the updated reference gamlss()
-#' and outputs results of the performance measures
+#' and outputs results of the performance measures based on a fitted reference model (This happens within the \code{\link{pat_level_func}}).
 #' 
 #' @param plmr          Fitted gamlss object updated with patient level data
-#' based on \code{\link{fitrefgamlss}} and \code{update()}.
-#' @param i             Patient id indicator.
+#' based on \code{\link{fitrefgamlss}} and \code{update()}. 
+#' @param i             Patient id indicator (type=numeric).
 #' @param time_window   vector of numbers for `centiles.pred()`, `xvalues` argument 
 #' @param mint          Numeric value indicating minimum time for predicting values
 #' @param maxt          Numeric value indicating maximum time for predicting values
-#' @param perfout       List of performance measures
-#' @param loocv         Whether or not to perform leave one out cross validation or just go straight to prediction. Should
-#'  have the userchoose value specified if `loocv=FALSE`
+#' @param perfout       List of performance measures to be filled. 
+#' @param loocv - Logical (\code{TRUE/FALSE}) that specifies whether 
+#' or not to perform leave-one-out cross validation or just output 
+#' predictions without hyperparameter tuning. If \code{loocv=FALSE}, then
+#' users need to specify the value of the nearest_n 
 #' @param traintestmatchdf  Matched train test dataframe based on \code{\link{matchTestDataGen}}
 #' @param matchmodel    Dataset generated from the \code{\link{matchTrainDataGen}} 
 #' @param time_elapsed  Name of the time variable. (type=string)
-#' @param ord_data      Idem, component \code{train_o}
-#' @param train_post    Datasets, typically the \code{train_post} list component 
-#' @param test_post     Idem, component \code{test_post}
-#' @param outcome       Name of the outcomes variable
-#' @param thresh_val    Numeric value indicating value of bias to ignore (not include in output)
-#' @return an array of performance measures for each individuals in the training and testing set 
+#' @param ord_data Data frame. Specifically, training data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
+#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
+#' then \code{x$train_o} would be used for this parameter.
+#' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param test_post Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param outcome    - Name of the outcomes variable (type=string)
+#' @param thresh_val - Numeric value indicating value of bias to ignore (not include in output) in terms of the leave-one-out cross validation process. The default is set to \code{thresh_val = 10000}
+#' 
+#' @return An array of performance measures for each individuals in the training and testing set 
+#' 
 #' @export
 # - - - - - - - - - - - - - - - - - - - -#
-# LOOCV Function ----
+# Function that outputs performance measaures for individual predictions ----
 # - - - - - - - - - - - - - - - - - - - -#
-# now using that we need to come up with the right number of matches that will give us the best bias and coverage.
 plmout <- function(
                    plmr, # updated patient level model
                    perfout=perfout,
@@ -211,6 +216,19 @@ plmout <- function(
 
         # store mean of the n coverage in vector
         perfout$coveragevec95[i]<-mean(bias$coverage)
+        #-- Test Predicted Values (i.e.C50)
+        perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+            left_join(
+                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                      by = "time"
+            )
+
+        #-- Train Predicted Values
+        perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
+            left_join(
+                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                      by = "time"
+            )
 
         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
         perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 

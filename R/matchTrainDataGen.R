@@ -1,17 +1,22 @@
 #' Match Training Data Generating Function: create Data based on pmm
 #' 
-#' @param train_post    dataset. Post operative training data from \code{\link{preproc}}. 
-#' @param ord_data      dataset. Training data with patient_id ordered from \code{\link{preproc}}. 
-#' @param mtype         Integer value indicating matching type. Default is set to 1 which follows the
-#'  matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. 
+#' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param ord_data Data frame. Specifically, training data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
+#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
+#' then \code{x$train_o} would be used for this parameter.
+#' @param mtype - Integer value indicating matching type. Default is set to 1 which follows the
+#' matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. \code{mtype} values are 
+#' from \code{0} to \code{4}
 #' @param n             Number of matches
-#' @param m             Number of repititions of obtaining \eqn{\dot{y}}
-#' @param i             Patient id indicator.
+#' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process.
+#' @param i             (Patient) Id indicator.
 #' @param time_elapsed  Name of the time variable. (type=string)
-#' @param outcome       Name of the outcomes variable
+#' @param outcome       Name of the outcomes variable.
 #' @param seed          Seed for randomly selecting matches based on differences in predicted y
-#' @param matchprobweight Logical that specifies whether to utilize probability sampling
-#' @return              A vector of patient id numbers
+#' @param matchprobweight Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling for selecting patients according to difference in the distance between the neighbor.
+#' 
+#' @return              A vector of (patient) id numbers
+#' 
 #' @export
 matchTrainDataGen <- function(
                               train_post=train_post, 

@@ -1,3 +1,13 @@
+# PMMSKNN 0.2.0.9002 - Development
+
+* Update Documentation on all fuctions especially the @return statements to help end users in terms of the resulting output of the functions
+
+# PMMSKNN 0.2.0.9001 - Development
+
+* Remove create_person_data() function
+
+* Remove create_testdata() function
+
 # PMMSKNN 0.2.0.9000 - Development
 
 * Add create_person_data() function

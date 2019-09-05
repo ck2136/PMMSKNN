@@ -1,26 +1,51 @@
-#' PreProcess Function: create train/test filtering
+#' PreProcess Function: Split full data into train/test and match patients using predictive mean matching
 #' 
-#' @param dff dataset
-#' @param split_var A string with the name of the splitting variables
-#' @param trainval -
-#' @param testval -
-#' @param filter_exp Expression can be of form \code{"time > 3"}. Default is \code{NULL}
-#' @param knots_exp  Numeric vector with break points for \code{brokenstick} model
-#' @param out_time   Single number value specifying the target time. Has to be one of 
+#' \code{preproc()} function essentially takes a full dataset along with a list of arguments
+#' necessary to split the data into train/test datasets. After splitting the data 
+#' into a training and testing split, The training data is used to fit a linear mixed model
+#' with a b-s;line using the \code{brokenstick} package. The user specifies the knots 
+#' and the distal outcome of interest (\eqn{\hat{y}}) which essentially is used to perform the 
+#' predictive mean matching. The \eqn{\hat{y}} is used to fit a linear model based on the 
+#' user specified list of matching characteristics provided through the `varlist` argument.
+#' 
+#' @param dff - Full dataset containing both training and testing dataset specified by 
+#' `split_var` column.
+#' @param split_var - A string representing the name of the splitting variable used to split
+#' the full dataset (i.e. `dff`) into training and testing data. THe variable/column should be
+#' numeric type.
+#' @param trainval - A numeric value indicating training set observations. 
+#' If \code{train_val = 1}, then rows in the \code{dff} should have 1 in each of the
+#' `split_var` column.
+#' @param testval - A numeric value indicating testing set observations. 
+#' If \code{test_val = 0}, then rows in the \code{dff} should have 0 in each of the
+#' `split_var` column.
+#' @param filter_exp - String that represents filtering of the full data to be processed.
+#' Expression can be of form \code{"time > 3"}. Default is \code{NULL}
+#' @param knots_exp  - Numeric vector with break points for \code{brokenstick} model
+#' @param out_time   - Single numeric value specifying the distal time. Has to be one of 
 #'                   \code{knots_exp}.
-#' @param outcome    Name of the outcomes variable
-#' @param time_var   Name of the time variable
-#' @param pat_id     Name of the variable with patient identification
-#' @param baseline_var Name of the pre-op/post-op indicator variable: preop (baseline = 1); 
-#'                   postop: (baseline = 0), or otherwise
+#' @param outcome    - String representing the name of the outcomes variable
+#' @param time_var   - String representing the name of the time variable
+#' @param pat_id     - String representing the name of the variable with patient identification
+#' @param baseline_var - String representing the name of the pre-op/post-op 
+#' indicator variable. For example, for pre-op (baseline = 1); 
+#'                   for post-op: (baseline = 0), or otherwise
 #' @param varlist    Names of additional variables for prediction. If not 
-#'                   specified, all variables \code{dff} are predictors. 
+#'                   specified, all variables in \code{dff} are predictors. 
 #'                   Categorical variables may be factor or character.
-#' @param pmmform    - 
-#' @param modelselect A logical specifying ...
-#' @param \dots Not used.
-#' @param m          Number of repititions of obtaining \eqn{\dot{y}}
-#' @return A list with six components.
+#' @param pmmform    - formula representing the model used for predictive mean matching. For example, to regress \code{outcome} on the variables in \code{varlist}, \code{outcome ~ var1 + var2 + var3} 
+#' @param modelselect  - A logical (\code{TRUE/FALSE}) specifying whether to go through a stepwise selection of variables for the predictive mean matching algorithm
+#' @param \dots        - Specification for linear model in the predictive mean matching algorithm.
+#' @param m           - Numeric value representing the Number of repititions of obtaining \eqn{\dot{y}} (i.e. the predicted value from predictive mean matching)
+#' 
+#' @return  A list with six components. 
+#'          1. Post-baseline training data 
+#'          2. Dataframe with training set patient id and \eqn{\dot{y}} values ordered
+#'          3. Regression dataframe used for the predictive mean matching
+#'          4. Predictive mean matching model object
+#'          5. Post-baseline testing data 
+#'          6. Dataframe with testing set patient id and \eqn{\dot{y}} values ordered
+#' 
 #' @export
 preproc <- function(dff,
                     split_var = 'train_test',

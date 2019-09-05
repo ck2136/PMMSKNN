@@ -7,8 +7,9 @@
 #' @param predicted     Vector of predicted values (Numeric type).
 #' @param n             Number of splits for observed and predicted.
 #' Default is 10.
-#' @return A list of data frames data frame components ..., or an object of class 
-#' \code{ggplot} [??]
+#' 
+#' @return A data frame used to generate calibration plots (using \code{"ggplot"}) for training and testing data.
+#' 
 #' @export
 calplotDFgen <- function(observed,
                          predicted,

@@ -1,12 +1,12 @@
-#' Match ID Function: create array of ID values closest matching to training or testing case
+#' Match ID Function for Sequential K Nearest Neighbor Algorithm: Create an array of ID values closest matching to training or testing case
 #' 
 #' @param data          Full dataset. Contains both Training and Testing data. 
 #' @param train_test    Column name indicating whether individual belongs to
 #' Training or Testing dataset. Train = 1, Test = 2 by default.
-#' @param patid         Column name indicating patient id.
+#' @param patid         Column name indicating patient id. (type = "string")
 #' @param formula       Formula indicating the variables used for matching.
 #' (e.g. \code{ ~ var1 + var2 + var3 }).
-#' @return              An k x klist$test (or k x klist$train) array of patient id numbers
+#' @return              An k x k list$test (or k x k list$train) array of patient id numbers
 #' @export
 matchIdExtractsknn <- function(
                  data,

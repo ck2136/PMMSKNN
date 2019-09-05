@@ -8,7 +8,9 @@
 #' @param seed Integer value indicating seed number for random generation
 #' of \eqn{\sigma*} and \eqn{\beta*}
 #' @param dftest  test data.frame object 
+#' 
 #' @return A data frame that includes \eqn{\dot{y}}.
+#' 
 #' @export
 pmmydotgen <- function(df,  # df should be with id column and all other covariates that are going to be included in the formula
                        formula, 

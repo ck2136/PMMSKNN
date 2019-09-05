@@ -1,11 +1,15 @@
 #' Match ID Function: create vector of (Training set) ID values for Test set cases
 #' 
-#' @param test_proc   object processed after using \code{\link{preproc}}. 
-#' @param mtype       Integer value indicating matching type. Default is set to 1 which follows the
-#'  matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. 
-#' @param i          (Test) Patient id indicator.
+#' @param test_proc   Object processed after using \code{\link{preproc}}. 
+#' For example, \code{x <- preproc()}, then \code{test_proc = x}
+#' @param mtype - Integer value indicating matching type. Default is set to 1 which follows the
+#' matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. \code{mtype} values are 
+#' from \code{0} to \code{4}
+#' @param i          (Test patient) id indicator.
 #' @param n          Number of matches
-#' @return           A vector of patient id numbers
+#' 
+#' @return           A vector of (patient) id numbers
+#' 
 #' @export
 
 matchIdExtractTest <- function(

@@ -3,6 +3,7 @@
 #' The function that predicts Z-score values initial GAMLSS distribution to the full data
 #' in order to be used as a reference distribution for the following
 #' patient like me GAMLSS fits
+#' 
 #' @param plmr  Fitted object from \code{\link{plm}}
 #' @param traintestmatchdf  Matched train test dataframe based on \code{\link{matchTestDataGen}}
 #' @param matchmodel - dataset generated from the \code{\link{matchTrainDataGen}} 
@@ -16,7 +17,9 @@
 #' @param i             Patient id indicator.
 #' \code{TRUE} will result int zscores from the training set, otherwise zscores from test set
 #' will be generated.
+#' 
 #' @return There are many possible return values 
+#' 
 #' @export
 predZsc <- function(
                     plmr=plmr,

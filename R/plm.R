@@ -3,9 +3,12 @@
 #' The function fits an initial GAMLSS distribution to the full data
 #' in order to be used as a reference distribution for the following
 #' patient like me GAMLSS fits
-#' @param ref  Reference model from the \code{\link{fitrefgamlss}}.
+#' 
+#' @param ref  - gamlss model object generated from using the \code{\link{fitrefgamlss}}. This would be a reference model fit to the whole population dataset.
 #' @param matchmodel - dataset generated from the \code{\link{matchTrainDataGen}} 
-#' @return There are many possible return values 
+#' 
+#' @return A fitted gamlss object that is used within the \code{\link{loocv_function}} where the object is updated according to the closest \code{n} matches.
+#' 
 #' @export
 # - - - - - - - - - - - - - - - - - - - - - - #
 # Fit GAMLSS model to nearest n matches

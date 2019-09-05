@@ -35,11 +35,11 @@
 #'@importFrom utils       head str
 NULL
 
-globalVariables(c(".","fitmed", "fitpois"))
+globalVariables(c(".","fitmed", "fitpois","test_id","train_id"))
 
-#' \pkg{PMMSKNN}: Curve Matching Validation Tools for Knee Surgery Outcomes.
+#' \pkg{PMMSKNN}: Sequential KNN Extended via Predicted Mean Matching.
 #'
-#' INSERT HERE DESCRIPTION OF THE PACKAGE 
+#' This package provides functions that allow personalized predictions of longitudinal outcome trajectory based on extending the sequential KNN algorithm via Predicted Mean Matching. Essentially individuals are matched according to a distal outcome of interest based on characteristics that explains the variation in the outcome. The trajectory of the matched population is used to generate predictions for each individuals.
 #'
 #' @section PMMSKNN functions:
 #' The main functions are:

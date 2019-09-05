@@ -2,26 +2,29 @@
 #' 
 #' The function fits an initial GAMLSS distribution to the full data
 #' in order to be used as a reference distribution for the following
-#' patient like me GAMLSS fits
-#' @param dist_fam  gamlss distribution specification
-#' @param train_post - datasets, typically the \code{train_post} list component 
-#'  of the object produced by \code{\link{preproc}}.
-#' @param test_post Idem, component \code{test_post}
-#' @param outcome    Name of the outcomes variable
+#' matched individuals' GAMLSS fits
+#' 
+#' @param dist_fam  - gamlss distribution specification using the \code{\link{gamlss.dist}} package. The specification for a normal distribution would be \code{gamlss.dist::NO}. For other distributions see \code{\link{gamlss.dist}}.
+#' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param test_post - Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param outcome    - Name of the outcomes variable (type=string)
 #' @param time_elapsed - Name of the time variable. (type=string)
-#' @param time_window - vector of numbers for `centiles.pred()`, `xvalues` argument 
+#' @param time_window - vector of numbers for `centiles.pred()`, `xvalues` argument. For example, specify such as \code{c(10:30)}
 #' @param cs Logical that specifies whether to use cubic spline. 
 #'  The default \code{cs = FALSE} uses ...
-#' @param dfspec Logical that specifies whether to the user sets  
-#' degrees of freedom (...not clear to me what it does, and how it 
-#' interacts with the next set of arguments)
-#' @param d_f_m ... explain: arguments probably mean different things for different distributions. Might be preferable to package it with \code{dist_fam}
-#' @param ptr_m -
-#' @param d_f_s -
-#' @param d_f_n - 
-#' @param d_f_t -
+#' @param dfspec - Logical (\code{TRUE/FALSE}) that specifies whether to 
+#' specify degrees of freedoms for the location, scale, and shape parameters
+#' for the distribution specified with \code{dist_fam}.
+#' Default value is \code{NULL}.
+#' @param d_f_m - Numeric value that specifies the degrees of freedom for the cubic spline specified for the mean parameter of the distribution specified according to \code{dist_fam}
+#' @param ptr_m - Numeric value that specifies the power transformation of time variable. Default value is 1.
+#' @param d_f_s - Numeric value that specifies the degrees of freedom for the cubic spline specified for the scale parameter of the distribution specified according to \code{dist_fam}
+#' @param d_f_n - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\nu} parameter, of the distribution specified according to \code{dist_fam}
+#' @param d_f_t - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\tau} parameter, of the distribution specified according to \code{dist_fam}
 #' @param \dots Passed down to \code{gamlss}
-#' @return There are many possible return values 
+#' 
+#' @return Returns a gamlss object as described in \code{\link{gamlss}}
+#' 
 #' @export
 # - - - - - - - - - - - - - - - - - - - -#
 # LOOCV Function ----
