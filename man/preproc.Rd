@@ -2,7 +2,7 @@
 % Please edit documentation in R/preproc.R
 \name{preproc}
 \alias{preproc}
-\title{PreProcess Function: create train/test filtering}
+\title{PreProcess Function: Split full data into train/test and match patients using predictive mean matching}
 \usage{
 preproc(dff, split_var = "train_test", trainval = 1, testval = 2,
   filter_exp = NULL, knots_exp = c(0, 14, 50, 90), out_time = 90,
@@ -11,45 +11,66 @@ preproc(dff, split_var = "train_test", trainval = 1, testval = 2,
   modelselect = FALSE, m = 5, ...)
 }
 \arguments{
-\item{dff}{dataset}
+\item{dff}{- Full dataset containing both training and testing dataset specified by 
+`split_var` column.}
 
-\item{split_var}{A string with the name of the splitting variables}
+\item{split_var}{- A string representing the name of the splitting variable used to split
+the full dataset (i.e. `dff`) into training and testing data. THe variable/column should be
+numeric type.}
 
-\item{trainval}{-}
+\item{trainval}{- A numeric value indicating training set observations. 
+If \code{train_val = 1}, then rows in the \code{dff} should have 1 in each of the
+`split_var` column.}
 
-\item{testval}{-}
+\item{testval}{- A numeric value indicating testing set observations. 
+If \code{test_val = 0}, then rows in the \code{dff} should have 0 in each of the
+`split_var` column.}
 
-\item{filter_exp}{Expression can be of form \code{"time > 3"}. Default is \code{NULL}}
+\item{filter_exp}{- String that represents filtering of the full data to be processed.
+Expression can be of form \code{"time > 3"}. Default is \code{NULL}}
 
-\item{knots_exp}{Numeric vector with break points for \code{brokenstick} model}
+\item{knots_exp}{- Numeric vector with break points for \code{brokenstick} model}
 
-\item{out_time}{Single number value specifying the target time. Has to be one of 
+\item{out_time}{- Single numeric value specifying the distal time. Has to be one of 
 \code{knots_exp}.}
 
-\item{outcome}{Name of the outcomes variable}
+\item{outcome}{- String representing the name of the outcomes variable}
 
-\item{time_var}{Name of the time variable}
+\item{time_var}{- String representing the name of the time variable}
 
-\item{pat_id}{Name of the variable with patient identification}
+\item{pat_id}{- String representing the name of the variable with patient identification}
 
-\item{baseline_var}{Name of the pre-op/post-op indicator variable: preop (baseline = 1); 
-postop: (baseline = 0), or otherwise}
+\item{baseline_var}{- String representing the name of the pre-op/post-op 
+indicator variable. For example, for pre-op (baseline = 1); 
+                  for post-op: (baseline = 0), or otherwise}
 
 \item{varlist}{Names of additional variables for prediction. If not 
-specified, all variables \code{dff} are predictors. 
+specified, all variables in \code{dff} are predictors. 
 Categorical variables may be factor or character.}
 
-\item{pmmform}{-}
+\item{pmmform}{- formula representing the model used for predictive mean matching. For example, to regress \code{outcome} on the variables in \code{varlist}, \code{outcome ~ var1 + var2 + var3}}
 
-\item{modelselect}{A logical specifying ...}
+\item{modelselect}{- A logical (\code{TRUE/FALSE}) specifying whether to go through a stepwise selection of variables for the predictive mean matching algorithm}
 
-\item{m}{Number of repititions of obtaining \eqn{\dot{y}}}
+\item{m}{- Numeric value representing the Number of repititions of obtaining \eqn{\dot{y}} (i.e. the predicted value from predictive mean matching)}
 
-\item{\dots}{Not used.}
+\item{\dots}{- Specification for linear model in the predictive mean matching algorithm.}
 }
 \value{
-A list with five components.
+A list with six components. 
+         1. Post-baseline training data 
+         2. Dataframe with training set patient id and \eqn{\dot{y}} values ordered
+         3. Regression dataframe used for the predictive mean matching
+         4. Predictive mean matching model object
+         5. Post-baseline testing data 
+         6. Dataframe with testing set patient id and \eqn{\dot{y}} values ordered
 }
 \description{
-PreProcess Function: create train/test filtering
+\code{preproc()} function essentially takes a full dataset along with a list of arguments
+necessary to split the data into train/test datasets. After splitting the data 
+into a training and testing split, The training data is used to fit a linear mixed model
+with a b-s;line using the \code{brokenstick} package. The user specifies the knots 
+and the distal outcome of interest (\eqn{\hat{y}}) which essentially is used to perform the 
+predictive mean matching. The \eqn{\hat{y}} is used to fit a linear model based on the 
+user specified list of matching characteristics provided through the `varlist` argument.
 }
