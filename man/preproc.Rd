@@ -48,7 +48,7 @@ Categorical variables may be factor or character.}
 \item{\dots}{Not used.}
 }
 \value{
-A list with five components.
+A list with six components.
 }
 \description{
 PreProcess Function: create train/test filtering
