@@ -5,7 +5,7 @@
 #' more than one potential baseline values (i.e. values <= 0)
 #' then `baselinemk()` will arrange the times according to 
 #' closest value to 0 then assign that as baseline = 1 
-#' while the other potential values will be assigne -1. 
+#' while the other potential baseline values will be assigne -1. 
 #'
 #' @param dftotf data frame to create baseline column.
 #'   The data frame must contain specified `pat_id` and

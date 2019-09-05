@@ -1,8 +1,15 @@
 #' Extract ID by Bias: extracts ID value from loocv and percentile based on bias
 #' 
+#' `extractIdbyPerf` is a utility function that returns one single id number based on the 
+#' `perc` (numeric) argument provided. This is useful to determine the n-th percentile person
+#' in terms of the overall performance values 
+#' (could be a combination of bias, coverage, and precision) obtained from the LOOCV process.
+#' 
 #' @param test_proc  object from \code{\link{preproc}}. 
 #' @param perc       Floating point value indicating N/100 percentile ID to look for.
-#' @return           A numeric value of patient id number 
+#' 
+#' @return           A numeric value representing patient id number 
+#' 
 #' @export
 
 extractIdbyPerf <- function(test_proc, perc){

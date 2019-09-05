@@ -1,10 +1,13 @@
-#' Generate DataFrame for Calibration plot (for Continuous Value Predictions)
+#' Generate a DataFrame for producing a calibration plot (for Continuous Value Predictions)
+#' 
+#' This is a utility function that takes two vectors of observed and predicted values 
+#' in order to generate a dataframe necessary for producing a calibration plot.
 #' 
 #' @param observed      Vector of observed values (Numeric type).
 #' @param predicted     Vector of predicted values (Numeric type).
 #' @param n             Number of splits for observed and predicted.
 #' Default is 10.
-#' @return A lsit of data frames data frame components ..., or an object of class 
+#' @return A list of data frames data frame components ..., or an object of class 
 #' \code{ggplot} [??]
 #' @export
 calplotDFgen <- function(observed,
