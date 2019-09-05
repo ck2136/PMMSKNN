@@ -750,9 +750,9 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         # iterate through all patients and match patients according to order. ord <- data is the training data
                         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                         if(is.null(interval)){
-                            patlistint <- seq(1,nrow(train[,patid]))
+                            patlistint <- seq(1,length(train[,patid]))
                         } else {
-                            patlistint <- seq(1,nrow(train[,patid]), by=interval)
+                            patlistint <- seq(1,length(train[,patid]), by=interval)
                         }
 
                         for (i in patlistint) {
