@@ -52,7 +52,7 @@ matchIdExtractsknn <- function(
     # - - - - - - - - - - - - - - - - - - - - #
     nnarraytrain <- sapply(1:nrow(train), function(y){
 
-                               temp  <- sapply(2:ncol(train), function(x){
+                               temp  <- lapply(2:ncol(train), function(x){
                                                    (train[-y,x] - c(train[y,x]))^2
                         })
 
