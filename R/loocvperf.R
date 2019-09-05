@@ -83,7 +83,7 @@ loocvperf <- function(loocv_res,
            # MINMAX
            bsc = (.data$bias - min(.data$bias, na.rm=TRUE)) / (max(.data$bias, na.rm=TRUE) - min(.data$bias, na.rm=TRUE)),
            rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
-           covsc = (abs(.data$coverage - 0.50) - min(abs(.data$coverage - 0.50), na.rm =TRUE)) / (max(abs(.data$coverage - 0.50), na.rm=TRUE) - min(abs(.data$coverage - 0.50), na.rm=TRUE)),
+           covsc = ifelse((max(abs(.data$coverage - 0.50), na.rm=TRUE) - min(abs(.data$coverage - 0.50), na.rm=TRUE)) == 0,0, (abs(.data$coverage - 0.50) - min(abs(.data$coverage - 0.50), na.rm =TRUE)) / (max(abs(.data$coverage - 0.50), na.rm=TRUE) - min(abs(.data$coverage - 0.50), na.rm=TRUE))),
            presc = (.data$precision - min(.data$precision, na.rm=TRUE)) / (max(.data$precision, na.rm=TRUE) - min(.data$precision, na.rm=TRUE)),
            zsc = (.data$zscore - min(.data$zscore, na.rm=TRUE)) / (max(.data$zscore, na.rm=TRUE) - min(.data$zscore, na.rm=TRUE))
     ) 

@@ -1,4 +1,7 @@
-#' Generate DataFrame for Calibration plot (for Continuous Value Predictions)
+#' Generate a DataFrame for producing a calibration plot (for Continuous Value Predictions)
+#' 
+#' This is a utility function that takes two vectors of observed and predicted values 
+#' in order to generate a dataframe necessary for producing a calibration plot.
 #' 
 #' @param observed      Vector of observed values (Numeric type).
 #' @param predicted     Vector of predicted values (Numeric type).
