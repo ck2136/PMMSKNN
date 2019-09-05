@@ -82,20 +82,37 @@ preproc <- function(dff,
     # Check for duplicated values in baseline and postoperative
     # - - - - - - - - - - - - - - - - - - - - - - #
     if(any(dff %>% filter(.$baseline == 1) %>% select_(pat_id) %>% unlist %>% duplicated)){
-        stop("Duplicate baseline values exist! remove them before running preproc")
+        warning("Duplicate baseline values exist within training and testing set! remove them before running preproc")
+    }
+  
+  if(
+    any(c(
+      # Training set duplicated?
+      dff %>%
+      filter(.$train_test == 1 & .$baseline == 1) %>%
+      select(pat_id) %>%
+      unlist %>% duplicated,
+      # Test set duplicated?
+      dff %>%
+      filter(.$train_test == 2 & .$baseline == 1) %>%
+      select(pat_id) %>%
+      unlist %>% duplicated
+    ))
+  ){
+    warning("Duplicate baseline values exist within either the training and testing set! remove them before running preproc")
     }
 
-    if(
-       dff %>% 
-           filter(.data$baseline == 0) %>% 
-           dplyr::select_(pat_id, time_var) %>% nrow != 
-           dff %>% 
-           filter(.data$baseline == 0) %>% 
-           dplyr::select_(pat_id, time_var) %>% 
-           distinct_(pat_id, time_var)  %>% nrow
-    ){
-        stop("Duplicate post operative values exist! remove them before running preproc")
-    }
+    # if(
+    #    dff %>% 
+    #        filter(.data$baseline == 0) %>% 
+    #        dplyr::select_(pat_id, time_var) %>% nrow != 
+    #        dff %>% 
+    #        filter(.data$baseline == 0) %>% 
+    #        dplyr::select_(pat_id, time_var) %>% 
+    #        distinct_(pat_id, time_var)  %>% nrow
+    # ){
+    #     stop("Duplicate post operative values exist! remove them before running preproc")
+    # }
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Check whether train and test cases have both pre and post op values
