@@ -531,14 +531,14 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                                 #train_post[train_post$patient_id == ord_data$id[c(i)],c("patient_id",time_elapsed,outcome)] %>% 
                                 left_join(
-                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                           by = "time"
                                 )
 
                             #-- store Training C50
                             dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
                                 left_join(
-                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                          data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                           by = "time"
                                 )
                             #-- store all centile for later test set merging
@@ -1177,7 +1177,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                                     dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                                         #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
                                         left_join(
-                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                                   by = "time"
                                         )
                                         #left_join(
@@ -1188,7 +1188,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                                     #-- store Training C50
                                     dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i,patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
                                         left_join(
-                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                                  data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                                   by = "time"
                                         )
                                         #left_join(
