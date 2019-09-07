@@ -246,7 +246,7 @@ preproc <- function(dff,
                   ydot = pmmydotgen(alldf, 
                                     formula = formula(paste0("yhat ~ ", paste0(varlist, collapse="+"))),
                                     m, 
-                                    pat_id = "patient_id", 
+                                    pat_id = pat_id, 
                                     seed=1234, 
                                     dftest=NULL)
         )
@@ -271,7 +271,7 @@ preproc <- function(dff,
                   ydot = pmmydotgen(alldf, 
                                     formula = formula(paste0("yhat ~ ", paste0(varlist, collapse="+"))),
                                     m, 
-                                    pat_id = "patient_id", 
+                                    pat_id = pat_id, 
                                     seed=1234, 
                                     dftest=pre_test_df)
         )
@@ -280,12 +280,16 @@ preproc <- function(dff,
     # Change patient_id column for LOOCV function use
     # - - - - - - - - - - - - - - - - - - - - - - #
     post_train_df <- post_train_df %>%
-        rename_("patient_id" = pat_id,
-                "time" = time_var)
+        rename_(
+          "patient_id" = pat_id
+          # "time" = time_var
+          )
 
     post_test_df <- post_test_df %>%
-        rename_("patient_id" = pat_id,
-                "time" = time_var)
+        rename_(
+          "patient_id" = pat_id
+          # "time" = time_var
+          )
 
     return(list(train_post = post_train_df, 
                 train_o =  train_ordered,
