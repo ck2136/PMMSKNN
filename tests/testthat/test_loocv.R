@@ -8,6 +8,32 @@
 # }}}
 
 # LOOCV: Non Parallel {{{
+data("ChickWeight")
+full  <- ChickWeight
+full %<>%
+  mutate(
+    Chick = as.numeric(as.character(Chick)),
+    train_test = ifelse(Chick %in% c(1,2,20, 30, 40), 2, 1),
+    Diet = as.numeric(as.character(Diet))
+  ) %>% 
+  rename(time = Time) %>%
+  # Need to have distinct patient id's for the full data
+  distinct(Chick, time, .keep_all=TRUE)
+set.seed(1234)
+full <- PMMSKNN:::baselinemk(full, "Chick", "time")
+test_proc <- preproc(
+                dff=full,                 # specify full dataset name
+                split_var = 'train_test', # train test split variable
+                trainval = 1,             # training set value
+                testval = 2,              # test set value
+                knots_exp = c(0, 4, 8, 16), # Specify broken stick knots
+                out_time = 16,            # specify which timepoint to use 
+                outcome = "weight",          # specify outcome variable name
+                time_var = "time",        # specify time variable name
+                pat_id = "Chick",    # specify patient id variable name
+                varlist = c("Diet") # specify list of covariates for pmm
+                # filter_exp = "time > 3"   # Filter observations that will be included
+)
 
 ## loocv_function() {{{
 fin <- loocv_function(
@@ -20,7 +46,7 @@ fin <- loocv_function(
   test_post = test_proc$test_post,
   test_o = test_proc$test_o,
   # Specify outcome variable and time variable name
-  outcome = "tug",
+  outcome = "weight",
   time_elapsed = "time",
   interval = 10,
   
@@ -33,7 +59,7 @@ fin <- loocv_function(
   # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
   # specify power transformation of location (ptr_m)
   d_f_m=3, ptr_m=0.5,
-  d_f_s=1,
+  d_f_s=1, m=5,
   
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
@@ -65,7 +91,7 @@ fin <- loocv_function(
   test_post = test_proc$test_post,
   test_o = test_proc$test_o,
   # Specify outcome variable and time variable name
-  outcome = "tug",
+  outcome = "weight",
   #outcome = "knee_flex",
   time_elapsed = "time",
   interval = NULL,
@@ -83,7 +109,7 @@ fin <- loocv_function(
   #d_f_m=3, ptr_m=1,
   d_f_s=1,
   # parallel
-  parallel=3,
+  parallel=3,m=5,
   
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
