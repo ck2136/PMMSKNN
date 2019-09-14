@@ -124,17 +124,17 @@ plmout <- function(
 
         #-- Precision
         perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
-        #-- Test Predicted Values (i.e.C50)
+        #-- Store the Test Predicted Values (i.e.C50)
         perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                       by = "time"
             )
 
-        #-- Train Predicted Values
+        #-- Store the Train Predicted Values
         perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                       by = "time"
             )
         #-- All centile 
