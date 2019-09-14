@@ -118,7 +118,7 @@ pat_level_func <- function(
                                       "d_f_n", "d_f_t", "dist_fam", "spls","spln","splt",
                                       "outcome","time_elapsed", "plot", "matchprobweight","time_window",
                                       "interval","thresh_val","printtrace","userchoose","seed", "ref",
-                                      "loocv","mint","maxt", "traintestmatchdf"),                                                                                                              .packages=c("dplyr","gamlss"),
+                                      "loocv","mint","maxt", "traintestmatchdf", "m"),                                                                                                              .packages=c("dplyr","gamlss"),
                             .combine=list,
                             .multicombine = TRUE
                             ) %dopar% {
