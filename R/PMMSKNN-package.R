@@ -8,15 +8,15 @@
 #'                        summarise summarise_ arrange arrange_ 
 #'                        rename rename_ bind_cols full_join ntile do 
 #'                        if_else row_number group_by_ slice ungroup
-#'                        tibble mutate_
-#'@importFrom data.table  data.table rbindlist
+#'                        tibble mutate_ top_n
+#'@importFrom data.table  data.table rbindlist 
 #'@importFrom cowplot     plot_grid get_legend
 #'@importFrom DescTools   MedianCI
 #'@importFrom lme4        lmer
 #'@importFrom merTools    predictInterval
-#'@importFrom tidyr       spread
+#'@importFrom tidyr       spread nest
 #'@importFrom tidyselect  contains matches
-#'@importFrom rlang       .data := parse_quosure
+#'@importFrom rlang       .data := parse_quo caller_env global_env
 #'@importFrom ggplot2     aes aes_string facet_wrap geom_abline 
 #'                        geom_boxplot geom_hline geom_line geom_point
 #'                        geom_pointrange geom_text ggplot geom_smooth
@@ -26,16 +26,18 @@
 #'@importFrom MASS        stepAIC mvrnorm
 #'@importFrom doParallel  registerDoParallel 
 #'@importFrom doSNOW      registerDoSNOW 
-#'@importFrom parallel    makeCluster
+#'@importFrom parallel    makeCluster detectCores 
+#'@importFrom future      plan multiprocess
+#'@importFrom future.apply      future_lapply
 #'@importFrom foreach     foreach %dopar%
 #'@importFrom stats       as.formula complete.cases cor formula
 #'                        glm lm median  na.omit pnorm poisson 
 #'                        predict setNames update median rchisq
-#'                        model.matrix coef quantile fitted
-#'@importFrom utils       head str
+#'                        model.matrix coef quantile fitted qt sd
+#'@importFrom utils       head str globalVariables
 NULL
 
-globalVariables(c(".","fitmed", "fitpois","test_id","train_id"))
+utils::globalVariables(c(".","fitmed", "fitpois","test_id","train_id","..","bs_obj"))
 
 #' \pkg{PMMSKNN}: Sequential KNN Extended via Predicted Mean Matching.
 #'
