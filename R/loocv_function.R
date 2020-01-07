@@ -57,6 +57,8 @@
 #' choosing the optimal nearest number of neighbors. 
 #' Default is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
 #' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process.
+#' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
+#' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param \dots Passed down to \code{gamlss}
 #' 
 #' @return Returns a list of 3 lists and a value. 1) \code{pred_res} contains a list of predicted values for the training data (\code{pred_train}) and test data (\code{pred_test}), the performance (\code{bias},\code{rmse},\code{zscore},\code{iqrcoverage},\code{precisionvec}, and number of dropped cases in fitting the gamlss model(\code{dropped_cases})); 2) \code{loocv_res} contains the same lists described above for each models fitted using different values of number of nearest neighbors; 3) \code{loocv_score} contains the summarised performance measures as a data frame; 4) \code{nearest_n} contains the optimal number of matches based on the aggregate performance metric.
@@ -91,6 +93,8 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                            mtype=1,
                            biasm="raw",
                            m,
+                           perfrank="cov",
+                           perf_round_by=4,
                            ...) {
 
     
@@ -169,16 +173,62 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                 }
                 opt_n_index <- which(nearest_n == userchoose)
             } else {
-                # - - - - - - - - - - - - - - - - - - - - - - #
-                # Use a weighted scoring fucntion of bias, coverage, and precision to choose optimal m
-                # - - - - - - - - - - - - - - - - - - - - - - #
-                opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
-                    dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                
+                # PERFORMANCE CALCULATION --------------------------------
+                
+                if(perfrank=="totscore"){
+                    
+                    # - - - - - - - - - - - - - - - - - - - - - - #
+                    # Use a weighted scoring fucntion of bias, coverage, and precision to choose optimal m
+                    # - - - - - - - - - - - - - - - - - - - - - - #
+                    opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
+                        dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                    
+                    
+                } else if(perfrank=="cov"){
+                    
+                    
+                    perfdf <- loocv_perf(
+                        loocv_test_result,
+                        outcome=outcome,
+                        nearest_n=nearest_n,
+                        perf_round_by=perf_round_by
+                    )
+                    
+                    
+                    opt_n <- perfdf %>%
+                        arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
+                        head(1) %>%
+                        .[,"nearest_n"] 
+                    
+                    
+                } else if(perfrank=="bias"){
+                    
+                    perfdf <- loocv_perf(
+                        loocv_test_result,
+                        outcome=outcome,
+                        nearest_n=nearest_n,
+                        perf_round_by=perf_round_by
+                    )
+                    
+                    opt_n <- perfdf %>%
+                        arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
+                        head(1) %>%
+                        .[,"nearest_n"] 
+                    
+                }
+                
+                if(length(opt_n) > 1){
+                    opt_n <- opt_n[1] # select first one
+                } 
+                
+                opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
+                
             }
         }
         names(loocv_test_result) <- paste0("nearest_",nearest_n)
 
-        print(paste0(mean(loocv_test_result[[opt_n_index]]$rmse, na.rm=TRUE), " from ", names(loocv_test_result))[[opt_n_index]])
+        print(paste0("bias: ", perfdf$rmse, "cov: ", perfdf$cov, "prec: ", perfdf$prec, " from ", names(loocv_test_result))[[opt_n_index]])
         print(paste0("Number of misses is: ",loocv_test_result[[opt_n_index]]$dropped_cases,' cases'))
         print(paste0("Distribution chosen for matched GAMLSS: ", ref$gamlss_dist))
         print(paste0("Optimal Number of Matches is: ", nearest_n[[opt_n_index]]))
@@ -201,10 +251,22 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                               parallel=parallel, loocv=FALSE, mtype=mtype,
                                               biasm=biasm,m=m
         ) 
+        # calculate performance for test data
+        
+        perfdf_test <- loocv_perf(
+            predict_test_result,
+            outcome=outcome,
+            nearest_n=nearest_n[opt_n_index],
+            perf_round_by=perf_round_by,
+            train=FALSE
+        )
+        
         # extract prediction results from the optimum nearest n 
         return(list(pred_res = predict_test_result,
+                    test_score = perfdf_test,
                     loocv_res =  loocv_test_result,
-                    loocv_score = loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n),
+                    loocv_score = perfdf,
+                    # loocv_score = loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n),
                     nearest_n=nearest_n[opt_n_index]))
     } else {
         if(loocv){
@@ -225,8 +287,16 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                 parallel=parallel, loocv=loocv, mtype=mtype,
                                                 biasm=biasm,m=m
             ) 
+            
+            perfdf <- loocv_perf(
+                loocv_test_result,
+                outcome=outcome,
+                nearest_n=nearest_n,
+                perf_round_by=perf_round_by
+            )
+            
             predict_test_result <- pat_level_func(
-                                                  ref=ref,nearest=nearest_n[opt_n_index], # number to play with 
+                                                  ref=ref,nearest=nearest_n, # number to play with 
                                                   dist_fam = dist_fam, # for gamlss distribution
                                                   train_post=train_post, ord_data=ord_data, 
                                                   test_post=test_post, test_o=test_o,  # datasets
@@ -241,11 +311,22 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                   parallel=parallel, loocv=FALSE, mtype=mtype,
                                                   biasm=biasm,m=m
             ) 
+            
+            perfdf_test <- loocv_perf(
+                predict_test_result,
+                outcome=outcome,
+                nearest_n=nearest_n,
+                perf_round_by=perf_round_by,
+                train=FALSE
+            )
+            
             retlist <- list(pred_res = predict_test_result,
-                            loocv_res =  list(loocv_test_result),
+                            loocv_res = loocv_test_result,
+                            test_score = perfdf_test,
+                            loocv_res = loocv_test_result,
+                            loocv_score = perfdf,
                             nearest_n=nearest_n)
             names(retlist$loocv_res) <- c(paste0("nearest_",nearest_n))
-            retlist$loocv_score <- loocvperf(retlist$loocv_res, ord_data, bias=biasm, nearest_n)
             return(retlist)
         } else {
             predict_test_result <- pat_level_func(
@@ -264,7 +345,16 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                   parallel=parallel, loocv=FALSE, mtype=mtype,
                                                   biasm=biasm,m=m
             ) 
+            
+            perfdf_test <- loocv_perf(
+                predict_test_result,
+                outcome=outcome,
+                nearest_n=nearest_n,
+                perf_round_by=perf_round_by,
+                train=FALSE
+            )
             return(list(pred_res = predict_test_result,
+                        test_score = perfdf_test,
                         nearest_n=nearest_n))
         }
     }
