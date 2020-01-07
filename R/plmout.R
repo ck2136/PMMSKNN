@@ -89,41 +89,41 @@ plmout <- function(
         }
 
         # -- IQR values
-        iqr$iqr<-iqr$C75-iqr$C25
-        perfout$iqrvec[i]<-mean(iqr$iqr)
+        # iqr$iqr<-iqr$C75-iqr$C25
+        # perfout$iqrvec[i]<-mean(iqr$iqr)
 
         targetid<-traintestmatchdf[traintestmatchdf$train_id %in% ord_data$id[c(i)], "test_id"] # select the test id's that corresopnd to current train patient
-        targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data
+        # targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data
 
-        bias<-merge(iqr,targetrec, by=time_elapsed)
-        bias$diff<-bias$C50-bias[,outcome]
+        # bias<-merge(iqr,targetrec, by=time_elapsed)
+        # bias$diff<-bias$C50-bias[,outcome]
 
         # Bais RAW
-        perfout$biasvec[i] <- mean(bias$diff)
+        # perfout$biasvec[i] <- mean(bias$diff)
         # Bais RMSE
-        perfout$rmsevec[i] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+        # perfout$rmsevec[i] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
 
         # 50% Coverage
-        bias$cov1<-bias[,outcome]-bias$C25
-        bias$cov2<-bias$C75-bias[,outcome]
-        bias$cov3<-ifelse(bias$cov1>0,1,0)
-        bias$cov4<-ifelse(bias$cov2>0,1,0)
-        bias$cov5<-bias$cov3+bias$cov4
-        bias$coverage<-ifelse(bias$cov5>1,1,0)
+        # bias$cov1<-bias[,outcome]-bias$C25
+        # bias$cov2<-bias$C75-bias[,outcome]
+        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+        # bias$cov5<-bias$cov3+bias$cov4
+        # bias$coverage<-ifelse(bias$cov5>1,1,0)
 
         # Mean of 50% Coverage
-        perfout$coveragevec[i]<-mean(bias$coverage)
+        # perfout$coveragevec[i]<-mean(bias$coverage)
 
 
         # Crazy Matches 
-        if(any(bias$C50 > thresh_val)){
+        if(any(iqr$C50 > thresh_val)){
             perfout$crazymatch[[i]] <- matchmodel
         } else {
             perfout$crazymatch[[i]] <- NA
         }
 
         #-- Precision
-        perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+        # perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
         #-- Store the Test Predicted Values (i.e.C50)
         perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
@@ -138,7 +138,7 @@ plmout <- function(
                       by = "time"
             )
         #-- All centile 
-        perfout$centilepred[[i]] <- cbind(ord_data$id[c(i)], iqr$time, iqr$C50)
+        # perfout$centilepred[[i]] <- cbind(ord_data$id[c(i)], iqr$time, iqr$C50)
 
 
         #-- Final Output
@@ -182,56 +182,56 @@ plmout <- function(
         # code for storing either LOOCV result or extracting prediction #
         # - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - #
 
-        iqr$iqr<-iqr$C75-iqr$C25
+        # iqr$iqr<-iqr$C75-iqr$C25
 
-        perfout$iqrvec[i]<-mean(iqr$iqr)
+        # perfout$iqrvec[i]<-mean(iqr$iqr)
         targetid<-ord_data$id[c(i)]
-        targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
+        # targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
 
-        bias<-merge(iqr,targetrec, by=time_elapsed)
-        bias$diff<-bias$C50-bias[,outcome]
+        # bias<-merge(iqr,targetrec, by=time_elapsed)
+        # bias$diff<-bias$C50-bias[,outcome]
 
         #store mean of bias and rmse in biasvec, rmsevec
-        perfout$biasvec[i] <- mean(bias$diff)
-        perfout$rmsevec[i] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+        # perfout$biasvec[i] <- mean(bias$diff)
+        # perfout$rmsevec[i] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
 
         # coverage prob based on IQR 50%
-        bias$cov1<-bias[,outcome]-bias$C25
-        bias$cov2<-bias$C75-bias[,outcome]
-        bias$cov3<-ifelse(bias$cov1>0,1,0)
-        bias$cov4<-ifelse(bias$cov2>0,1,0)
-        bias$cov5<-bias$cov3+bias$cov4
-        bias$coverage<-ifelse(bias$cov5>1,1,0)
+        # bias$cov1<-bias[,outcome]-bias$C25
+        # bias$cov2<-bias$C75-bias[,outcome]
+        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+        # bias$cov5<-bias$cov3+bias$cov4
+        # bias$coverage<-ifelse(bias$cov5>1,1,0)
 
         # store mean of the n coverage in vector
-        perfout$coveragevec[i]<-mean(bias$coverage)
+        # perfout$coveragevec[i]<-mean(bias$coverage)
 
         # coverage prob based on IQR 95%
-        bias$cov1<-bias[,outcome]-bias$C2.5
-        bias$cov2<-bias$C97.5 -bias[,outcome]
-        bias$cov3<-ifelse(bias$cov1>0,1,0)
-        bias$cov4<-ifelse(bias$cov2>0,1,0)
-        bias$cov5<-bias$cov3+bias$cov4
-        bias$coverage<-ifelse(bias$cov5>1,1,0)
+        # bias$cov1<-bias[,outcome]-bias$C2.5
+        # bias$cov2<-bias$C97.5 -bias[,outcome]
+        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+        # bias$cov5<-bias$cov3+bias$cov4
+        # bias$coverage<-ifelse(bias$cov5>1,1,0)
 
         # store mean of the n coverage in vector
-        perfout$coveragevec95[i]<-mean(bias$coverage)
+        # perfout$coveragevec95[i]<-mean(bias$coverage)
         #-- Test Predicted Values (i.e.C50)
-        perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
-            left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
-                      by = "time"
-            )
+        # perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+        #     left_join(
+        #               data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+        #               by = "time"
+        #     )
 
         #-- Train Predicted Values
         perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25=iqr$C25, c75=iqr$C75) ,
                       by = "time"
             )
 
         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
-        perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+        # perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
 
 
         return(
