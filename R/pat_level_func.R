@@ -288,7 +288,7 @@ pat_level_func <- function(
                                  },
                                  error=function(cond){
                                      message(cond)
-                                     return(NA)
+                                     return(1)
                                  },
                                  warning = function(cond){
                                      message(cond)
