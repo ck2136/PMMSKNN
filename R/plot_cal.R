@@ -51,6 +51,7 @@ plot_cal <- function(plotobj,
                      wtotplot=FALSE,
                      plotvals=FALSE,
                      iqrfull=NULL,
+                     bs=FALSE,
                      ...) {
   
   # - - - - - - - - - - - - - - - - - - - - - - #
@@ -64,17 +65,36 @@ plot_cal <- function(plotobj,
     # RMSE/Coverage Plot function for test and train
     # - - - - - - - - - - - - - - - - - - - - - - #
     
-    # Run listtodf function to format plotobj 
-    tmp1 <-listtodf(plotobj$loocv_res) 
+    # For brokenstick object it's simple data manipulation of loocv_score
+    if(bs){
+      tmp1 <- plotobj$loocv_score %>%
+        tidyr::pivot_longer(rmse:prec, names_to = "measure") %>% rename(nearest_n = 1)
+      perfdf <- plotobj$loocv_score
+    
+    } else {
+      nearest_n =as.numeric(regmatches(names(plotobj$loocv_res), regexpr("\\d+",names(plotobj$loocv_res)))) 
+      
+      perfdf <- loocv_perf(
+        plotobj$loocv_res,
+        outcome=outcome,
+        nearest_n=nearest_n,
+        perf_round_by=4
+      ) 
+      
+      tmp1 <- perfdf %>%
+        tidyr::pivot_longer(rmse:prec, names_to = "measure") %>% rename(nearest_n = 1)
+    }
+    
+    # tmp1 <-listtodf(plotobj$loocv_res) 
     
     train_bias <- ggplot(tmp1 %>%
                            filter(
                              #abs(value) < 50,
                              #measure == 'bias' | measure == 'rmse' | measure == 'zscore') 
                              #measure == 'bias' | measure == 'zscore') 
-                             .data$measure == 'zscore') 
+                             .data$measure == 'rmse') 
     ) + 
-      xlab("Matches (N)") + ylab("Bias") +
+      xlab("Matches (N)") + ylab("RMSE") +
       geom_point(aes(x=.data$nearest_n, y=.data$value, colour=.data$measure)) + 
       #geom_smooth(aes(x=.data$nearest_n, y=.data$value, colour = .data$measure), 
                   #method="gam",formula = y ~ s(x, bs="cs", k=splinek ), se=FALSE) + 
@@ -86,20 +106,20 @@ plot_cal <- function(plotobj,
     train_cov <- ggplot(tmp1 %>%
                           filter(
                             #nearest_n > 10,
-                            .data$measure == 'iqrcoverage') 
+                            .data$measure == 'cov') 
                         #measure == 'iqrcoverage' | measure == 'coverage95c' ) 
     ) + 
       geom_point(aes(x=.data$nearest_n, y=.data$value), colour="blue") + 
       #geom_smooth(aes(x=.data$nearest_n, y=.data$value), colour = "blue", 
                   #method="gam",formula = y ~ s(x, bs="cs", k=splinek ), se=FALSE) + 
-                       xlab("Matches (N)") + ylab("Coverage") +
+                       xlab("Matches (N)") + ylab("Coverage (50%)") +
       ylim(min(tmp1 %>% 
-                 filter(.data$measure == 'iqrcoverage') %>%
+                 filter(.data$measure == 'cov') %>%
                  dplyr::select(.data$value) %>%
                  unlist %>%
                  as.vector) * 0.95 ,
            max(tmp1 %>%
-                 filter(.data$measure == 'iqrcoverage') %>%
+                 filter(.data$measure == 'cov') %>%
                  dplyr::select(.data$value) %>%
                  unlist %>%
                  as.vector) * 1.05)+
@@ -113,38 +133,33 @@ plot_cal <- function(plotobj,
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Precision Plot: Mean IQR dif by Nearest N
     # - - - - - - - - - - - - - - - - - - - - - - #
-    ppdf <- rbindlist(lapply(plotobj$loocv_res, function(y) {
-      rbindlist(lapply(y$precisionvec, function(x) {
-        list(meaniqrdif = mean(x$prec, na.rm=TRUE))
-      }))
-    }), idcol='nearest_n')
-    
-    #- change values in id column to numeric
-    ppdf <- ppdf %>%
-      mutate(nearest_n = as.numeric(gsub("nearest_", "", .data$nearest_n))) 
-    ppdf_means <- ppdf %>%
-      group_by(.data$nearest_n) %>%
-      summarise(meaniqrdif=mean(.data$meaniqrdif, na.rm=TRUE))
-    
-    pppm <- ggplot(ppdf_means) + 
-      geom_point(aes(x=.data$nearest_n, y=.data$meaniqrdif), colour="green") + 
+    pppm <- ggplot(tmp1 %>%
+                     filter(
+                       #nearest_n > 10,
+                       .data$measure == 'prec') 
+                   #measure == 'iqrcoverage' | measure == 'coverage95c' ) 
+    ) +
+      geom_point(aes(x=.data$nearest_n, y=.data$value), colour="green") + 
       #geom_smooth(aes(x=.data$nearest_n, y=.data$meaniqrdif), colour="green",
                  #method="gam",formula = y ~ s(x, bs="cs", k=splinek ), se=FALSE) + 
       xlab("Matches (N)") + ylab("Mean IQR difference") +
-      ylim(min(ppdf_means%>% 
-                 dplyr::select(.data$meaniqrdif) %>%
+      ylim(min(tmp1 %>% 
+                 filter(.data$measure == 'prec') %>%
+                 dplyr::select(.data$value) %>%
                  unlist %>%
                  as.vector) * 0.95 ,
-           max(ppdf_means%>%
-                 dplyr::select(.data$meaniqrdif) %>%
+           max(tmp1 %>% 
+                 filter(.data$measure == 'prec') %>%
+                 dplyr::select(.data$value) %>%
                  unlist %>%
                  as.vector) * 1.05)+
       #ylim(0.3,1)+
       #scale_colour_manual(labels=c("95% IQR Coverage","50% IQR Coverage"), values=c("blue","red")) +
       #scale_colour_manual(labels=c("50% IQR Coverage"), values=c("blue")) +
       theme_bw() + theme(legend.position="none", aspect.ratio = 1) +
-      geom_hline(yintercept = max(ppdf_means %>% dplyr::select(.data$meaniqrdif) %>% unlist %>% as.vector)) 
+      geom_hline(yintercept = max(perfdf$prec)) 
       #annotate("text", x=median(ppdf_means$nearest_n), y = max(ppdf_means %>% dplyr::select(.data$meaniqrdif) %>% unlist %>% as.vector), vjust = -1, label = "Max IQR Difference")
+    
     
   # - - - - - - - - - - - - - - - - - - - - - - #
   # Return plot objects
