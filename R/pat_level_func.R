@@ -129,17 +129,23 @@ pat_level_func <- function(
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             # Instantiate array of values
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+            # perfout <- list(
+            #                 dfList = vector("list", length = length(ord_data$id)), 
+            #                 dfList_test = vector("list", length = length(ord_data$id)), 
+            #                 centilepred = vector("list", length = length(ord_data$id)), 
+            #                 biasvec = vector("numeric", length = length(ord_data$id)), 
+            #                 rmsevec = vector("numeric", length = length(ord_data$id)), 
+            #                 coveragevec = vector("numeric", length = length(ord_data$id)), 
+            #                 coveragevec95 = vector("numeric", length = length(ord_data$id)), 
+            #                 iqrvec = vector("numeric", length = length(ord_data$id)), 
+            #                 precisionvec = vector("list", length = length(ord_data$id)), 
+            #                 crazymatch = vector("list", length = length(ord_data$id)), 
+            #                 zscore = vector("list", length = length(ord_data$id))
+            # )
             perfout <- list(
                             dfList = vector("list", length = length(ord_data$id)), 
                             dfList_test = vector("list", length = length(ord_data$id)), 
-                            centilepred = vector("list", length = length(ord_data$id)), 
-                            biasvec = vector("numeric", length = length(ord_data$id)), 
-                            rmsevec = vector("numeric", length = length(ord_data$id)), 
-                            coveragevec = vector("numeric", length = length(ord_data$id)), 
-                            coveragevec95 = vector("numeric", length = length(ord_data$id)), 
-                            iqrvec = vector("numeric", length = length(ord_data$id)), 
-                            precisionvec = vector("list", length = length(ord_data$id)), 
-                            crazymatch = vector("list", length = length(ord_data$id)), 
+                            crazymatch = vector("list", length = length(ord_data$id)),
                             zscore = vector("list", length = length(ord_data$id))
             )
 
@@ -201,11 +207,15 @@ pat_level_func <- function(
             # Include missing points and rename and return
             # - - - - - - - - - - - - - - - - - - - - - - - - -#  
             perfout <- c(perfout, dropped_cases=misses)
+            # names(perfout) <- c("pred_train","pred_test",
+            #                     "centilerange","bias",
+            #                     "rmse","iqrcoverage",
+            #                     "coverage95c","iqr",
+            #                     "precisionvec","crazymatch", 
+            #                     "zscore","dropped_cases")
             names(perfout) <- c("pred_train","pred_test",
-                                "centilerange","bias",
-                                "rmse","iqrcoverage",
-                                "coverage95c","iqr",
-                                "precisionvec","crazymatch", 
+                                # "precisionvec",
+                                "crazymatch", 
                                 "zscore","dropped_cases")
             perfout
 
@@ -233,13 +243,13 @@ pat_level_func <- function(
             perfout <- list(
                             dfList = vector("list", length = length(ord_data$id)), 
                             dfList_test = vector("list", length = length(ord_data$id)), 
-                            centilepred = vector("list", length = length(ord_data$id)), 
-                            biasvec = vector("numeric", length = length(ord_data$id)), 
-                            rmsevec = vector("numeric", length = length(ord_data$id)), 
-                            coveragevec = vector("numeric", length = length(ord_data$id)), 
-                            coveragevec95 = vector("numeric", length = length(ord_data$id)), 
-                            iqrvec = vector("numeric", length = length(ord_data$id)), 
-                            precisionvec = vector("list", length = length(ord_data$id)), 
+                            # centilepred = vector("list", length = length(ord_data$id)), 
+                            # biasvec = vector("numeric", length = length(ord_data$id)), 
+                            # rmsevec = vector("numeric", length = length(ord_data$id)), 
+                            # coveragevec = vector("numeric", length = length(ord_data$id)), 
+                            # coveragevec95 = vector("numeric", length = length(ord_data$id)), 
+                            # iqrvec = vector("numeric", length = length(ord_data$id)), 
+                            # precisionvec = vector("list", length = length(ord_data$id)), 
                             crazymatch = vector("list", length = length(ord_data$id)), 
                             zscore = vector("list", length = length(ord_data$id))
             )
@@ -323,18 +333,20 @@ pat_level_func <- function(
             perfout <- c(perfout, dropped_cases=misses)
             if(!loocv){
                 names(perfout) <- c("pred_train","pred_test",
-                                    "centilerange","biasvec",
-                                    "rmse","iqrcoverage",
-                                    "coverage95c","iqr",
-                                    "precisionvec","crazymatch", 
+                                    # "centilerange","biasvec",
+                                    # "rmse","iqrcoverage",
+                                    # "coverage95c","iqr",
+                                    # "precisionvec",
+                                    "crazymatch", 
                                     "zscore","dropped_cases")
                 nn_arr <- perfout
             } else {
                 names(perfout) <- c("pred_train","pred_test",
-                                    "centilerange","bias",
-                                    "rmse","iqrcoverage",
-                                    "coverage95c","iqr",
-                                    "precisionvec","crazymatch", 
+                                    # "centilerange","bias",
+                                    # "rmse","iqrcoverage",
+                                    # "coverage95c","iqr",
+                                    # "precisionvec",
+                                    "crazymatch", 
                                     "zscore","dropped_cases")
                 nn_arr[[which(nearest == n)]] <- perfout
             }

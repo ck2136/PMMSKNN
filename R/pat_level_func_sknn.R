@@ -123,15 +123,15 @@ pat_level_func_sknn <- function(
             
             dfList <- list()                #-- list to store training data's predicted C50 from gamlss model
             dfList_test <- list()           #-- list to store testing data's predicted C50 from gamlss model
-            centilepred <- list()           #-- store all centile for later test set merging
-            biasvec<-vector()               #-- store mean of bias
-            rmsevec <- vector()             #-- store rmse vector
-            coveragevec<-vector()           #-- store coverage vector
-            coveragevec95a<-vector()        #-- store mean of the n coverage in vector
-            #coveragevec95<-vector()
-            iqrvec<-vector()
-            ninefiveconf <- data.frame()
-            precisionvec <- list()
+            # centilepred <- list()           #-- store all centile for later test set merging
+            # biasvec<-vector()               #-- store mean of bias
+            # rmsevec <- vector()             #-- store rmse vector
+            # coveragevec<-vector()           #-- store coverage vector
+            # coveragevec95a<-vector()        #-- store mean of the n coverage in vector
+            # #coveragevec95<-vector()
+            # iqrvec<-vector()
+            # ninefiveconf <- data.frame()
+            # precisionvec <- list()
             crazymatch <- list()
             zsc_list <- list()
             
@@ -355,8 +355,8 @@ pat_level_func_sknn <- function(
                         
                         # -- IQR for the test data set
                         
-                        iqr$iqr<-iqr$C75-iqr$C25
-                        iqrvec[cnt]<-mean(iqr$iqr)
+                        # iqr$iqr<-iqr$C75-iqr$C25
+                        # iqrvec[cnt]<-mean(iqr$iqr)
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
@@ -368,35 +368,35 @@ pat_level_func_sknn <- function(
                             ),]  %>% unlist %>% as.vector
                         
                         # get the trainging set post op data
-                        targetrec<-test_post[which(test_post$patient_id %in% targetid), ] 
+                        # targetrec<-test_post[which(test_post$patient_id %in% targetid), ] 
                         
-                        bias<-merge(iqr,targetrec, by=time_elapsed)
-                        bias$diff<-bias$C50-bias[,outcome]
+                        # bias<-merge(iqr,targetrec, by=time_elapsed)
+                        # bias$diff<-bias$C50-bias[,outcome]
                         
                         #store mean of bias and rmse in biasvec, rmsevec
-                        biasvec[cnt] <- mean(bias$diff)
-                        rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+                        # biasvec[cnt] <- mean(bias$diff)
+                        # rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
                         
                         # coverage prob based on IQR 50%
-                        bias$cov1<-bias[,outcome]-bias$C25
-                        bias$cov2<-bias$C75-bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # bias$cov1<-bias[,outcome]-bias$C25
+                        # bias$cov2<-bias$C75-bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
                         
                         # store mean of the n coverage in vector
-                        coveragevec[cnt]<-mean(bias$coverage)
+                        # coveragevec[cnt]<-mean(bias$coverage)
                         
                         
-                        if(any(bias$C50 > thresh_val)){
+                        if(any(iqr$C50 > thresh_val)){
                             crazymatch[[cnt]] <- matchmodel
                         } else {
                             crazymatch[[cnt]] <- NA
                         }
                         
                         #-- precision
-                        precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+                        # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
                         #-- store Testing C50
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
@@ -411,7 +411,7 @@ pat_level_func_sknn <- function(
                                 by = "time"
                             )
                         #-- store all centile for later test set merging
-                        centilepred[[cnt]] <- cbind(train[i, patid][[1]], iqr$time, iqr$C50)
+                        # centilepred[[cnt]] <- cbind(train[i, patid][[1]], iqr$time, iqr$C50)
                         
                     } else { # loocv = TRUE
                         
@@ -489,56 +489,56 @@ pat_level_func_sknn <- function(
                         # code for storing either LOOCV result or extracting prediction #
                         # - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - #
                         
-                        iqr$iqr<-iqr$C75-iqr$C25
+                        # iqr$iqr<-iqr$C75-iqr$C25
                         
-                        iqrvec[cnt]<-mean(iqr$iqr)
+                        # iqrvec[cnt]<-mean(iqr$iqr)
                         targetid<-train[i,patid][[1]]
-                        targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
+                        # targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
                         
-                        bias<-merge(iqr,targetrec, by=time_elapsed)
-                        bias$diff<-bias$C50-bias[,outcome]
+                        # bias<-merge(iqr,targetrec, by=time_elapsed)
+                        # bias$diff<-bias$C50-bias[,outcome]
                         
                         #store mean of bias and rmse in biasvec, rmsevec
-                        biasvec[cnt] <- mean(bias$diff)
-                        rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
-                        
-                        # coverage prob based on IQR 50%
-                        bias$cov1<-bias[,outcome]-bias$C25
-                        bias$cov2<-bias$C75-bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
-                        
-                        # store mean of the n coverage in vector
-                        coveragevec[cnt]<-mean(bias$coverage)
-                        
-                        # coverage prob based on IQR 95%
-                        bias$cov1<-bias[,outcome]-bias$C2.5
-                        bias$cov2<-bias$C97.5 -bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
-                        
-                        # store mean of the n coverage in vector
-                        coveragevec95a[cnt]<-mean(bias$coverage)
+                        # biasvec[cnt] <- mean(bias$diff)
+                        # rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+                        # 
+                        # # coverage prob based on IQR 50%
+                        # bias$cov1<-bias[,outcome]-bias$C25
+                        # bias$cov2<-bias$C75-bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # 
+                        # # store mean of the n coverage in vector
+                        # coveragevec[cnt]<-mean(bias$coverage)
+                        # 
+                        # # coverage prob based on IQR 95%
+                        # bias$cov1<-bias[,outcome]-bias$C2.5
+                        # bias$cov2<-bias$C97.5 -bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # 
+                        # # store mean of the n coverage in vector
+                        # coveragevec95a[cnt]<-mean(bias$coverage)
                         #-- store Testing C50
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                 by = "time"
                             )
                         
                         #-- store Training C50
                         dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50) ,
+                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
                                 by = "time"
                             )
                         
                         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
-                        precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+                        # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
                         
                         
                     }
@@ -559,12 +559,12 @@ pat_level_func_sknn <- function(
                 nn_arr  <- list(
                     pred_train = dfList, 
                     pred_test = dfList_test, 
-                    biasvec = Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
-                    coveragevec = Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
-                    centilerange = centilepred, 
-                    precisionvec=precisionvec, 
+                    # biasvec = Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
+                    # coveragevec = Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
+                    # centilerange = centilepred, 
+                    # precisionvec=precisionvec, 
                     zsc_list = zsc_list,
-                    rmse = rmsevec,
+                    # rmse = rmsevec,
                     crazymatch = crazymatch)
                 
                 
@@ -575,21 +575,27 @@ pat_level_func_sknn <- function(
                     #                          Filter(Negate(is.null),Filter(Negate(is.null), fin)),
                     dfList,
                     dfList_test,
-                    Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
                     #Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), iqrvec)),
-                    rmsevec,
+                    # Filter(Negate(is.na),Filter(Negate(is.na), iqrvec)),
+                    # rmsevec,
                     zsc_list,
-                    precisionvec = precisionvec,
+                    # precisionvec = precisionvec,
                     misses 
                 )
                 
                 # name the list objects
                 message(paste0("Assigning names"))
                 #names(All_list) <- c("bias","iqrcoverage","coverage95c","coverage95m","iqr","rmse", "dropped_cases")
-                names(nn_arr) <- c("dfList","dfList_test","bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
+                names(nn_arr) <- c(
+                    "pred_train","pred_test",
+                    # "dfList","dfList_test",
+                    # "bias","iqrcoverage","coverage95c","iqr","rmse",
+                    "zscore",
+                    # "precisionvec", 
+                    "dropped_cases")
             }
             nn_arr
             
@@ -617,15 +623,15 @@ pat_level_func_sknn <- function(
             
             dfList <- list()                #-- list to store training data's predicted C50 from gamlss model
             dfList_test <- list()           #-- list to store testing data's predicted C50 from gamlss model
-            centilepred <- list()           #-- store all centile for later test set merging
-            biasvec<-vector()               #-- store mean of bias
-            rmsevec <- vector()             #-- store rmse vector
-            coveragevec<-vector()           #-- store coverage vector
-            coveragevec95a<-vector()        #-- store mean of the n coverage in vector
+            # centilepred <- list()           #-- store all centile for later test set merging
+            # biasvec<-vector()               #-- store mean of bias
+            # rmsevec <- vector()             #-- store rmse vector
+            # coveragevec<-vector()           #-- store coverage vector
+            # coveragevec95a<-vector()        #-- store mean of the n coverage in vector
             #coveragevec95<-vector()
-            iqrvec<-vector()
-            ninefiveconf <- data.frame()
-            precisionvec <- list()
+            # iqrvec<-vector()
+            # ninefiveconf <- data.frame()
+            # precisionvec <- list()
             crazymatch <- list()
             zsc_list <- list()
             
@@ -861,8 +867,8 @@ pat_level_func_sknn <- function(
                         
                         # -- IQR for the test data set
                         
-                        iqr$iqr<-iqr$C75-iqr$C25
-                        iqrvec[cnt]<-mean(iqr$iqr)
+                        # iqr$iqr<-iqr$C75-iqr$C25
+                        # iqrvec[cnt]<-mean(iqr$iqr)
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
@@ -872,34 +878,34 @@ pat_level_func_sknn <- function(
                                     distinct_(.dots="patient_id") %>%
                                     .[i,] %>% unlist %>% as.vector}
                             ),]  %>% unlist %>% as.vector
-                        targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data
+                        # targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data
                         
-                        bias<-merge(iqr,targetrec, by=time_elapsed)
-                        bias$diff<-bias$C50-bias[,outcome]
+                        # bias<-merge(iqr,targetrec, by=time_elapsed)
+                        # bias$diff<-bias$C50-bias[,outcome]
                         
                         #store mean of bias and rmse in biasvec, rmsevec
-                        biasvec[cnt] <- mean(bias$diff)
-                        rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+                        # biasvec[cnt] <- mean(bias$diff)
+                        # rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
                         
                         # coverage prob based on IQR 50%
-                        bias$cov1<-bias[,outcome]-bias$C25
-                        bias$cov2<-bias$C75-bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # bias$cov1<-bias[,outcome]-bias$C25
+                        # bias$cov2<-bias$C75-bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
                         
                         # store mean of the n coverage in vector
-                        coveragevec[cnt]<-mean(bias$coverage)
+                        # coveragevec[cnt]<-mean(bias$coverage)
                         
-                        if(any(bias$C50 > thresh_val)){
+                        if(any(iqr$C50 > thresh_val)){
                             crazymatch[[cnt]] <- matchmodel
                         } else {
                             crazymatch[[cnt]] <- NA
                         }
                         
                         #-- precision
-                        precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+                        # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
                         #-- store Testing C50
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
@@ -922,8 +928,8 @@ pat_level_func_sknn <- function(
                         #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,]) ,
                         #by = "patient_id"
                         #)
-                        #-- store all centile for later test set merging
-                        centilepred[[cnt]] <- cbind(train[i,patid][[1]], iqr$time, iqr$C50)
+                        # -- store all centile for later test set merging
+                        # centilepred[[cnt]] <- cbind(train[i,patid][[1]], iqr$time, iqr$C50)
                         
                     } else { # loocv = TRUE
                         
@@ -1005,40 +1011,40 @@ pat_level_func_sknn <- function(
                         # code for storing either LOOCV result or extracting prediction #
                         # - - - - - - - -- - - - - - - - - - - - - - - - - - - - - - - - #
                         
-                        iqr$iqr<-iqr$C75-iqr$C25
+                        # iqr$iqr<-iqr$C75-iqr$C25
                         
-                        iqrvec[cnt]<-mean(iqr$iqr)
+                        # iqrvec[cnt]<-mean(iqr$iqr)
                         targetid<-train[i,patid][[1]]
-                        targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
+                        # targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
                         
-                        bias<-merge(iqr,targetrec, by=time_elapsed)
-                        bias$diff<-bias$C50-bias[,outcome]
+                        # bias<-merge(iqr,targetrec, by=time_elapsed)
+                        # bias$diff<-bias$C50-bias[,outcome]
                         
                         #store mean of bias and rmse in biasvec, rmsevec
-                        biasvec[cnt] <- mean(bias$diff)
-                        rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
+                        # biasvec[cnt] <- mean(bias$diff)
+                        # rmsevec[cnt] <- sqrt(sum(na.omit(bias$diff)^2)/length(na.omit(bias$diff)))
                         
                         # coverage prob based on IQR 50%
-                        bias$cov1<-bias[,outcome]-bias$C25
-                        bias$cov2<-bias$C75-bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # bias$cov1<-bias[,outcome]-bias$C25
+                        # bias$cov2<-bias$C75-bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
                         
                         # store mean of the n coverage in vector
-                        coveragevec[cnt]<-mean(bias$coverage)
+                        # coveragevec[cnt]<-mean(bias$coverage)
                         
                         # coverage prob based on IQR 95%
-                        bias$cov1<-bias[,outcome]-bias$C2.5
-                        bias$cov2<-bias$C97.5 -bias[,outcome]
-                        bias$cov3<-ifelse(bias$cov1>0,1,0)
-                        bias$cov4<-ifelse(bias$cov2>0,1,0)
-                        bias$cov5<-bias$cov3+bias$cov4
-                        bias$coverage<-ifelse(bias$cov5>1,1,0)
+                        # bias$cov1<-bias[,outcome]-bias$C2.5
+                        # bias$cov2<-bias$C97.5 -bias[,outcome]
+                        # bias$cov3<-ifelse(bias$cov1>0,1,0)
+                        # bias$cov4<-ifelse(bias$cov2>0,1,0)
+                        # bias$cov5<-bias$cov3+bias$cov4
+                        # bias$coverage<-ifelse(bias$cov5>1,1,0)
                         
                         # store mean of the n coverage in vector
-                        coveragevec95a[cnt]<-mean(bias$coverage)
+                        # coveragevec95a[cnt]<-mean(bias$coverage)
                         #-- store Testing C50
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
@@ -1063,7 +1069,7 @@ pat_level_func_sknn <- function(
                         #)
                         
                         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
-                        precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+                        # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
                         
                     }
                     
@@ -1085,12 +1091,12 @@ pat_level_func_sknn <- function(
                 nn_arr  <- list(
                     pred_train = dfList, 
                     pred_test = dfList_test, 
-                    biasvec = Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
-                    coveragevec = Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
-                    centilerange = centilepred, 
-                    precisionvec=precisionvec, 
+                    # biasvec = Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
+                    # coveragevec = Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
+                    # centilerange = centilepred, 
+                    # precisionvec=precisionvec, 
                     zsc_list = zsc_list,
-                    rmse = rmsevec,
+                    # rmse = rmsevec,
                     crazymatch = crazymatch)
                 
             } else {
@@ -1100,21 +1106,27 @@ pat_level_func_sknn <- function(
                     #                          Filter(Negate(is.null),Filter(Negate(is.null), fin)),
                     dfList,
                     dfList_test,
-                    Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
-                    #Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95)),
-                    Filter(Negate(is.na),Filter(Negate(is.na), iqrvec)),
-                    rmsevec,
+                    # Filter(Negate(is.na),Filter(Negate(is.na), biasvec)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), coveragevec)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95a)),
+                    # #Filter(Negate(is.na),Filter(Negate(is.na), coveragevec95)),
+                    # Filter(Negate(is.na),Filter(Negate(is.na), iqrvec)),
+                    # rmsevec,
                     zsc_list,
-                    precisionvec = precisionvec,
+                    # precisionvec = precisionvec,
                     misses 
                 )
                 
                 # name the list objects
                 message(paste0("Assigning names"))
                 #names(All <- list) <- c("bias","iqrcoverage","coverage95c","coverage95m","iqr","rmse", "dropped <- cases")
-                names(All_list) <- c("dfList","dfList_test","bias","iqrcoverage","coverage95c","iqr","rmse","zscore","precisionvec", "dropped_cases")
+                names(All_list) <- c(
+                    "pred_train","pred_test",
+                    # "dfList","dfList_test",
+                    # "bias","iqrcoverage","coverage95c","iqr","rmse",
+                    "zscore",
+                    # "precisionvec", 
+                    "dropped_cases")
                 
                 message(paste0("Putting in the list in array slot: ",n))
                 # store the result of the n nearest <- n result
@@ -1123,38 +1135,6 @@ pat_level_func_sknn <- function(
                 # rename the list items to indicate nearestn
                 names(nn_arr)[which(nearest == n)] <- paste0('nearest_',n)
                 
-                
-                # Plotting
-                if (plot==TRUE){
-                    
-                    # create dataframe from compiled array for plotting
-                    
-                    df <- data.table(mrmse = sapply(nn_arr, function(x) {
-                        mean(x[['rmse']], na.rm=TRUE)
-                    }),
-                    mcov = sapply(nn_arr, function(x) {
-                        mean(x[['iqrcoverage']], na.rm=TRUE)
-                    }),
-                    mcov95c = sapply(nn_arr, function(x) {
-                        mean(x[['coverage95c']], na.rm=TRUE)
-                    }),
-                    mzscore = sapply(nn_arr, function(x) {
-                        mean(x[['zscore']], na.rm=TRUE)
-                    }),
-                    mmis = sapply(nn_arr, function(x) {
-                        mean(x[['dropped_cases']], na.rm=TRUE)
-                    })
-                    )
-                    
-                    # add timepoints 
-                    # df[,('nearest <- n') := nearest <- n]
-                    
-                    #plot(fin[,time <- elapsed], fin$final, type="l",col="red", ylim=range(0.5:1.5), ylab="Normalized IQR", xlab="Days following Surgery", lwd=3)
-                    
-                    #Add the individual data
-                    #for(i in 1:nearest <- n) {
-                    #lines(fin[,time <- elapsed], fin[,paste0('d',i)], col="green")
-                }
                 
                 # select of the n result, which has the smallest mean 'rmse' or selection criteria chosen by user
                 
