@@ -41,7 +41,7 @@
 #' @return  A list with six components. 
 #'          1. Post-baseline training data 
 #'          2. Dataframe with training set patient id and \eqn{\dot{y}} values ordered
-#'          3. Regression dataframe used for the predictive mean matching
+#'          3. Regression dataframe used for the predictive mean matching. the `yhat` column here is the predicted mean values.
 #'          4. Predictive mean matching model object
 #'          5. Post-baseline testing data 
 #'          6. Dataframe with testing set patient id and \eqn{\dot{y}} values ordered
@@ -161,7 +161,7 @@ preproc <- function(dff,
     }
 
     # - - - - - - - - - - - - - - - - - - - - - - #
-    # Split test/train by pre and post
+    # Split test/train 
     # - - - - - - - - - - - - - - - - - - - - - - #
 
     df_train <-dff  %>% filter_(paste0(split_var, "==", trainval)) 
@@ -174,9 +174,9 @@ preproc <- function(dff,
     pre_train_df <- df_train %>% filter_(paste0(baseline_var,"== 1"))
     pre_test_df <- df_test %>% filter_(paste0(baseline_var, "== 1"))
 
-    # - - - - - - - - - - - - - - - - - - - - - - #
-    # Allow user to specify filter_exp
-    # - - - - - - - - - - - - - - - - - - - - - - #
+      # - - - - - - - - - - - - - - - - - - - - - - #
+      # Allow user to specify filter_exp
+      # - - - - - - - - - - - - - - - - - - - - - - #
 
     if(is.null(filter_exp)) {
         post_train_df <- df_train %>% filter_(paste0(baseline_var, "== 0"))
@@ -202,7 +202,8 @@ preproc <- function(dff,
                          setNames(c(pat_id,"x","y","yhat","knot")) %>%
                           dplyr::select_(pat_id, "yhat") %>%
                           # need to change pat_id bc it is a factor when outputted through predict()
-                          mutate(!!pat_id := !!parse_quosure(paste0("as.numeric(as.character(",pat_id,"))")))
+                          mutate(!!pat_id := !!parse_quo(paste0("as.numeric(as.character(",pat_id,"))"), env=rlang::caller_env()))
+                          # mutate(!!pat_id := !!parse_quosure(paste0("as.numeric(as.character(",pat_id,"))")))
                       ,
                      pre_train_df %>%
                        .[,c(pat_id, time_var, split_var, baseline_var, varlist)],
@@ -231,7 +232,7 @@ preproc <- function(dff,
     }
 
     # - - - - - - - - - - - - - - - - - - - - - - #
-    # Created dataset with fitted outcome at out_time for training patients
+    # Create dataset with fitted outcome at out_time for training patients
     # - - - - - - - - - - - - - - - - - - - - - - #
     train_ordered <- alldf %>%
         dplyr::select_(pat_id) %>%
@@ -252,7 +253,7 @@ preproc <- function(dff,
         )
 
     # - - - - - - - - - - - - - - - - - - - - - - #
-    # Created dataset with fitted outcome at out_time for testing patients
+    # Create dataset with fitted outcome at out_time for testing patients
     # Here we still use the linear model used to fit the training data (i.e. pmm)
     # - - - - - - - - - - - - - - - - - - - - - - #
     
@@ -281,14 +282,14 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     post_train_df <- post_train_df %>%
         rename_(
-          "patient_id" = pat_id
-          # "time" = time_var
+          "patient_id" = pat_id,
+          "time" = time_var
           )
 
     post_test_df <- post_test_df %>%
         rename_(
-          "patient_id" = pat_id
-          # "time" = time_var
+          "patient_id" = pat_id,
+          "time" = time_var
           )
 
     return(list(train_post = post_train_df, 
@@ -296,6 +297,8 @@ preproc <- function(dff,
                 reg_df = alldf,
                 reg_obj = pmm,
                 test_post = post_test_df, 
-                test_o =  test_ordered)
+                test_o =  test_ordered,
+                bs_obj = fit
+                )
     )
 }
