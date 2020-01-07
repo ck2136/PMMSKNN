@@ -52,6 +52,7 @@ matchIdExtractsknn <- function(
     # - - - - - - - - - - - - - - - - - - - - #
     nnarraytrain <- sapply(1:nrow(train), function(y){
 
+                                # the lapply here needs to be sapply on some instances... need to fix actually needs to be a tibble for sapply for just dataframes need to be lapply....
                                temp  <- sapply(2:ncol(train), function(x){
                                                    (train[-y,x] - c(train[y,x]))^2
                         })
