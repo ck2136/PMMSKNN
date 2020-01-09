@@ -37,7 +37,7 @@ matchIdExtractsknn <- function(
                           temp  <- sapply(2:ncol(test), function(x){
                                               (train[,x] - c(test[y,x]))^2
                         })
-                          sqrt(apply(data.frame(temp),1, sum))
+                          # sqrt(apply(data.frame(temp),1, sum))
                           full %>%
                               filter(train_test == 1) %>%
                               distinct_(.dots = patid)  %>%

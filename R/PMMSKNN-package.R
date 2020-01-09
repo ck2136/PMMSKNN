@@ -24,7 +24,7 @@
 #'                        xlab xlim ylab ylim annotate guide_legend
 #'                        labs
 #'@importFrom MASS        stepAIC mvrnorm
-#'@importFrom doParallel  registerDoParallel 
+#'@importFrom doParallel  registerDoParallel stopImplicitCluster
 #'@importFrom doSNOW      registerDoSNOW 
 #'@importFrom parallel    makeCluster detectCores 
 #'@importFrom future      plan multiprocess

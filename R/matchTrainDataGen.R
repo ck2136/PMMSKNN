@@ -13,6 +13,10 @@
 #' @param time_elapsed  Name of the time variable. (type=string)
 #' @param outcome       Name of the outcomes variable.
 #' @param seed          Seed for randomly selecting matches based on differences in predicted y
+#' @param loocv - Logical (\code{TRUE/FALSE}) that specifies whether 
+#' or not to perform leave-one-out cross validation or just output 
+#' predictions without hyperparameter tuning. If \code{loocv=FALSE}, then
+#' users need to specify the value of the nearest_n 
 #' @param matchprobweight Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling for selecting patients according to difference in the distance between the neighbor.
 #' 
 #' @return              A vector of (patient) id numbers
@@ -23,13 +27,13 @@ matchTrainDataGen <- function(
                               ord_data, mtype=1, n, m = 5,i,
                               time_elapsed=time_elapsed,
                               outcome = outcome,
-                              seed = seed,
+                              seed = seed, loocv=loocv,
                               matchprobweight){
     # If using new matching method where matches from all m subsets are extracted
 
     if(matchprobweight){
         matchprob <- matchProbGen(ord_data, mtype, n,m, i)
-        matches <- matchIdExtract(ord_data, mtype, n,m, i) 
+        matches <- matchIdExtract(ord_data, mtype, loocv=loocv, n,m, i) 
         # create dataset with weights
         matchindexdf <- data.frame(
                                    patient_id = matches
@@ -56,7 +60,7 @@ matchTrainDataGen <- function(
         matchmodel <- train_post[train_post$patient_id %in% matches, ]
         return(matchmodel)
     } else {
-        matches <- matchIdExtract(ord_data, mtype, n,m, i) 
+        matches <- matchIdExtract(ord_data, mtype, loocv=loocv, n,m, i) 
         matchmodel <- train_post[train_post$patient_id %in% matches, ]
         return(matchmodel)
     }

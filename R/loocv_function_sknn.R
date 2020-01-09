@@ -178,6 +178,12 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         stop("Optimal n not in the range of nearest_n specified!")
                     }
                     opt_n_index <- which(nearest_n == userchoose)
+                    perfdf <- loocv_perf(
+                        loocv_test_result,
+                        outcome=outcome,
+                        nearest_n=nearest_n,
+                        perf_round_by=perf_round_by
+                    )
                 } else {
                     
                     
@@ -205,11 +211,6 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             head(1) %>%
                             .[,"nearest_n"] 
                         
-                        if(length(opt_n) > 1){
-                            opt_n <- opt_n[1] # select first one
-                        } 
-                        
-                        opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                         
                     } else if(perfrank=="bias"){
                         
@@ -225,22 +226,29 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             head(1) %>%
                             .[,"nearest_n"] 
                         
-                        if(length(opt_n) > 1){
-                            opt_n <- opt_n[1] # select first one
-                        } 
-                        
-                        opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                         
                     } 
+                    if(length(opt_n) > 1){
+                        opt_n <- opt_n[1] # select first one
+                    } 
+                    
+                    opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                     
                 }
+                names(loocv_test_result) <- paste0("nearest_",nearest_n)
+                
+                print(paste0(mean(loocv_test_result[[opt_n_index]]$rmse, na.rm=TRUE), " from ", names(loocv_test_result))[[opt_n_index]])
+                print(paste0("Number of misses is: ",loocv_test_result[[opt_n_index]]$dropped_cases,' cases'))
+                print(paste0("Distribution chosen for matched GAMLSS: ", ref$gamlss_dist))
+                print(paste0("Optimal Number of Matches is: ", nearest_n[[opt_n_index]]))
+            } else {
+                # if loocv = FALSE
+                if(is.null(userchoose)){
+                    stop("User must choose the nearest number of matches via specifying userchoose = N!")
+                }
+                nearest_n <-  userchoose
+                opt_n_index <- which(nearest_n == userchoose)
             }
-            names(loocv_test_result) <- paste0("nearest_",nearest_n)
-
-            print(paste0(mean(loocv_test_result[[opt_n_index]]$rmse, na.rm=TRUE), " from ", names(loocv_test_result))[[opt_n_index]])
-            print(paste0("Number of misses is: ",loocv_test_result[[opt_n_index]]$dropped_cases,' cases'))
-            print(paste0("Distribution chosen for matched GAMLSS: ", ref$gamlss_dist))
-            print(paste0("Optimal Number of Matches is: ", nearest_n[[opt_n_index]]))
             # - - - - - - - - - - - - - - - - - - - - - - #
             # Run the result on test set
             # - - - - - - - - - - - - - - - - - - - - - - #
@@ -451,11 +459,27 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             head(1) %>%
                             .[,"nearest_n"] 
                         
-                        if(length(opt_n) > 1){
-                            opt_n <- opt_n[1] # select first one
-                        } 
-                        opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
+                    } else if(perfrank=="bias"){
+                        
+                        perfdf <- loocv_perf(
+                            loocv_test_result,
+                            outcome=outcome,
+                            nearest_n=nearest_n,
+                            perf_round_by=perf_round_by
+                        )
+                        
+                        opt_n <- perfdf %>%
+                            arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"] 
+                        
                     } 
+                    
+                    if(length(opt_n) > 1){
+                        opt_n <- opt_n[1] # select first one
+                    } 
+                    
+                    opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                 }
             }
 

@@ -127,7 +127,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             curid <- ord_data$id[nthind]
                             
                             # identify matches for the curid
-                            matches <- matchIdExtract(ord_data, mtype, n, m, nthind) 
+                            matches <- matchIdExtract(ord_data, mtype, loocv, n, m, nthind) 
                             # extract the time  component of the curid participants
                             time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                             
@@ -259,7 +259,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, opt_n, m, nthind) 
+                matches <- matchIdExtract(ord_data, mtype, loocv = FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
@@ -357,7 +357,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, opt_n, m, nthind) 
+                matches <- matchIdExtract(ord_data, mtype, loocv=FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
@@ -438,7 +438,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             curid <- ord_data$id[nthind]
                             
                             # identify matches for the curid
-                            matches <- matchIdExtract(ord_data, mtype, n, m, nthind) 
+                            matches <- matchIdExtract(ord_data, mtype, loocv, n, m, nthind) 
                             # extract the time  component of the curid participants
                             time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                             
@@ -567,7 +567,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, opt_n, m, nthind) 
+                matches <- matchIdExtract(ord_data, mtype, loocv=FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
@@ -656,7 +656,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, opt_n, m, nthind) 
+                matches <- matchIdExtract(ord_data, mtype, loocv = FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%

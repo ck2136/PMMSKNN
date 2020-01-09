@@ -131,12 +131,12 @@ plmout <- function(
                       by = "time"
             )
 
-        #-- Store the Train Predicted Values
-        perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
-            left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                      by = "time"
-            )
+        # #-- Store the Train Predicted Values
+        # perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
+        #     left_join(
+        #               data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+        #               by = "time"
+        #     )
         #-- All centile 
         # perfout$centilepred[[i]] <- cbind(ord_data$id[c(i)], iqr$time, iqr$C50)
 

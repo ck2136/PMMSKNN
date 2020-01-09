@@ -167,7 +167,7 @@ pat_level_func <- function(
                                                 mtype=mtype, n=n,m=m, i=i,
                                                 time_elapsed=time_elapsed,
                                                 outcome = outcome,
-                                                seed = seed,
+                                                seed = seed, loocv=loocv,
                                                 matchprobweight = matchprobweight)
 
 
@@ -213,6 +213,7 @@ pat_level_func <- function(
             #                     "coverage95c","iqr",
             #                     "precisionvec","crazymatch", 
             #                     "zscore","dropped_cases")
+            # Change below output to only have 1 dataset for train/test
             names(perfout) <- c("pred_train","pred_test",
                                 # "precisionvec",
                                 "crazymatch", 
@@ -221,6 +222,7 @@ pat_level_func <- function(
 
         }
 
+        stopImplicitCluster()
         # return either LOOCV array or final prediction array
         return(loocvres)
 
@@ -275,7 +277,7 @@ pat_level_func <- function(
                                                 mtype=mtype, n=n,m=m, i=i,
                                                 time_elapsed=time_elapsed,
                                                 outcome = outcome,
-                                                seed = seed,
+                                                seed = seed, loocv=loocv,
                                                 matchprobweight = matchprobweight)
 
                 # - - - - - - - - - - - - - - - - - - - - - - #

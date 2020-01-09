@@ -404,12 +404,12 @@ pat_level_func_sknn <- function(
                                 by = "time"
                             )
                         
-                        #-- store Training C50
-                        dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
-                            left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
-                            )
+                        # #-- store Training C50
+                        # dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
+                        #     left_join(
+                        #         data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+                        #         by = "time"
+                        #     )
                         #-- store all centile for later test set merging
                         # centilepred[[cnt]] <- cbind(train[i, patid][[1]], iqr$time, iqr$C50)
                         
@@ -523,12 +523,12 @@ pat_level_func_sknn <- function(
                         # 
                         # # store mean of the n coverage in vector
                         # coveragevec95a[cnt]<-mean(bias$coverage)
-                        #-- store Testing C50
-                        dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
-                            left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
-                            )
+                        # #-- store Testing C50
+                        # dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                        #     left_join(
+                        #         data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+                        #         by = "time"
+                        #     )
                         
                         #-- store Training C50
                         dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
@@ -604,6 +604,7 @@ pat_level_func_sknn <- function(
         # after loocv finishes for all nearest, print which n is the lowest
         
         
+        stopImplicitCluster()
         # return either LOOCV array or final prediction array
         return(loocvres)
         
@@ -639,9 +640,9 @@ pat_level_func_sknn <- function(
             # iterate through all patients and match patients according to order. ord <- data is the training data
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             if(is.null(interval)){
-                patlistint <- seq(1,length(train[,patid]))
+                patlistint <- seq(1,nrow(train[,patid]))
             } else {
-                patlistint <- seq(1,length(train[,patid]), by=interval)
+                patlistint <- seq(1,nrow(train[,patid]), by=interval)
             }
             
             for (i in patlistint) {
@@ -652,9 +653,18 @@ pat_level_func_sknn <- function(
                 # Matching by probability weighting also possible
                 # - - - - - - - - - - - - - - - - - - - - - - #
                 
-                matchmodel <- train_post %>%
-                    filter(.data$patient_id %in% (traintestmatchdf$nnarraytrain[,i] %>%
-                                                      head(n=n)))
+                if(loocv){
+                    
+                    matchmodel <- train_post %>%
+                        filter(.data$patient_id %in% (traintestmatchdf$nnarraytrain[,i] %>%
+                                                          head(n=n)))
+                } else {
+                    
+                    matchmodel <- train_post %>%
+                        filter(.data$patient_id %in% c(train[[patid]][i], traintestmatchdf$nnarraytrain[,i] %>%
+                                                          head(n=(n-1))))
+                    
+                }
                 
                 # - - - - - - - - - - - - - - - - - - - - - - #
                 # Fit GAMLSS model to nearest n matches
@@ -918,12 +928,12 @@ pat_level_func_sknn <- function(
                         #by = "patient_id"
                         #)
                         
-                        #-- store Training C50
-                        dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i,patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
-                            left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
-                            )
+                        # #-- store Training C50
+                        # dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i,patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
+                        #     left_join(
+                        #         data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+                        #         by = "time"
+                        #     )
                         #left_join(
                         #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,]) ,
                         #by = "patient_id"
@@ -1046,12 +1056,12 @@ pat_level_func_sknn <- function(
                         # store mean of the n coverage in vector
                         # coveragevec95a[cnt]<-mean(bias$coverage)
                         #-- store Testing C50
-                        dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
-                            #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
-                            left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
-                            )
+                        # dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                        #     #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
+                        #     left_join(
+                        #         data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+                        #         by = "time"
+                        #     )
                         #left_join(
                         #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,patient_id]) ,
                         #by = "patient_id"
