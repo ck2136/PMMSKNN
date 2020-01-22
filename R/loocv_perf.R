@@ -24,12 +24,21 @@ loocv_perf <- function(loocv_res,
                       train=TRUE
                       ){
     
-    
     if(train){
         # For Training Data aggregation ---------------------
         
         perflist <- lapply(loocv_res, function(x) {
             
+            #IF error object is returned then return NA columns
+            if(is.null(x$pred_train)){
+               return(
+                      data.frame(
+                                 rmse = NA,
+                                 cov = NA,
+                                 prec = NA
+                      )
+               )
+            }
             resdf <- rbindlist(x$pred_train)
             resdf[, cov := ifelse(get(outcome) >= c25 & get(outcome) <= c75, 1, 0)]
             resdf[, prec := c75 - c25]
@@ -42,6 +51,19 @@ loocv_perf <- function(loocv_res,
                 prec = mean(resdf$prec)
             )
         })
+
+        ## For cases where there are no data due to errors in fitting 
+        #if(length(perflist) == 0){
+           #return(
+                  #data.frame(
+                             #rmse = rep(NA,  length(nearest_n)),
+                             #cov = rep(NA,  length(nearest_n)),
+                             #prec = rep(NA,  length(nearest_n)),
+                             #nearest_n = nearest_n,
+                             #prec = rep(NA,  length(nearest_n))
+                  #)
+           #)
+        #}
         
         perfdf <- rbindlist(perflist) %>%
             bind_cols(

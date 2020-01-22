@@ -115,6 +115,7 @@ pat_level_func_sknn <- function(
                                       "interval","thresh_val","printtrace","userchoose", "ref",
                                       "loocv","mint","maxt", "traintestmatchdf"),                                                                                                              .packages=c("dplyr","gamlss"),
                             .combine=list,
+                            .errorhandling = "pass",
                             .multicombine = TRUE
         ) %dopar% {
             #for(n in nearest){
@@ -492,7 +493,7 @@ pat_level_func_sknn <- function(
                         # iqr$iqr<-iqr$C75-iqr$C25
                         
                         # iqrvec[cnt]<-mean(iqr$iqr)
-                        targetid<-train[i,patid][[1]]
+                        targetid<-train[n,patid][[1]]
                         # targetrec<-train_post[which(train_post$patient_id %in% targetid), ]
                         
                         # bias<-merge(iqr,targetrec, by=time_elapsed)
@@ -545,7 +546,7 @@ pat_level_func_sknn <- function(
                     
                 }
                 message(paste0("Current count is: ",cnt))
-                message(paste0("and Current n: ",n))
+                message(paste0("and Current n: ",i))
             }
             
             # - - - - - - - - - - - - - - - - - - - - - - - - -#  

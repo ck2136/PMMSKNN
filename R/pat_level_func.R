@@ -120,6 +120,7 @@ pat_level_func <- function(
                                       "interval","thresh_val","printtrace","userchoose","seed", "ref",
                                       "loocv","mint","maxt", "traintestmatchdf", "m"),                                                                                                              .packages=c("dplyr","gamlss"),
                             .combine=list,
+                            .errorhandling = "pass",
                             .multicombine = TRUE
                             ) %dopar% {
             #for(n in nearest){
