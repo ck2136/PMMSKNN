@@ -119,9 +119,10 @@ pat_level_func <- function(
                                       "outcome","time_elapsed", "plot", "matchprobweight","time_window",
                                       "interval","thresh_val","printtrace","userchoose","seed", "ref",
                                       "loocv","mint","maxt", "traintestmatchdf", "m"),                                                                                                              .packages=c("dplyr","gamlss"),
-                            .combine=list,
-                            .errorhandling = "pass",
-                            .multicombine = TRUE
+                            #.combine=list,
+                            .errorhandling = "pass"
+                            #.multicombine = TRUE,
+                            #.maxcombine = nearest[length(nearest)]
                             ) %dopar% {
             #for(n in nearest){
             #cnt = 0
