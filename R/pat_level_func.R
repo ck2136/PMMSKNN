@@ -122,7 +122,6 @@ pat_level_func <- function(
                             #.combine=list,
                             .errorhandling = "pass"
                             #.multicombine = TRUE,
-                            #.maxcombine = nearest[length(nearest)]
                             ) %dopar% {
             #for(n in nearest){
             #cnt = 0
