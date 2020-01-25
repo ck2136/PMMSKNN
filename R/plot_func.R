@@ -47,12 +47,34 @@ plot_func <- function(plotobj = plotobj,
   val <- "c50"
   if(train == TRUE){
     
-    if(filt==TRUE){
-      
-      temp <- rbindlist(plotobj$pred_res$pred_train) %>% filter_(filter_exp) # first one is c50
-    } else {
-      temp <- rbindlist(plotobj$pred_res$pred_train) # first one is c50
-    }
+     # For BS objects which will have null names for loocv_res
+     if(is.null(names(plotobj$loocv_res))){
+
+        nearest_n_idx <- which({unlist(lapply(plotobj$loocv_res, function(x) {
+           unique(x$resdf$nearest_n)
+}))} == plotobj$nearest_n)
+
+        if(filt==TRUE){
+           temp <- plotobj$loocv_res[[nearest_n_idx]]$resdf %>% filter_(filter_exp) # first one is c50
+           colnames(temp)[3] <- outcome
+           colnames(temp)[4] <- val
+        } else {
+           temp <- plotobj$loocv_res[[nearest_n_idx]]$resdf # first one is c50
+           colnames(temp)[3] <- outcome
+           colnames(temp)[4] <- val
+        }
+
+     } else {
+        nearest_n_idx <- which(names(plotobj$loocv_res) == paste0("nearest_",plotobj$nearest_n))
+
+        if(filt==TRUE){
+           temp <- rbindlist(plotobj$loocv_res[[nearest_n_idx]]$pred_train) %>% filter_(filter_exp) # first one is c50
+        } else {
+           temp <- rbindlist(plotobj$loocv_res[[nearest_n_idx]]$pred_train) # first one is c50
+        }
+
+     }
+
     
     filtdf <- temp %>%
       bind_cols(
@@ -221,8 +243,9 @@ plot_func <- function(plotobj = plotobj,
     
     # other performance measures
     
-    zscres <- loocvperf(plotobj$loocv_res, train_o = test_proc$train_o, bias="zsc", nearest_n=plotobj$loocv_score$nearest_n)
-    test_perf <- zscres[which.min(zscres$totscore),c("zscore","coverage","precision")]
+    #zscres <- loocvperf(plotobj$loocv_res, train_o = test_proc$train_o, bias="zsc", nearest_n=plotobj$loocv_score$nearest_n)
+    #test_perf <- zscres[which.min(zscres$totscore),c("zscore","coverage","precision")]
+   test_perf <- plotobj$loocv_score[plotobj$loocv_score$nearest_n == plotobj$nearest_n, c("rmse","cov","prec")]
     
     if(!is.null(iqrfull)){
       
@@ -310,34 +333,57 @@ plot_func <- function(plotobj = plotobj,
     #-- get id of train_df that has closests y90 value to test df
     print("creating temp and test matching data")
     
-    temp <-  test_proc$test_post %>% 
-      dplyr::select_("patient_id", "time", outcome) %>%
-      left_join(
-        test_proc$test_o %>%
-          bind_cols(
-            train_id = test_proc$train_o$id[sapply(1:length(test_proc$test_o$pred), function(x) {
-              which.min(abs(test_proc$test_o$pred[x] - test_proc$train_o$Fitted))                                         })]
-          ) %>% 
-          dplyr::select(.data$id, .data$train_id) %>%
-          rename(patient_id = .data$id),
-        by = "patient_id"
-      ) %>%
-      rename(test_id = .data$patient_id)  %>%
-      #-- join centiles.pred from the unique train id's that were selected based on minimum difference between y90 of train and test
-      left_join(
-        data.frame(train_id = unique(test_proc$train_o$id[sapply(1:length(test_proc$test_o$pred), function(x) {
-          which.min(abs(test_proc$test_o$pred[x] - test_proc$train_o$Fitted))
-        })]) ) %>% 
-          full_join(
-            rbindlist(lapply(plotobj$pred_res$centilerange, data.frame)) %>%
-              rename(train_id = 1,
-                     time = 2,
-                     C50 = 3),
-            by = "train_id"
-          )
-        ,
-        by = c("time","train_id") 
-      ) 
+    #temp <-  test_proc$test_post %>% 
+      #dplyr::select_("patient_id", "time", outcome) %>%
+      #left_join(
+        #test_proc$test_o %>%
+          #bind_cols(
+            #train_id = test_proc$train_o$id[sapply(1:length(test_proc$test_o$pred), function(x) {
+              #which.min(abs(test_proc$test_o$pred[x] - test_proc$train_o$Fitted))                                         })]
+          #) %>% 
+          #dplyr::select(.data$id, .data$train_id) %>%
+          #rename(patient_id = .data$id),
+        #by = "patient_id"
+      #) %>%
+      #rename(test_id = .data$patient_id)  %>%
+      ##-- join centiles.pred from the unique train id's that were selected based on minimum difference between y90 of train and test
+      #left_join(
+        #data.frame(train_id = unique(test_proc$train_o$id[sapply(1:length(test_proc$test_o$pred), function(x) {
+          #which.min(abs(test_proc$test_o$pred[x] - test_proc$train_o$Fitted))
+        #})]) ) %>% 
+          #full_join(
+            #rbindlist(lapply(plotobj$pred_res$centilerange, data.frame)) %>%
+              #rename(train_id = 1,
+                     #time = 2,
+                     #C50 = 3),
+            #by = "train_id"
+          #)
+        #,
+        #by = c("time","train_id") 
+      #) 
+
+  if(is.null(plotobj$pred_res$pred_test)) {
+
+     # For BS
+     if(class(res_bs$pred_res[[1]]) == "numeric"){
+        temp <- simonceNO$bs$pred_res %>% 
+           dplyr::select(1:4) %>%
+           rename(C50 = 4)
+
+        colnames(temp)[3] <- outcome
+
+     } else {
+     # for pmmsknn 
+        temp <- data.table::rbindlist(plotobj$pred_res[[1]]$pred_test) %>%
+           dplyr::select(1:4) %>%
+           rename(C50 = 4)
+     }
+  } else {
+     temp <- data.table::rbindlist(plotobj$pred_res$pred_test) %>%
+        dplyr::select(1:4) %>%
+        rename(C50 = 4)
+  }
+
     #-- bind with decile
     print("binding with decile")
     print("filt df made in test")
@@ -419,10 +465,10 @@ plot_func <- function(plotobj = plotobj,
     } else {
       
       dffitmed <- filtdf %>%
-        dplyr::select(-train_id) %>%
-        dplyr::rename(
-          patient_id = test_id
-          ) %>%
+        #dplyr::select(-train_id) %>%
+        #dplyr::rename(
+          #patient_id = test_id
+          #) %>%
         group_by(.data$dec) %>%
         do(fitmed = MedianCI(.[,outcome][[1]], conf.level= 0.95,
                              method = "boot", R = 10000, na.rm = TRUE))
@@ -520,7 +566,8 @@ plot_func <- function(plotobj = plotobj,
       paste0("r^2 ==", .)
     
     # other performance measures
-    test_perf <- extvalid(plotobj, test_proc)
+    #test_perf <- extvalid(plotobj, test_proc)
+    test_perf <- plotobj$test_score
     
     # Reference plot plotting
     if(!is.null(iqrfull)){
