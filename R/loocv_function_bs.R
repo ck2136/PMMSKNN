@@ -403,14 +403,22 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 mutate(
                     cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
                     prec = upper95 - lower95,
-                    nearest_n = n
+                    nearest_n = opt_n
+                    # nearest_n = n
                 )
+            
+            perfdf_test = data.frame(
+                rmse = sqrt(sum((predresdf$obsvals - predresdf$predvals)^2)/length(predresdf$obsvals)),
+                cov = sum(predresdf$cov) / nrow(predresdf),
+                prec = mean(predresdf$prec)
+            )
             
             # extract prediction results from the optimum nearest n  --------------
             message("Finished PMM Prediction Process Only For Test Case (i.e. No LOOCV)")
             return(
                 list(
                     pred_res = predict_test_result,
+                    test_score = perfdf_test,
                     predresdf = predresdf,
                     nearest_n=opt_n)
             )
@@ -703,17 +711,21 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 mutate(
                     cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
                     prec = upper95 - lower95,
-                    nearest_n = n
+                    nearest_n = opt_n
                 )
             
             # extract prediction results from the optimum nearest n  --------------
             message("Finished PMM Prediction Process")
+            perfdf_test = data.frame(
+                rmse = sqrt(sum((predresdf$obsvals - predresdf$predvals)^2)/length(predresdf$obsvals)),
+                cov = sum(predresdf$cov) / nrow(predresdf),
+                prec = mean(predresdf$prec)
+            )
             return(
                 list(
                     pred_res = predict_test_result,
+                    test_score = perfdf_test,
                     predresdf = predresdf,
-                    loocv_res =  loocv_test_result,
-                    loocv_score = perfdf,
                     nearest_n=opt_n)
             )
         }
