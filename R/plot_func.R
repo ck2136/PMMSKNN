@@ -365,8 +365,8 @@ plot_func <- function(plotobj = plotobj,
   if(is.null(plotobj$pred_res$pred_test)) {
 
      # For BS
-     if(class(res_bs$pred_res[[1]]) == "numeric"){
-        temp <- simonceNO$bs$pred_res %>% 
+     if(class(plotobj$pred_res[[1]]) %in% c("numeric", "integer")){
+        temp <- plotobj$pred_res %>% 
            dplyr::select(1:4) %>%
            rename(C50 = 4)
 
