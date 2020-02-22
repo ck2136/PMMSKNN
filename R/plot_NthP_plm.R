@@ -1,4 +1,4 @@
-#' Plot Nth Percentile patient like me plots
+#' Plot Nth Percentile patient like me plots using PMMSKNN-GAMLSS
 #' 
 #' Creates two plots.
 #' \enumerate{
@@ -10,7 +10,6 @@
 #'   upper N-th vector value specified
 #'   }
 #'   
-#' @param plotobj   - An object produced by \code{\link{loocv_function}}
 #' @param test_proc - Preprocessed object from \code{\link{preproc}}
 #' @param outcome   - Name of the outcomes variable (type=string)
 #' @param time_var  - Name of the time variable. (type=string)
@@ -31,7 +30,7 @@
 #' @return An object of class \code{ggplot} that outputs a gamlss predition curve for 2 individuals in terms of their predicted values over time.
 #' 
 #' @export
-plot_NthP_plm <- function(plotobj,
+plot_NthP_plm <- function(
                      test_proc=test_proc,
                      outcome = "tug",
                      time_var = "time",
