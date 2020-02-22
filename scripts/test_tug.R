@@ -219,6 +219,25 @@ sknnlooObj$test_score
 
 ## }}}
 
+## Plot Nth Person {{{
+
+plot_NthP_plm(
+              test_proc=test_proc,
+              outcome = "tug",
+              time_var = "time",
+              nvec=c(0.1,0.9),
+              mtype = 1,
+              n=10,
+              dist=BCCGo,
+              df_m=2,
+              df_s=1,
+              df_n=1,
+              df_t=1,
+              xvalues=3:200,
+              )
+
+## }}}
+
 ## test_that() {{{------------------------
 
 test_that("LOOCV performance list created" , {
