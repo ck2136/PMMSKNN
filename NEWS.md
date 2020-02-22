@@ -1,3 +1,7 @@
+# PMMSKNN 0.2.0.9003 - Development
+
+* Update plotting function plot_func() & loocv_*() such that performance calculations are defaulted to prioritize coverage
+
 # PMMSKNN 0.2.0.9002 - Development
 
 * Update Documentation on all fuctions especially the @return statements to help end users in terms of the resulting output of the functions
