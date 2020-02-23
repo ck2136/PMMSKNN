@@ -43,6 +43,7 @@
 #' is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
 #' @param seed - Seed for probability sampling of the nearest matches
 #' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
+#' @param opt_cov - Float value indicating optimal coverage value used for `perfrank`. Defaults to 0.5
 #' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param \dots Passed down to \code{gamlss}
 #' 
@@ -79,6 +80,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                            seed = 1234,
                            biasm="raw",
                            perfrank="cov",
+                           opt_cov=0.5,
                            perf_round_by=4,
                            ...) {
 
@@ -182,6 +184,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         loocv_test_result,
                         outcome=outcome,
                         nearest_n=nearest_n,
+                        opt_cov = opt_cov,
                         perf_round_by=perf_round_by
                     )
                 } else {
@@ -192,9 +195,21 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         # - - - - - - - - - - - - - - - - - - - - - - #
                         # Use a weighted scoring fucntion of bias, coverage, and precision to choose optimal m
                         # - - - - - - - - - - - - - - - - - - - - - - #
-                        opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
-                            dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                        # opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
+                        #     dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                        # 
+                        perfdf <- loocv_perf(
+                            loocv_test_result,
+                            outcome=outcome,
+                            nearest_n=nearest_n,
+                            opt_cov = opt_cov,
+                            perf_round_by=perf_round_by
+                        )
                         
+                        opt_n <- perfdf %>%
+                            arrange(totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"] 
                         
                     } else if(perfrank=="cov"){
                         
@@ -203,6 +218,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             loocv_test_result,
                             outcome=outcome,
                             nearest_n=nearest_n,
+                            opt_cov = opt_cov,
                             perf_round_by=perf_round_by
                         )
                         
@@ -218,6 +234,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             loocv_test_result,
                             outcome=outcome,
                             nearest_n=nearest_n,
+                            opt_cov = opt_cov,
                             perf_round_by=perf_round_by
                         )
                         
@@ -276,6 +293,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 predict_test_result,
                 outcome=outcome,
                 nearest_n=nearest_n[opt_n_index],
+                opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
                 train=FALSE
             )
@@ -318,6 +336,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     loocv_test_result,
                     outcome=outcome,
                     nearest_n=nearest_n,
+                    opt_cov = opt_cov,
                     perf_round_by=perf_round_by
                 )
                 predict_test_result <- pat_level_func_sknn(
@@ -343,6 +362,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     predict_test_result,
                     outcome=outcome,
                     nearest_n=nearest_n,
+                    opt_cov = opt_cov,
                     perf_round_by=perf_round_by,
                     train=FALSE
                 )
@@ -382,6 +402,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     predict_test_result,
                     outcome=outcome,
                     nearest_n=nearest_n,
+                    opt_cov = opt_cov,
                     perf_round_by=perf_round_by,
                     train=FALSE
                 )
@@ -452,6 +473,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             loocv_test_result,
                             outcome=outcome,
                             nearest_n=nearest_n,
+                            opt_cov = opt_cov,
                             perf_round_by=perf_round_by
                         )
                         opt_n <- perfdf %>%
@@ -465,6 +487,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                             loocv_test_result,
                             outcome=outcome,
                             nearest_n=nearest_n,
+                            opt_cov = opt_cov,
                             perf_round_by=perf_round_by
                         )
                         
@@ -511,6 +534,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 predict_test_result,
                 outcome=outcome,
                 nearest_n=nearest_n[opt_n_index],
+                opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
                 train=FALSE
             )
@@ -548,6 +572,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 predict_test_result,
                 outcome=outcome,
                 nearest_n=nearest_n,
+                opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
                 train=FALSE
             )

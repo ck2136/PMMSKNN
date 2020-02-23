@@ -10,6 +10,7 @@
 #' The number of nearest_n should be within the range of number of individuals
 #' That are in the data. For example if there are 500 individuals in the data,
 #' one could do \code{nearest_n <- 10:100}
+#' @param opt_cov - Float value indicating optimal coverage value used for `perfrank`.
 #' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param train - Logical indicating whether or not aggregating from training data or testing data. Deafult `TRUE`
 #' 
@@ -20,6 +21,7 @@
 loocv_perf <- function(loocv_res, 
                        outcome,
                       nearest_n=nearest_n,
+                      opt_cov = 0.5,
                       perf_round_by=perf_round_by,
                       train=TRUE
                       ){
@@ -70,8 +72,18 @@ loocv_perf <- function(loocv_res,
                 nearest_n = nearest_n
             ) %>%
             mutate(
-                covdiff = round(abs(.data$cov - 0.5), perf_round_by)
-            )
+                covdiff = round(abs(.data$cov - opt_cov), perf_round_by),
+                rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
+                covsc = if((max(covdiff, na.rm=TRUE) - min(covdiff, na.rm=TRUE)) == 0) { return(0)} else { (covdiff - min(covdiff, na.rm =TRUE)) / (max(covdiff, na.rm=TRUE) - min(covdiff, na.rm=TRUE))},
+                presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE)),
+            ) %>%
+            bind_cols(
+                dcase = sapply(loocv_res, function(x) {
+                    c(x$dropped_cases)
+                })
+            ) %>%
+            mutate(totscore = .data$rsc + .data$covsc + .data$presc + .data$dcase)  
+        
         
     } else {
 
@@ -95,8 +107,8 @@ loocv_perf <- function(loocv_res,
                 nearest_n = nearest_n
             ) %>%
             mutate(
-                covdiff = round(abs(.data$cov - 0.5), perf_round_by)
-            )
+                covdiff = round(abs(.data$cov - opt_cov), perf_round_by),
+            ) 
         
     }
     
