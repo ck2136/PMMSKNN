@@ -11,6 +11,7 @@
 
 library("pacman")
 p_load(PMMSKNN, readxl, dplyr, here,testthat, gamlss, doParallel, future.apply)
+devtools::reload(pkgload::inst("PMMSKNN"))
 # }}}
 
 # Load Data and Wrangle {{{ --------------
@@ -83,7 +84,6 @@ summary(test_proc$reg_obj)
 # RUN LOOCV on Training with BrokenStick {{{ ----------------------------
 p_load(profvis)
 
-
 res_bs <- loocv_function_bs(
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
   nearest_n = seq(10, 30, 10),
@@ -108,11 +108,34 @@ res_bs$test_score
 res_bs$loocv_score
 res_bs$nearest_n
 
+res_bs2 <- loocv_function_bs(
+  # specify number or vector of numbers from {1,...,total number of patients in training data} 
+  nearest_n = seq(10, 30, 10),
+  # enter training and testing post operative and fitted y90 dataset
+  train_post = test_proc$train_post,
+  ord_data = test_proc$train_o,
+  test_post = test_proc$test_post,
+  test_o = test_proc$test_o,
+  # Specify outcome variable and time variable name
+  outcome = "tug",
+  time_elapsed = "time",
+  mtype=0, # Use straight up predicted value
+  # m = 10, # if we're using 
+  # interval = 10,
+  # loocv = FALSE,
+  # userchoose = 9,
+  bs_obj = test_proc$bs_obj,
+  parallel = 7L,
+  perfrank = "totscore",
+  opt_cov = 0.5
+)
+
+res_bs2$test_score
+res_bs2$loocv_score
+res_bs2$nearest_n
 ## }}}
 
 # LOOCV PMM: Non Parallel {{{ ------------------
-
-# undebug(plmout)
 res_ps1 <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
@@ -137,14 +160,15 @@ res_ps1 <- loocv_function(
   d_f_s=1,
   # Specify distribution for location, scale and shape 
   #dist_fam = gamlss.dist::NO)
-  dist_fam = gamlss.dist::NO)
+  dist_fam = gamlss.dist::NO,
+  perfrank = "totscore"
+  )
 
 # }}}
 res_ps1$loocv_score
 res_ps1$test_score
 
 # LOOCV PMM: Parallel {{{ -----------------
-
 res_ps2 <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
@@ -178,6 +202,7 @@ res_ps2 <- loocv_function(
 
 # }}}
 res_ps2$loocv_score
+res_ps2$nearest_n
 res_ps2$test_score
 
 # LOOCV_SKNN {{{ -------------------------
@@ -216,6 +241,47 @@ sknnlooObj<- loocv_function_sknn(
 )
 
 sknnlooObj$test_score
+sknnlooObj$loocv_score
+sknnlooObj$nearest_n
+
+# Try ranking by totscore
+sknnlooObj2<- loocv_function_sknn(
+  # specify number or vector of numbers from {1,...,total number of patients in training data} 
+  fulldata = full,
+  nearest_n = c(15,30,45),
+  formula =  ~ age + bmi + b_tug,
+  # enter training and testing post operative and fitted y90 dataset
+  train_post = test_proc$train_post,
+  ord_data = test_proc$train_o,
+  test_post = test_proc$test_post,
+  test_o = test_proc$test_o,
+  # Specify outcome variable and time variable name
+  outcome = "tug",
+  time_elapsed = "time",
+  # interval = 10,
+  
+  # Specify use of cubic spline or not
+  cs=TRUE,
+  
+  # specify degrees of freedom use or not
+  dfspec=TRUE,
+  
+  # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
+  # specify power transformation of location (ptr_m)
+  d_f_m=3, ptr_m=0.5,
+  d_f_s=1,
+  # parallel
+  parallel=5, m=5,
+  
+  # Specify distribution for location, scale and shape 
+  #dist_fam = gamlss.dist::NO)
+  dist_fam = gamlss.dist::NO,
+  perfrank = "totscore"
+)
+
+sknnlooObj2$test_score
+sknnlooObj2$loocv_score
+sknnlooObj2$nearest_n
 
 ## }}}
 
@@ -241,8 +307,8 @@ plot_NthP_plm(
 ## test_that() {{{------------------------
 
 test_that("LOOCV performance list created" , {
-             expect_that(names(fin), equals(c("pred_res","loocv_res","loocv_score","nearest_n")))
-             expect_false(is.null(fin$nearest_n))
+             expect_that(names(res_bs), equals(c("pred_res","test_score","loocv_res","loocv_score","nearest_n")))
+             expect_false(is.null(res_bs$nearest_n))
 })
 
 ## }}}
@@ -256,7 +322,7 @@ plot_cal(plotobj = res_ps1, test_proc = test_proc, obs_dist = "median")
 ## }}}
 
 ## Calibration {{{
-debug(plot_cal)
+#debug(plot_cal)
 plot_cal(plotobj = res_ps1, test_proc = test_proc, obs_dist = "median", loocv = FALSE)
 ## }}}
 
@@ -270,6 +336,10 @@ loocv_perf(
   outcome="tug",
   nearest_n=35:37,
   perf_round_by=4
+)
+cbind(abc = sapply(res_ps2$loocv_res, function(x) {
+  c(x$dropped_cases)
+})
 )
 # }}}
 
