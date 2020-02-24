@@ -75,6 +75,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                            biasm="raw",
                            m=5,
                            perfrank="cov",
+                           opt_cov = 0.5,
                            perf_round_by=4,
                            ...) {
 
@@ -182,42 +183,43 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     })
                 )
                 
+                perfdf <- perfdf %>%
+                    mutate(
+                        rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
+                        presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE))
+                    ) 
+                
+                # Coverage calculation
+                ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
+                       {.data$covsc = 0},
+                       {perfdf <- perfdf %>%
+                           mutate(
+                               covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
+                           )
+                       })
+                
+                perfdf <- perfdf %>%
+                    mutate(totscore = .data$rsc + .data$covsc + .data$presc)  
+                
                 if(perfrank=="totscore"){
-                    perfdf <- perfdf %>%
-                        mutate(
-                            rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
-                            presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE))
-                            #zsc = (.data$zscore - min(.data$zscore, na.rm=TRUE)) / (max(.data$zscore, na.rm=TRUE) - min(.data$zscore, na.rm=TRUE))
-                        ) 
-                    
-                    # Coverage calculation
-                    ifelse((max(abs(.data$cov - 0.50), na.rm=TRUE) - min(abs(.data$cov - 0.50), na.rm=TRUE)) == 0, 
-                           {.data$covsc = 0},
-                           {perfdf <- perfdf %>%
-                               mutate(
-                                   covsc = (abs(.data$cov - 0.50) - min(abs(.data$cov - 0.50), na.rm =TRUE)) / (max(abs(.data$cov - 0.50), na.rm=TRUE) - min(abs(.data$cov - 0.50), na.rm=TRUE))
-                               )
-                           })
-                    
-                    perfdf <- perfdf %>%
-                        mutate(totscore = .data$rsc + .data$covsc + .data$presc)  
                     
                     # Select optimal n 
                     if(nrow(perfdf %>% top_n(-1, totscore)) > 1){
                         opt_n <- perfdf %>%
-                            top_n(-1, totscore) %>%
-                            .[1,] %>%
-                            dplyr::select(nearest_n) %>% unlist %>% as.vector
+                            arrange(totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"]
                     } else {
                         opt_n <- perfdf %>%
-                            top_n(-1, totscore) %>%
-                            dplyr::select(nearest_n) %>% unlist %>% as.vector
+                            arrange(totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"]
                     }
                     
                 } else if(perfrank=="cov"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - 0.5), perf_round_by)
+                            covdiff = round(abs(cov - opt_cov), perf_round_by)
                         ) %>%
                         arrange(covdiff, rmse, prec)  %>%
                         head(1) %>%
@@ -225,7 +227,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 } else if(perfrank=="bias"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - 0.5), perf_round_by),
+                            covdiff = round(abs(cov - opt_cov), perf_round_by),
                             rmse = round(rmse, perf_round_by)
                         ) %>%
                         arrange(rmse, covdiff, prec)  %>%
@@ -502,43 +504,44 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     })
                 )
                 
+                perfdf <- perfdf %>%
+                    mutate(
+                        rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
+                        presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE))
+                        #zsc = (.data$zscore - min(.data$zscore, na.rm=TRUE)) / (max(.data$zscore, na.rm=TRUE) - min(.data$zscore, na.rm=TRUE))
+                    ) 
+                
+                # Coverage calculation
+                ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
+                       {.data$covsc = 0},
+                       {perfdf <- perfdf %>%
+                           mutate(
+                               covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
+                           )
+                       })
+                
+                perfdf <- perfdf %>%
+                    mutate(totscore = .data$rsc + .data$covsc + .data$presc)  
                 
                 if(perfrank=="totscore"){
-                    perfdf <- perfdf %>%
-                        mutate(
-                            rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
-                            presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE))
-                            #zsc = (.data$zscore - min(.data$zscore, na.rm=TRUE)) / (max(.data$zscore, na.rm=TRUE) - min(.data$zscore, na.rm=TRUE))
-                        ) 
-                    
-                    # Coverage calculation
-                    ifelse((max(abs(.data$cov - 0.50), na.rm=TRUE) - min(abs(.data$cov - 0.50), na.rm=TRUE)) == 0, 
-                           {.data$covsc = 0},
-                           {perfdf <- perfdf %>%
-                               mutate(
-                                   covsc = (abs(.data$cov - 0.50) - min(abs(.data$cov - 0.50), na.rm =TRUE)) / (max(abs(.data$cov - 0.50), na.rm=TRUE) - min(abs(.data$cov - 0.50), na.rm=TRUE))
-                               )
-                           })
-                    
-                    perfdf <- perfdf %>%
-                        mutate(totscore = .data$rsc + .data$covsc + .data$presc)  
                     
                     # Select optimal n 
                     if(nrow(perfdf %>% top_n(-1, totscore)) > 1){
                         opt_n <- perfdf %>%
-                            top_n(-1, totscore) %>%
-                            .[1,] %>%
-                            dplyr::select(nearest_n) %>% unlist %>% as.vector
+                            arrange(totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"]
                     } else {
                         opt_n <- perfdf %>%
-                            top_n(-1, totscore) %>%
-                            dplyr::select(nearest_n) %>% unlist %>% as.vector
+                            arrange(totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"]
                     }
                     
                 } else if(perfrank=="cov"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - 0.5), perf_round_by)
+                            covdiff = round(abs(cov - opt_cov), perf_round_by)
                         ) %>%
                         arrange(covdiff, rmse, prec)  %>%
                         head(1) %>%
@@ -547,7 +550,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     # assume bias as default
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - 0.5), perf_round_by)
+                            covdiff = round(abs(cov - opt_cov), perf_round_by)
                         ) %>%
                         arrange(rmse, covdiff, prec)  %>%
                         head(1) %>%
