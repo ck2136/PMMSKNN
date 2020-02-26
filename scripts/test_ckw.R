@@ -276,8 +276,6 @@ sknnlooObj2$nearest_n
 ## }}}
 
 ## Plot Nth Person {{{
-debug(plot_NthP_plm)
-debug(matchIdExtractTest)
 plot_NthP_plm(
               test_proc=test_proc,
               outcome = "weight",
