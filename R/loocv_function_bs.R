@@ -23,7 +23,6 @@
 #' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
 #' then \code{x$test_o} would be used for this parameter.
 #' @param outcome    - Name of the outcomes variable (type=string)
-#' @param time_elapsed - Name of the time variable. (type=string)
 #' @param plot - Logical (\code{TRUE/FALSE}) that specifies whether to output individual precision plots
 #' @param matchprobweight - Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling
 #'  when doing the mean matching. If TRUE, matches nearest n weighted on differnce in 
@@ -62,7 +61,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                            test_post, 
                            test_o,  # datasets
                            bs_obj, # broken stick object
-                           outcome, time_elapsed, plot = FALSE,
+                           outcome, plot = FALSE,
                            matchprobweight=FALSE,
                            time_window=NULL,
                            interval=NULL,
@@ -143,7 +142,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             # calculate confidence intervals using t dist
                             data.frame(
                                 patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time) %>% unlist %>% as.vector,
                                 obsvals =train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -290,7 +289,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # get obs value for curid
                 data.frame(
                     patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -388,7 +387,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # get obs value for curid
                 data.frame(
                     patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -464,7 +463,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             
                             data.frame(
                                 patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time) %>% unlist %>% as.vector,
                                 obsvals = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select_(outcome) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -608,7 +607,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 
                 data.frame(
                     patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -697,7 +696,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 
                 data.frame(
                     patiet_id  = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time_elapsed) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
