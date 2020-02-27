@@ -140,9 +140,9 @@ pat_level_func_sknn <- function(
             # iterate through all patients and match patients according to order. ord_data is the training data
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             if(is.null(interval)){
-                patlistint <- seq(1,nrow(train[,patid]))
+                patlistint <- seq(1,nrow(train))
             } else {
-                patlistint <- seq(1,nrow(train[,patid]), by=interval)
+                patlistint <- seq(1,nrow(train), by=interval)
             }
             for (i in patlistint) {
                 cnt = cnt + 1
@@ -236,10 +236,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct_(.dots=patid) %>%
+                                              distinct_(.dots="patient_id") %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct_(.dots=patid) %>%
+                                                      distinct_(.dots="patient_id") %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -290,10 +290,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct_(.dots=patid) %>%
+                                              distinct_(.dots="patient_id") %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct_(.dots=patid) %>%
+                                                      distinct_(.dots="patient_id") %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -361,7 +361,7 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct_(.dots=patid) %>%
+                            distinct_(.dots="patient_id") %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
                                     distinct_(.dots="patient_id") %>%
@@ -641,9 +641,9 @@ pat_level_func_sknn <- function(
             # iterate through all patients and match patients according to order. ord <- data is the training data
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             if(is.null(interval)){
-                patlistint <- seq(1,nrow(train[,patid]))
+                patlistint <- seq(1,nrow(train))
             } else {
-                patlistint <- seq(1,nrow(train[,patid]), by=interval)
+                patlistint <- seq(1,nrow(train), by=interval)
             }
             
             for (i in patlistint) {
@@ -753,7 +753,7 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct_(.dots=patid) %>%
+                                              distinct_(.dots="patient_id") %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
                                                       distinct_(.dots="patient_id") %>%
@@ -810,7 +810,7 @@ pat_level_func_sknn <- function(
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     
                                     for(x in (test_post %>%
-                                              distinct_(.dots=patid) %>%
+                                              distinct_(.dots="patient_id") %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
                                                       distinct_(.dots="patient_id") %>%
@@ -883,7 +883,7 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct_(.dots=patid) %>%
+                            distinct_(.dots="patient_id") %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
                                     distinct_(.dots="patient_id") %>%
