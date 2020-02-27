@@ -75,7 +75,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                            ord_data, 
                            test_post, 
                            test_o,  # datasets
-                           outcome, time_elapsed, plot = FALSE,
+                           outcome, time_elapsed="time", plot = FALSE,
                            matchprobweight=FALSE,
                            time_window=NULL,
                            interval=NULL,
