@@ -22,11 +22,13 @@ matchIdExtractsknn <- function(
     train <- full %>%
         filter(train_test == 1) %>% 
         distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(patid, all.vars(formula))
+        dplyr::select(patid, all.vars(formula)) %>%
+        data.frame
     test <- full %>%
         filter(train_test == 2) %>% 
         distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(patid, all.vars(formula))
+        dplyr::select(patid, all.vars(formula)) %>%
+        data.frame
 
 
     # - - - - - - - - - - - - - - - - - - - - #
@@ -54,7 +56,7 @@ matchIdExtractsknn <- function(
 
                                 # the lapply here needs to be sapply on some instances... need to fix actually needs to be a tibble for sapply for just dataframes need to be lapply....
                                diffcov  <- sapply(2:ncol(train), function(x){
-                                                   (train[-y,x] - c(train[y,x]))^2
+                                                   (data.frame(train)[-y,x] - c(data.frame(train)[y,x]))^2
                         })
 
                                #sqrt(apply(data.frame(temp),1, sum))
