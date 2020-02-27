@@ -9,7 +9,7 @@
 # }}}
 
 # Load Libraries {{{ ----------------
-
+rm(list=ls())
 library("pacman")
 p_load(
   PMMSKNN,readxl,dplyr,here,testthat,gamlss, 
@@ -22,6 +22,7 @@ devtools::reload(pkgload::inst("PMMSKNN"))
 data("ChickWeight")
 
 ## Select 50% as training set
+set.seed(1234)
 cid <- ChickWeight %>% 
   distinct(Chick) %>%
   pull() %>%
