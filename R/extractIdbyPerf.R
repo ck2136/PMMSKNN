@@ -19,7 +19,9 @@ extractIdbyPerf <- function(test_proc, perc){
         quantile(., perc) %>% as.vector
 
     id <- test_proc$test_o %>%
-        filter(.data$pred == val) %>%
+        filter(abs(.data$pred - val) == min(abs(.data$pred - val))) %>%
+        # Only select 1
+        .[1,] %>%
         dplyr::select(id) %>% unlist %>% as.vector
     return(id)
 }
