@@ -53,19 +53,23 @@ matchIdExtractsknn <- function(
     nnarraytrain <- sapply(1:nrow(train), function(y){
 
                                 # the lapply here needs to be sapply on some instances... need to fix actually needs to be a tibble for sapply for just dataframes need to be lapply....
-                               temp  <- sapply(2:ncol(train), function(x){
+                               diffcov  <- sapply(2:ncol(train), function(x){
                                                    (train[-y,x] - c(train[y,x]))^2
                         })
 
                                #sqrt(apply(data.frame(temp),1, sum))
-                               temp2 <- sapply(1:length(temp), function(x) {
-                                                   append(temp[[x]],0,y-1)
-                        })
+                               # Sum the abs value of differences
+                               sumdiffcov <- apply(diffcov,1,sum)
+                               sumdiffcovfin <- append(sumdiffcov,0,y-1)
+                        #        temp2 <- sapply(1:length(temp), function(x) {
+                        #                            append(temp[[x]],0,y-1)
+                        # })
 
                                full %>%
                                    filter(train_test == 1) %>%
                                    distinct_(.dots = patid)  %>%
-                                   bind_cols(diff = sqrt(apply(data.frame(temp2),1, sum))) %>%
+                                   # bind_cols(diff = sqrt(apply(data.frame(temp2),1, sum))) %>%
+                                   bind_cols(diff = sumdiffcovfin) %>%
                                    arrange(.data$diff) %>%
                                    .[-1, ] %>%
                                    #head(n = 5) %>%
