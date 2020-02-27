@@ -1,4 +1,4 @@
-#' Extract ID by Performance: extracts ID value from loocv object based on the percentile of bias value of individuals
+#' Extract ID by Performance: extracts ID value from processed object from `preproc()` based on the percentile of bias value of individuals
 #' 
 #' `extractIdbyPerf` is a utility function that returns one single id number based on the 
 #' `perc` (numeric) argument provided. This is useful to determine the n-th percentile person
