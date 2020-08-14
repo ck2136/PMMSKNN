@@ -45,6 +45,7 @@
 #' Default is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
 #' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process.
 #' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
+#' @param opt_cov -  Numeric value to indicate what the optimal coverage value is for calculating the performance. Default is `opt_cov = 0.5` (i.e. 50% coverage).
 #' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param \dots Passed down to \code{gamlss}
 #' 
