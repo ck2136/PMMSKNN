@@ -11,11 +11,6 @@
 context("LOOCV Using ChickWeight Data")
 
 data("ChickWeight")
-library("pacman")
-p_load(
-  PMMSKNN,readxl,dplyr,here,testthat,gamlss, 
-  doParallel,future.apply,janitor,fastDummies
-  )
 
 ## Select 50% as training set
 set.seed(1234)
@@ -41,8 +36,7 @@ full <- ChickWeight %>%
   mutate(
     baseline = ifelse(Time == 0, 1, 0),
     Chick = as.numeric(as.character(Chick))
-    ) %>%
-  dummy_cols("Diet")
+    ) 
 
 test_proc <- preproc(
                 dff=full,                 # specify full dataset name
@@ -56,7 +50,7 @@ test_proc <- preproc(
                 pat_id = "Chick",    # specify patient id variable name
                 baseline_var = "baseline",
                 m = 20,
-                varlist = c("Diet_2","Diet_3","Diet_4","b_weight") # specify list of covariates for pmm
+                varlist = c("b_weight") # specify list of covariates for pmm
 )
 
 ## loocv_function() {{{
@@ -87,51 +81,6 @@ fin <- loocv_function(
   perfrank = "totscore"
   )
 
-## }}}
-
-## test_that() {{{
-
-test_that("LOOCV performance list created" , {
-             expect_that(names(fin), equals(c("pred_res","test_score","loocv_res","loocv_score","nearest_n")))
-             expect_false(is.null(fin$nearest_n))
-})
-
-## }}}
-
-# }}}
-
-# LOOCV: Parallel {{{
-
-## loocv_function() {{{
-fin <- loocv_function(
-  
-  # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(15:18),
-  # enter training and testing post operative and fitted y90 dataset
-  train_post = test_proc$train_post,
-  ord_data = test_proc$train_o,
-  test_post = test_proc$test_post,
-  test_o = test_proc$test_o,
-  # Specify outcome variable and time variable name
-  outcome = "weight",
-  #outcome = "knee_flex",
-  interval = NULL,
-  mtype=0,
-  # Specify use of cubic spline or not
-  cs=TRUE,
-  # specify degrees of freedom use or not
-  #dfspec=NULL,
-  dfspec=TRUE,
-  # specify degree of freedom for location, scale and shape (d_f_* where * = {m, s} for location and scale default for shape is 1.
-  # specify power transformation of location (ptr_m)
-  d_f_m=3, ptr_m=0.5,
-  #d_f_m=3, ptr_m=1,
-  d_f_s=1,
-  # parallel
-  parallel=7, m=5,
-  # Specify distribution for location, scale and shape 
-  #dist_fam = gamlss.dist::NO)
-  dist_fam = gamlss.dist::NO)
 ## }}}
 
 ## test_that() {{{
