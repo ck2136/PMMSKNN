@@ -8,6 +8,8 @@
 # }}}
 
 # LOOCV: Non Parallel {{{
+context("LOOCV Using ChickWeight Data")
+
 data("ChickWeight")
 full  <- ChickWeight
 full %<>%
