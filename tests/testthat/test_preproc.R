@@ -21,7 +21,7 @@ full <- full %>%
     #filter(!patient_id %in% exclude$patient_id & time < 200)
     filter(Time < 200) 
 
-seed(1234)
+set.seed(1234)
 full %<>%
   mutate(
     Chick = as.numeric(as.character(Chick)),
