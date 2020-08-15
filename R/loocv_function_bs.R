@@ -22,6 +22,7 @@
 #' @param test_o  Data frame. Specifically, testing data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
 #' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
 #' then \code{x$test_o} would be used for this parameter.
+#' @param bs_obj        Brokenstick object outputted from \code{\link{preproc}}
 #' @param outcome     Name of the outcomes variable (type=string)
 #' @param plot  Logical (\code{TRUE/FALSE}) that specifies whether to output individual precision plots
 #' @param matchprobweight  Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling
