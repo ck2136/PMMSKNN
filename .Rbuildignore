@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+readme.*
+^README_figs/*
+^Rmd/*
+^code/*
+^scripts/*
+.travis.yml
+^\.travis\.yml$
