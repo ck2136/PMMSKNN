@@ -3,6 +3,8 @@
 language: R
 cache: packages
 
+r_github_packages: stefvanbuuren/brokenstick
+
 install:
-  - Rscript -e "install.packages('devtools')"
-  - Rscript -e "devtools::install_github('stefvanbuuren/brokenstick')"
+  - Rscript -e "install.packages(c('devtools','reshape2','broom','gamlss','gamlss.dist','ggplot2','cowplot','DescTools','merTools','data.table','doParallel','doSNOW','future','future.apply','foreach'))"
+  
