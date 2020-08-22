@@ -207,7 +207,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         )
                         
                         opt_n <- perfdf %>%
-                            arrange(totscore)  %>%
+                            arrange(.data$totscore)  %>%
                             head(1) %>%
                             .[,"nearest_n"] 
                         
@@ -465,8 +465,21 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         # - - - - - - - - - - - - - - - - - - - - - - #
                         # Use a weighted scoring fucntion of bias, coverage, and precision to choose optimal m
                         # - - - - - - - - - - - - - - - - - - - - - - #
-                        opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
-                            dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                        # opt_n_index <- loocvperf(loocv_test_result, ord_data, bias=biasm, nearest_n) %>%
+                        #     dplyr::select(.data$totscore) %>% unlist(.) %>% which.min(.) %>% as.vector(.)
+                        
+                        perfdf <- loocv_perf(
+                            loocv_test_result,
+                            outcome=outcome,
+                            nearest_n=nearest_n,
+                            opt_cov = opt_cov,
+                            perf_round_by=perf_round_by
+                        )
+                        
+                        opt_n <- perfdf %>%
+                            arrange(.data$totscore)  %>%
+                            head(1) %>%
+                            .[,"nearest_n"] 
                         
                     } else if(perfrank=="cov"){
                         perfdf <- loocv_perf(

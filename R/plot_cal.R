@@ -33,6 +33,7 @@
 #' that indicates the optimal n match based on equally weighting bias, coverage and precision
 #' @param plotvals - Logical (\code{TRUE/FALSE}) indicating whether to plot bias, coverage, and precision values onto the calibration plot
 #' @param iqrfull - Dataframe containing gamlss predictions which triggers the plotting of reference model prediction on the same plot as that of the patient like me predictions.
+#' @param bs      Logical (\code{TRUE/FALSE}) indicating whether to plot brokenstick object.
 #' @param \dots   - For specifying plotting options.
 #' 
 #' @return An object of class \code{ggplot} that outputs a calibration plot of observed vs. deciles of predicted values.
@@ -68,7 +69,7 @@ plot_cal <- function(plotobj,
     # For brokenstick object it's simple data manipulation of loocv_score
     if(bs){
       tmp1 <- plotobj$loocv_score %>%
-        tidyr::pivot_longer(rmse:prec, names_to = "measure") %>% rename(nearest_n = 1)
+        tidyr::pivot_longer(.data$rmse:.data$prec, names_to = "measure") %>% rename(nearest_n = 1)
       perfdf <- plotobj$loocv_score
     
     } else {
@@ -82,7 +83,7 @@ plot_cal <- function(plotobj,
       ) 
       
       tmp1 <- perfdf %>%
-        tidyr::pivot_longer(rmse:prec, names_to = "measure") %>% rename(nearest_n = 1)
+        tidyr::pivot_longer(.data$rmse:.data$prec, names_to = "measure") %>% rename(nearest_n = 1)
     }
     
     # tmp1 <-listtodf(plotobj$loocv_res) 

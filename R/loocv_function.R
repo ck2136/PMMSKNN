@@ -56,7 +56,7 @@
 #' @param biasm - Column indicating which bias measure to use for 
 #' choosing the optimal nearest number of neighbors. 
 #' Default is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
-#' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process.
+#' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process (default = 5).
 #' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to `opt_cov`. Then the lowest `rmse` value then `prec` value is prefered,
 #' @param opt_cov - Float value indicating optimal coverage value used for `perfrank`. Defaults to 0.5
 #' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
@@ -93,7 +93,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                            loocv=TRUE,
                            mtype=1,
                            biasm="raw",
-                           m,
+                           m=5,
                            perfrank="cov",
                            opt_cov = 0.5,
                            perf_round_by=4,
@@ -202,7 +202,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                     )
                     
                     opt_n <- perfdf %>%
-                        arrange(totscore)  %>%
+                        arrange(perfdf$totscore)  %>%
                         head(1) %>%
                         .[,"nearest_n"] 
                     
