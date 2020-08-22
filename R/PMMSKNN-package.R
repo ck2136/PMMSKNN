@@ -27,7 +27,7 @@
 #'@importFrom doParallel  registerDoParallel stopImplicitCluster
 #'@importFrom doSNOW      registerDoSNOW 
 #'@importFrom parallel    makeCluster detectCores 
-#'@importFrom future      plan multiprocess
+#'@importFrom future      plan multiprocess  sequential
 #'@importFrom future.apply      future_lapply
 #'@importFrom foreach     foreach %dopar%
 #'@importFrom stats       as.formula complete.cases cor formula
