@@ -24,7 +24,7 @@
 #' @param ylab        String indicating y axis label for plot (default: "Outcome")
 #' @param \dots       Options to specify in the plotting of the percentile curves
 #' 
-#' @return            A list that contains 1) an object of class \code{ggplot} that outputs a gamlss predition curve for an individual in terms of their predicted values over time and 2) a data frame that contains the observations from the matched neighbors as well as the individual w idnum
+#' @return            A list that contains 1) an object of class \code{ggplot} that outputs a gamlss predition curve for an individual in terms of their predicted values over time, 2) a data frame that contains the observations from the matched neighbors as well as the individual w idnum and 3) A data frame of centiles prediction results  (10th, 25th, 50th, 75th, and 90th)
 #' 
 #' @export
 plot_ind <- function(
@@ -97,7 +97,8 @@ plot_ind <- function(
     return(
       list(
         plot = plot_l,
-        plotdf = plotdf
+        plotdf = plotdf,
+        predres = iqrplm 
         )
     )
 }
