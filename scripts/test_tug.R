@@ -10,7 +10,7 @@
 # Load Libraries {{{ ----------------
 
 library("pacman")
-p_load(PMMSKNN, readxl, dplyr, here,testthat, gamlss, doParallel, future.apply)
+p_load(reshape2, broom, brokenstick, cowplot, DescTools, lme4, merTools, doSNOW, readxl, dplyr, here,testthat, gamlss, doParallel, future.apply, PMMSKNN)
 devtools::reload(pkgload::inst("PMMSKNN"))
 # }}}
 
@@ -60,7 +60,7 @@ full <- full %>%
 ###   1. Taking training post data and running broken stick to get y90 or yNU where NU is value chosen
 ###   2. Processes test data set so that yNU is matched with training data
 ###   3. The matched test and train data according to yNU is used to later match the personalized predicted gamlss
-#debug(preproc)
+undebug(preproc)
 test_proc <- preproc(
                 dff=full,                 # specify full dataset name
                 split_var = 'train_test', # train test split variable
@@ -71,9 +71,8 @@ test_proc <- preproc(
                 outcome = "tug",          # specify outcome variable name
                 time_var = "time",        # specify time variable name
                 pat_id = "patient_id",    # specify patient id variable name
-                m = 20,
-                varlist = c("age","gender","bmi","b_tug"), # specify list of covariates for pmm
-                filter_exp = "time > 3"   # Filter observations that will be included
+                m = 3,                    # the larger the m the longer it will take to generate yhats
+                varlist = c("age","gender","bmi","b_tug") # specify list of covariates for pmm
 )
 
 # }}}
