@@ -19,7 +19,6 @@
 #' @param testval - A numeric value indicating testing set observations. 
 #' If \code{test_val = 0}, then rows in the \code{dff} should have 0 in each of the
 #' `split_var` column.
-#' @param filter_exp - String that represents filtering of the full data to be processed.
 #' Expression can be of form \code{"time > 3"}. Default is \code{NULL}
 #' @param knots_exp  - Numeric vector with break points for \code{brokenstick} model
 #' @param out_time   - Single numeric value specifying the distal time. Has to be one of 
@@ -51,7 +50,6 @@ preproc <- function(dff,
                     split_var = 'train_test',
                     trainval = 1,
                     testval = 2,
-                   filter_exp = NULL,               # expression can be of form "time > 3"
                    knots_exp = c(0, 14, 50, 90),    # select knots that are clinically relevat
                    out_time = 90,                   # this variable has to be within the knots above
                    outcome = "tug",
@@ -106,7 +104,7 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Check for duplicated values in baseline and postoperative
     # - - - - - - - - - - - - - - - - - - - - - - #
-    if(any(dff %>% filter(.$baseline == 1) %>% select_(pat_id) %>% unlist %>% duplicated)){
+    if(any(dff %>% filter(.$baseline == 1) %>% dplyr::select(!!sym(pat_id)) %>% unlist %>% duplicated)){
         warning("Duplicate baseline values exist within training and testing set! remove them before running preproc")
     }
   
@@ -114,13 +112,13 @@ preproc <- function(dff,
     any(c(
       # Training set duplicated?
       dff %>%
-      filter(.$train_test == 1 & .$baseline == 1) %>%
-      select(pat_id) %>%
+      dplyr::filter(.$train_test == 1 & .$baseline == 1) %>%
+      dplyr::select(!!sym(pat_id)) %>%
       unlist %>% duplicated,
       # Test set duplicated?
       dff %>%
-      filter(.$train_test == 2 & .$baseline == 1) %>%
-      select(pat_id) %>%
+      dplyr::filter(.$train_test == 2 & .$baseline == 1) %>%
+      dplyr::select(!!sym(pat_id)) %>%
       unlist %>% duplicated
     ))
   ){
@@ -144,13 +142,13 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     exclude <- dff %>% 
         filter(.data$baseline == 1) %>%
-        dplyr::select_(pat_id, outcome) %>% 
+        dplyr::select(!!sym(pat_id), !!sym(outcome)) %>% 
         full_join(
                   dff %>% 
                       filter(.data$baseline ==1) %>%
                       distinct_(pat_id, .keep_all =TRUE) %>%
-                      dplyr::select_(pat_id, outcome) %>% 
-                      dplyr::rename_("p_outcome" = outcome),
+                      dplyr::select(!!sym(pat_id), !!sym(outcome)) %>% 
+                      dplyr::rename("p_outcome" = !!sym(outcome)),
                   by = c(pat_id)
                   ) %>%
         filter(is.na(.data$p_outcome) | is.na(.[outcome])) 
@@ -164,43 +162,53 @@ preproc <- function(dff,
     # Split test/train 
     # - - - - - - - - - - - - - - - - - - - - - - #
 
-    df_train <-dff  %>% filter_(paste0(split_var, "==", trainval)) 
-    df_test <- dff %>% filter_(paste0(split_var, "==",testval))
+    # df_train <-dff  %>% filter_(paste0(split_var, "==", trainval)) 
+    # df_test <- dff %>% filter_(paste0(split_var, "==",testval))
+    df_train <-dff  %>% filter(!!sym(split_var) == trainval)
+    df_test <- dff %>% filter(!!sym(split_var) == testval)
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Split test/train by pre and post using baseline_var
     # - - - - - - - - - - - - - - - - - - - - - - #
 
-    pre_train_df <- df_train %>% filter_(paste0(baseline_var,"== 1"))
-    pre_test_df <- df_test %>% filter_(paste0(baseline_var, "== 1"))
+    # pre_train_df <- df_train %>% filter_(paste0(baseline_var,"== 1"))
+    # pre_test_df <- df_test %>% filter_(paste0(baseline_var, "== 1"))
+    pre_train_df <- df_train %>% filter(!!sym(baseline_var) == 1)
+    pre_test_df <- df_test %>% filter(!!sym(baseline_var) == 1)
 
-      # - - - - - - - - - - - - - - - - - - - - - - #
-      # Allow user to specify filter_exp
-      # - - - - - - - - - - - - - - - - - - - - - - #
-
-    if(is.null(filter_exp)) {
-        post_train_df <- df_train %>% filter_(paste0(baseline_var, "== 0"))
-        post_test_df <- df_test %>% filter_(paste0(baseline_var, "== 0"))
-    } else {
-        post_train_df <- df_train %>% filter_(filter_exp) %>% filter_(paste0(baseline_var, "== 0"))
-        post_test_df <- df_test %>% filter_(filter_exp)  %>% filter_(paste0(baseline_var, "== 0"))
-    }
+    # - - - - - - - - - - - - - - - - - - - - - - #
+    # Filter out the post-baseline observations
+    # - - - - - - - - - - - - - - - - - - - - - - #
+    
+    # post_train_df <- df_train %>% filter_(paste0(baseline_var, "== 0"))
+    # post_test_df <- df_test %>% filter_(paste0(baseline_var, "== 0"))
+    post_train_df <- df_train %>% filter(!!sym(baseline_var) == 0)
+    post_test_df <- df_test %>% filter(!!sym(baseline_var) == 0)
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # use brokenstick to predict values at knots_exp
     # - - - - - - - - - - - - - - - - - - - - - - #
 
-    fit <- brokenstick(y = unlist(post_train_df[,outcome]),
-                       x = unlist(post_train_df[,time_var]),
-                       subjid = unlist(post_train_df[,pat_id]),
-                       knots = knots_exp
-                       )
+    # fit <- brokenstick(y = unlist(post_train_df[,outcome]),
+    #                    x = unlist(post_train_df[,time_var]),
+    #                    subjid = unlist(post_train_df[,pat_id]),
+    #                    knots = knots_exp
+    #                    )
+    
+    fit <- brokenstick(
+      formula(paste0(outcome, " ~ ", time_var , " | ", pat_id)),
+      data = post_train_df,
+      knots = knots_exp
+    )
 
-    est1 <- predict(fit, at="knots")
+    # est1 <- predict(fit, post_train_df, at="knots")
+    # est1 <- predict(fit, post_train_df, x="knots", shape="wide")
+    est1 <- predict(fit, post_train_df, x="knots", shape="long") %>% select(!!sym(pat_id), !!sym(time_var), .pred) 
+    
     alldf <- left_join(
-                     est1[round(est1$x, 3)== round(out_time,3), ] %>%
-                         setNames(c(pat_id,"x","y","yhat","knot")) %>%
-                          dplyr::select_(pat_id, "yhat") %>%
+                       est1[round(est1[[time_var]], 3) == round(out_time,3),] %>%
+                       dplyr::select(!!sym(pat_id), .pred) %>%
+                       setNames(c(pat_id,"yhat")) %>%
                           # need to change pat_id bc it is a factor when outputted through predict()
                           mutate(!!pat_id := !!parse_quo(paste0("as.numeric(as.character(",pat_id,"))"), env=rlang::caller_env()))
                           # mutate(!!pat_id := !!parse_quosure(paste0("as.numeric(as.character(",pat_id,"))")))
@@ -235,10 +243,10 @@ preproc <- function(dff,
     # Create dataset with fitted outcome at out_time for training patients
     # - - - - - - - - - - - - - - - - - - - - - - #
     train_ordered <- alldf %>%
-        dplyr::select_(pat_id) %>%
+        dplyr::select(!!sym(pat_id)) %>%
         cbind(pmm$fitted.values) %>%
-        rename_("id"= pat_id,
-               "Fitted"="`pmm$fitted.values`") %>%
+        dplyr::rename(id= !!sym(pat_id),
+               Fitted=`pmm$fitted.values`) %>%
                #Fitted=`pmm$mu.fv`) %>%
         arrange(.data$Fitted)
 
@@ -258,13 +266,13 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     
     test_ordered <- pre_test_df %>% 
-        dplyr::select_(pat_id) %>%
+        dplyr::select(!!sym(pat_id)) %>%
         bind_cols(pred = predict(pmm, data=alldf, 
                                  newdata=pre_test_df %>% 
                                             .[,c(outcome, varlist)]
                              )
         ) %>%
-        rename_("id" = pat_id) %>%
+        rename(id = !!sym(pat_id)) %>%
         arrange(.data$pred)
 
     test_ordered <- test_ordered %>%
@@ -281,15 +289,15 @@ preproc <- function(dff,
     # Change patient_id column for LOOCV function use
     # - - - - - - - - - - - - - - - - - - - - - - #
     post_train_df <- post_train_df %>%
-        rename_(
-          "patient_id" = pat_id,
-          "time" = time_var
+        rename(
+          patient_id = !!sym(pat_id),
+          time = !!sym(time_var)
           )
 
     post_test_df <- post_test_df %>%
-        rename_(
-          "patient_id" = pat_id,
-          "time" = time_var
+        rename(
+          patient_id = !!sym(pat_id),
+          time = !!sym(time_var)
           )
 
     return(list(train_post = post_train_df, 

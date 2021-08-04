@@ -1,13 +1,13 @@
 #' PMM \eqn{\dot{Y}} Generating Function: Create Y dots through Predictive Mean Matching
 #' 
-#' @param df training data
+#' @param df Training data
 #' @param formula A string with the name of the splitting variables
 #' @param pat_id     Name of the variable with patient identification
-#' @param m - Integer value indicating the number of replications to obtain
+#' @param m Integer value indicating the number of replications to obtain
 #' \eqn{\beta*} and \eqn{\dot{y}}.
 #' @param seed Integer value indicating seed number for random generation
 #' of \eqn{\sigma*} and \eqn{\beta*}
-#' @param dftest  test data.frame object 
+#' @param dftest  Test data.frame object 
 #' 
 #' @return A data frame that includes \eqn{\dot{y}}.
 #' 
