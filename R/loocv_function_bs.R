@@ -7,14 +7,14 @@
 #' The parameters (i.e. performances measures) are 
 #' bias, coverage and the precision (50% prediction interval) 
 #' 
-#' @param nearest_n - Numeric vector indicating the nearest number of matches 
+#' @param nearest_n  Numeric vector indicating the nearest number of matches 
 #' to select from. The \code{loocv_function} will iterate through 
 #' the number within the vector and select the number of matches that has
 #' optimal bias, coverage, and precision.
 #' The number of nearest_n should be within the range of number of individuals
 #' That are in the data. For example if there are 500 individuals in the data,
 #' one could do \code{nearest_n <- 10:100}
-#' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param train_post  Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
 #' @param ord_data Data frame. Specifically, training data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
 #' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
 #' then \code{x$train_o} would be used for this parameter.
@@ -22,30 +22,32 @@
 #' @param test_o  Data frame. Specifically, testing data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
 #' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
 #' then \code{x$test_o} would be used for this parameter.
-#' @param outcome    - Name of the outcomes variable (type=string)
-#' @param plot - Logical (\code{TRUE/FALSE}) that specifies whether to output individual precision plots
-#' @param matchprobweight - Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling
+#' @param bs_obj        Brokenstick object outputted from \code{\link{preproc}}
+#' @param outcome     Name of the outcomes variable (type=string)
+#' @param plot  Logical (\code{TRUE/FALSE}) that specifies whether to output individual precision plots
+#' @param matchprobweight  Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling
 #'  when doing the mean matching. If TRUE, matches nearest n weighted on differnce in 
 #'  predicted outcome.
-#' @param time_window - vector of numbers for `centiles.pred()`, `xvalues` argument. For example, specify such as \code{c(10:30)}
-#' @param interval - Int value specifying the interval of individuals to skip 
-#' @param thresh_val - Numeric value indicating value of bias to ignore (not include in output) in terms of the leave-one-out cross validation process. The default is set to \code{thresh_val = 10000}
-#' @param userchoose - Int value indicating the choice that the user wants to use for the number of nearest matches 
-#' @param seed - Seed for probability sampling of the nearest matches
-#' @param parallel - Number of cores used for the leave-one-out cross validation process. Default = 1
-#' @param loocv - Logical (\code{TRUE/FALSE}) that specifies whether 
+#' @param time_window  vector of numbers for `centiles.pred()`, `xvalues` argument. For example, specify such as \code{c(10:30)}
+#' @param interval  Int value specifying the interval of individuals to skip 
+#' @param thresh_val  Numeric value indicating value of bias to ignore (not include in output) in terms of the leave-one-out cross validation process. The default is set to \code{thresh_val = 10000}
+#' @param userchoose  Int value indicating the choice that the user wants to use for the number of nearest matches 
+#' @param seed  Seed for probability sampling of the nearest matches
+#' @param parallel  Number of cores used for the leave-one-out cross validation process. Default = 1
+#' @param loocv  Logical (\code{TRUE/FALSE}) that specifies whether 
 #' or not to perform leave-one-out cross validation or just output 
 #' predictions without hyperparameter tuning. If \code{loocv=FALSE}, then
 #' users need to specify the value of the nearest_n 
-#' @param mtype - Integer value indicating matching type. Default is set to 1 which follows the
+#' @param mtype  Integer value indicating matching type. Default is set to 1 which follows the
 #' matching of patients based on recommendation from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}. \code{mtype} values are 
 #' from \code{0} to \code{4}
-#' @param biasm - Column indicating which bias measure to use for 
+#' @param biasm  Column indicating which bias measure to use for 
 #' choosing the optimal nearest number of neighbors. 
 #' Default is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
 #' @param m - For \code{mtype = 4}, which is type 4 matching from \href{https://stefvanbuuren.name/fimd/sec-pmm.html}{van Buuren et al.}, the Number of repititions for obtaining \eqn{\dot{y}} in terms of the predictive mean matching process.
-#' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
-#' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
+#' @param perfrank  String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
+#' @param opt_cov   Numeric value to indicate what the optimal coverage value is for calculating the performance. Default is `opt_cov = 0.5` (i.e. 50\% coverage).
+#' @param perf_round_by  Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param \dots Passed down to \code{gamlss}
 #' 
 #' @return Returns a list of 3 lists and a value. 1) \code{pred_res} contains a list of predicted values for the training data (\code{pred_train}) and test data (\code{pred_test}), the performance (\code{bias},\code{rmse},\code{zscore},\code{iqrcoverage},\code{precisionvec}, and number of dropped cases in fitting the gamlss model(\code{dropped_cases})); 2) \code{loocv_res} contains the same lists described above for each models fitted using different values of number of nearest neighbors; 3) \code{loocv_score} contains the summarised performance measures as a data frame; 4) \code{nearest_n} contains the optimal number of matches based on the aggregate performance metric.
@@ -132,7 +134,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                             
                             # using the match ids get predicted values of matches
-                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(x %in% time_curid) %>% group_by(x) %>% 
+                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -141,8 +143,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             # get obs value for curid
                             # calculate confidence intervals using t dist
                             data.frame(
-                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                                 obsvals =train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -156,8 +158,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         # generate rmse, cov, and prec 
                         predresdf <- predresdf %>%
                             mutate(
-                                cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                                prec = upper95 - lower95,
+                                cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                                prec = .data$upper95 - .data$lower95,
                                 nearest_n = n
                             )
                         
@@ -203,14 +205,14 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 if(perfrank=="totscore"){
                     
                     # Select optimal n 
-                    if(nrow(perfdf %>% top_n(-1, totscore)) > 1){
+                    if(nrow(perfdf %>% top_n(-1, .data$totscore)) > 1){
                         opt_n <- perfdf %>%
-                            arrange(totscore)  %>%
+                            arrange(.data$totscore)  %>%
                             head(1) %>%
                             .[,"nearest_n"]
                     } else {
                         opt_n <- perfdf %>%
-                            arrange(totscore)  %>%
+                            arrange(.data$totscore)  %>%
                             head(1) %>%
                             .[,"nearest_n"]
                     }
@@ -218,18 +220,18 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 } else if(perfrank=="cov"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - opt_cov), perf_round_by)
+                            covdiff = round(abs(.data$cov - .data$opt_cov), perf_round_by)
                         ) %>%
-                        arrange(covdiff, rmse, prec)  %>%
+                        arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                         head(1) %>%
                         .[,"nearest_n"]
                 } else if(perfrank=="bias"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - opt_cov), perf_round_by),
-                            rmse = round(rmse, perf_round_by)
+                            covdiff = round(abs(.data$cov - .data$opt_cov), perf_round_by),
+                            rmse = round(.data$rmse, perf_round_by)
                         ) %>%
-                        arrange(rmse, covdiff, prec)  %>%
+                        arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                         head(1) %>%
                         .[,"nearest_n"]
                 }
@@ -265,16 +267,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
                     filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-patient_id) %>%
+                    tidyr::nest(-.data$patient_id) %>%
                     mutate(
-                        times = lapply(data, function(data) {
+                        times = lapply(.data$data, function(data) {
                             data %>% 
-                                dplyr::select(time) %>% 
+                                dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
-                        predval = lapply(times, function(times) {
+                        predval = lapply(.data$times, function(times) {
                             predict(bs_obj, x=times, ids=matches) %>% 
-                                filter(x %in% times) %>% 
-                                group_by(x) %>% 
+                                filter(.data$x %in% times) %>% 
+                                group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -283,13 +285,13 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     )
                 
                 predvaldf <- nest_pred %>%
-                    tidyr::unnest(predval) 
+                    tidyr::unnest(.data$predval) 
                 
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -305,8 +307,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # generate rmse, cov, and prec 
             predresdf <- predresdf %>%
                 mutate(
-                    cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                    prec = upper95 - lower95
+                    cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                    prec = .data$upper95 - .data$lower95
                 )
             
             # Get test performance
@@ -363,16 +365,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
                     filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-patient_id) %>%
+                    tidyr::nest(-.data$patient_id) %>%
                     mutate(
-                        time_vals = lapply(data, function(data) {
+                        time_vals = lapply(.data$data, function(data) {
                             data %>% 
-                                dplyr::select(time) %>% 
+                                dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
-                        predval = lapply(time_vals, function(time_vals) {
+                        predval = lapply(.data$time_vals, function(time_vals) {
                             predict(bs_obj, x=time_vals, ids=matches) %>% 
-                                filter(x %in% time_vals) %>% 
-                                group_by(x) %>% 
+                                filter(.data$x %in% time_vals) %>% 
+                                group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -381,13 +383,13 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     )
                 
                 predvaldf <- nest_pred %>%
-                    tidyr::unnest(predval) 
+                    tidyr::unnest(.data$predval) 
                 
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -402,8 +404,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # generate rmse, cov, and prec 
             predresdf <- predresdf %>%
                 mutate(
-                    cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                    prec = upper95 - lower95,
+                    cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                    prec = .data$upper95 - .data$lower95,
                     nearest_n = opt_n
                     # nearest_n = n
                 )
@@ -424,7 +426,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     nearest_n=opt_n)
             )
         }
-        stopCluster(cl)
+        plan(sequential)
     } else {
         # Non Parallel -----------------------
         message("Initiating Non Parallel Process")
@@ -452,7 +454,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                             
                             # using the match ids get predicted values of matches
-                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(x %in% time_curid) %>% group_by(x) %>% 
+                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -462,8 +464,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                             # calculate confidence intervals using t dist
                             
                             data.frame(
-                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                                 obsvals = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select_(outcome) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -477,8 +479,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         # generate rmse, cov, and prec 
                         predresdf <- predresdf %>%
                             mutate(
-                                cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                                prec = upper95 - lower95,
+                                cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                                prec = .data$upper95 - .data$lower95,
                                 nearest_n = n
                             )
                         
@@ -525,14 +527,14 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 if(perfrank=="totscore"){
                     
                     # Select optimal n 
-                    if(nrow(perfdf %>% top_n(-1, totscore)) > 1){
+                    if(nrow(perfdf %>% top_n(-1, .data$totscore)) > 1){
                         opt_n <- perfdf %>%
-                            arrange(totscore)  %>%
+                            arrange(.data$totscore)  %>%
                             head(1) %>%
                             .[,"nearest_n"]
                     } else {
                         opt_n <- perfdf %>%
-                            arrange(totscore)  %>%
+                            arrange(.data$totscore)  %>%
                             head(1) %>%
                             .[,"nearest_n"]
                     }
@@ -540,18 +542,18 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 } else if(perfrank=="cov"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - opt_cov), perf_round_by)
+                            covdiff = round(abs(.data$cov - opt_cov), perf_round_by)
                         ) %>%
-                        arrange(covdiff, rmse, prec)  %>%
+                        arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                         head(1) %>%
                         .[,"nearest_n"]
                 } else {
                     # assume bias as default
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(cov - opt_cov), perf_round_by)
+                            covdiff = round(abs(.data$cov - opt_cov), perf_round_by)
                         ) %>%
-                        arrange(rmse, covdiff, prec)  %>%
+                        arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                         head(1) %>%
                         .[,"nearest_n"]
                 }
@@ -582,16 +584,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
                     filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-patient_id) %>%
+                    tidyr::nest(-.data$patient_id) %>%
                     mutate(
-                        times = lapply(data, function(data) {
+                        times = lapply(.data$data, function(data) {
                             data %>% 
-                                dplyr::select(time) %>% 
+                                dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
-                        predval = lapply(times, function(times) {
+                        predval = lapply(.data$times, function(times) {
                             predict(bs_obj, x=times, ids=matches) %>% 
-                                filter(x %in% times) %>% 
-                                group_by(x) %>% 
+                                filter(.data$x %in% times) %>% 
+                                group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -600,14 +602,14 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     )
                 
                 predvaldf <- nest_pred %>%
-                    tidyr::unnest(predval) 
+                    tidyr::unnest(.data$predval) 
                 
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 
                 data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -623,8 +625,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # generate rmse, cov, and prec 
             predresdf <- predresdf %>%
                 mutate(
-                    cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                    prec = upper95 - lower95
+                    cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                    prec = .data$upper95 - .data$lower95
                 )
             
             # Get test performance
@@ -671,16 +673,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
                 nest_pred <- test_post %>%
                     filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-patient_id) %>%
+                    tidyr::nest(-.data$patient_id) %>%
                     mutate(
-                        time_vals = lapply(data, function(data) {
+                        time_vals = lapply(.data$data, function(data) {
                             data %>% 
-                                dplyr::select(time) %>% 
+                                dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
-                        predval = lapply(time_vals, function(time_vals) {
+                        predval = lapply(.data$time_vals, function(time_vals) {
                             predict(bs_obj, x=time_vals, ids=matches) %>% 
-                                filter(x %in% time_vals) %>% 
-                                group_by(x) %>% 
+                                filter(.data$x %in% time_vals) %>% 
+                                group_by(.data$x) %>% 
                                 summarise(
                                     y_hat_avg = mean(.data$yhat), 
                                     y_sd = sd(.data$yhat)
@@ -689,14 +691,14 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     )
                 
                 predvaldf <- nest_pred %>%
-                    tidyr::unnest(predval) 
+                    tidyr::unnest(.data$predval) 
                 
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 
                 data.frame(
-                    patiet_id  = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(time) %>% unlist %>% as.vector,
+                    patiet_id  = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
+                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
                     obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
@@ -711,8 +713,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # generate rmse, cov, and prec 
             predresdf <- predresdf %>%
                 mutate(
-                    cov = ifelse(.data$obsvals > lower95 & .data$obsvals < upper95, 1, 0),
-                    prec = upper95 - lower95,
+                    cov = ifelse(.data$obsvals > .data$lower95 & .data$obsvals < .data$upper95, 1, 0),
+                    prec = .data$upper95 - .data$lower95,
                     nearest_n = opt_n
                 )
             

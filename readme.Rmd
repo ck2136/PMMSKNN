@@ -6,6 +6,11 @@ output: rmarkdown::github_document
 knitr::opts_chunk$set(collapse=TRUE, comment="##", fig.retina=2, fig.path = "README_figs/README-")
 ```
 
+<!-- badges: start -->
+  [![Travis build status](https://travis-ci.com/ck2136/PMMSKNN.svg?branch=master)](https://travis-ci.com/ck2136/PMMSKNN)
+<!-- badges: end -->
+
+
 # Predictive Mean Matched Sequential K-Nearest Neighbor 
 
 ## Introduction
@@ -138,18 +143,41 @@ res <- loocv_function(
 
 
 ```{r plotloocv, warning=FALSE, message=FALSE}
-plot_cal(plotobj = res, test_proc = test_proc, 
-         obs_dist = "median")
+plot_cal(plotobj = res, 
+         test_proc = test_proc, 
+         obs_dist = "median",
+         outcome = "weight",
+         filt=FALSE,
+         pred_sum="mean",
+         #plot_by=seq(10,150,5),
+         loocv=TRUE,
+         filter_exp = NULL,
+         plot_cal_zscore=FALSE,
+         wtotplot=FALSE,
+         plotvals=FALSE,
+         iqrfull=NULL,
+         bs=FALSE
+         )
 ```
 
 ### Plots: `plot_cal()` also returns plot of the calibration 
 
 ```{r plotcal, warning=FALSE, message=FALSE}
 plot_cal(plotobj = res, 
-         test_proc = test_proc,
+         test_proc = test_proc, 
+         obs_dist = "median",
          outcome = "weight",
-         obs_dist = "median", loocv = FALSE)  
-      ## Note: specify loocv = FALSE 
+         filt=FALSE,
+         pred_sum="mean",
+         #plot_by=seq(10,150,5),
+         loocv=FALSE,
+         filter_exp = NULL,
+         plot_cal_zscore=FALSE,
+         wtotplot=FALSE,
+         plotvals=FALSE,
+         iqrfull=NULL,
+         bs=FALSE
+         )
 ```
 
 

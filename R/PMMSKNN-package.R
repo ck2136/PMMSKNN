@@ -8,7 +8,7 @@
 #'                        summarise summarise_ arrange arrange_ 
 #'                        rename rename_ bind_cols full_join ntile do 
 #'                        if_else row_number group_by_ slice ungroup
-#'                        tibble mutate_ top_n
+#'                        tibble mutate_ top_n pull
 #'@importFrom data.table  data.table rbindlist 
 #'@importFrom cowplot     plot_grid get_legend
 #'@importFrom DescTools   MedianCI
@@ -27,7 +27,7 @@
 #'@importFrom doParallel  registerDoParallel stopImplicitCluster
 #'@importFrom doSNOW      registerDoSNOW 
 #'@importFrom parallel    makeCluster detectCores 
-#'@importFrom future      plan multiprocess
+#'@importFrom future      plan multiprocess  sequential
 #'@importFrom future.apply      future_lapply
 #'@importFrom foreach     foreach %dopar%
 #'@importFrom stats       as.formula complete.cases cor formula

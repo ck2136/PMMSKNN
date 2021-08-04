@@ -160,6 +160,12 @@ res_ps1 <- loocv_function(
 res_ps1$loocv_score
 res_ps1$test_score
 
+test_that("LOOCV performance list created" , {
+             expect_that(names(res_ps1), equals(c("pred_res","test_score","loocv_res","loocv_score","nearest_n")))
+             expect_false(is.null(res_ps1$nearest_n))
+})
+
+
 # LOOCV PMM: Parallel {{{ -----------------
 res_ps2 <- loocv_function(
   
@@ -279,7 +285,6 @@ sknnlooObj2$nearest_n
 plot_NthP_plm(
               test_proc=test_proc,
               outcome = "weight",
-              time_var = "Time",
               nvec=c(0.1,0.9),
               mtype = 1,
               n=10,
@@ -292,6 +297,41 @@ plot_NthP_plm(
               chartname="Reference Growth Chart",
               name="Chick"
               )
+
+## }}}
+
+## Plot individual trajectory {{{
+
+plotobj <- plot_ind(
+  test_proc=test_proc,
+  outcome = "weight",
+  idnum = 1,
+  mtype = 1,
+  n=10,
+  dist=NO,
+  df_m=2,
+  df_s=1,
+  df_n=1,
+  df_t=1,
+  xvalues=0:21,
+  xlab="Time", ylab="Chick Weight (grams)"
+)
+# Plot 
+plotobj$plot
+# Plot Data Frame
+plotobj$plotdf
+## }}}
+
+
+## Extract patients based on id {{{
+## in the below function, the parameter 'i' is the idnumber 
+matches <- matchIdExtractTest(test_proc = test_proc, 
+                              mtype = 1, 
+                              i = 1,
+                              n = 10) 
+
+matchmodel <- test_proc$train_post %>% 
+  filter(.data$patient_id %in% matches)
 
 ## }}}
 

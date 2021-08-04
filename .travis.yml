@@ -1,0 +1,8 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: R
+cache: packages
+
+install:
+  - Rscript -e "install.packages(c('devtools','reshape2','broom','gamlss','gamlss.dist','ggplot2','cowplot','DescTools','merTools','data.table','doParallel','doSNOW','future','future.apply','foreach'))"
+  - Rscript -e "devtools::install_github('stefvanbuuren/brokenstick')"

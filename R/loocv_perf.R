@@ -42,13 +42,14 @@ loocv_perf <- function(loocv_res,
                )
             }
             resdf <- rbindlist(x$pred_train)
+            prec <- c75 <- c25 <- cov <- NULL
             resdf[, cov := ifelse(get(outcome) >= c25 & get(outcome) <= c75, 1, 0)]
             resdf[, prec := c75 - c25]
             
             # get rmse
             # sqrt(sum((rbindlist(x$pred_train)[,outcome] - rbindlist(x$pred_train)[,"c50"])^2))
             data.frame(
-                rmse = sqrt(sum((resdf[,..outcome] - resdf[,"c50"])^2)/nrow(resdf)),
+                rmse = sqrt(sum((resdf[,outcome, with = FALSE] - resdf[,"c50"])^2)/nrow(resdf)),
                 cov = mean(resdf$cov),
                 prec = mean(resdf$prec)
             )
@@ -74,7 +75,7 @@ loocv_perf <- function(loocv_res,
             mutate(
                 covdiff = round(abs(.data$cov - opt_cov), perf_round_by),
                 rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
-                covsc = if((max(covdiff, na.rm=TRUE) - min(covdiff, na.rm=TRUE)) == 0) { return(0)} else { (covdiff - min(covdiff, na.rm =TRUE)) / (max(covdiff, na.rm=TRUE) - min(covdiff, na.rm=TRUE))},
+                covsc = if((max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE)) == 0) { return(0)} else { (.data$covdiff - min(.data$covdiff, na.rm =TRUE)) / (max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE))},
                 presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE)),
             ) %>%
             bind_cols(
@@ -93,11 +94,12 @@ loocv_perf <- function(loocv_res,
        } else {
           resdf <- rbindlist(loocv_res$pred_test)
        }
+        prec <- c75 <- c25 <- cov <- NULL
         resdf[, cov := ifelse(get(outcome) >= c25 & get(outcome) <= c75, 1, 0)]
         resdf[, prec := c75 - c25]
             
         perfdf <- data.frame(
-            rmse = sqrt(sum((resdf[,..outcome] - resdf[,"c50"])^2)/nrow(resdf)),
+            rmse = sqrt(sum((resdf[,outcome, with = FALSE] - resdf[,"c50"])^2)/nrow(resdf)),
             cov = mean(resdf$cov),
             prec = mean(resdf$prec)
         )
