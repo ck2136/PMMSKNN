@@ -10,7 +10,7 @@
 #' @param mint          Numeric value indicating minimum time for predicting values
 #' @param maxt          Numeric value indicating maximum time for predicting values
 #' @param perfout       List of performance measures to be filled. 
-#' @param loocv - Logical (\code{TRUE/FALSE}) that specifies whether 
+#' @param loocv Logical (\code{TRUE/FALSE}) that specifies whether 
 #' or not to perform leave-one-out cross validation or just output 
 #' predictions without hyperparameter tuning. If \code{loocv=FALSE}, then
 #' users need to specify the value of the nearest_n 
@@ -116,7 +116,7 @@ plmout <- function(
 
 
         # Crazy Matches 
-        if(any(iqr$C50 > thresh_val)){
+        if(any(iqr$`50` > thresh_val)){
             perfout$crazymatch[[i]] <- matchmodel
         } else {
             perfout$crazymatch[[i]] <- NA
@@ -127,7 +127,7 @@ plmout <- function(
         #-- Store the Test Predicted Values (i.e.C50)
         perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
+                      data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) ,
                       by = "time"
             )
 
@@ -226,7 +226,7 @@ plmout <- function(
         #-- Train Predicted Values
         perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25=iqr$C25, c75=iqr$C75) ,
+                      data.frame(time=iqr[,1],c50 = iqr$`50`, c25=iqr$`25`, c75=iqr$`75`) ,
                       by = "time"
             )
 

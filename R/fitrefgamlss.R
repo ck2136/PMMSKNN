@@ -4,23 +4,23 @@
 #' in order to be used as a reference distribution for the following
 #' matched individuals' GAMLSS fits
 #' 
-#' @param dist_fam  - gamlss distribution specification using the \code{\link{gamlss.dist}} package. The specification for a normal distribution would be \code{gamlss.dist::NO}. For other distributions see \code{\link{gamlss.dist}}.
-#' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
-#' @param test_post - Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
-#' @param outcome    - Name of the outcomes variable (type=string)
-#' @param time_elapsed - Name of the time variable. (type=string)
-#' @param time_window - vector of numbers for `centiles.pred()`, `xvalues` argument. For example, specify such as \code{c(10:30)}
+#' @param dist_fam  Gamlss distribution specification using the \code{\link{gamlss.dist}} package. The specification for a normal distribution would be \code{gamlss.dist::NO}. For other distributions see \code{\link{gamlss.dist}}.
+#' @param train_post Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param test_post Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
+#' @param outcome    Name of the outcomes variable (type=string)
+#' @param time_elapsed Name of the time variable. (type=string)
+#' @param time_window Vector of numbers for `centiles.pred()`, `xvalues` argument. For example, specify such as \code{c(10:30)}
 #' @param cs Logical that specifies whether to use cubic spline. 
 #'  The default \code{cs = FALSE} uses ...
-#' @param dfspec - Logical (\code{TRUE/FALSE}) that specifies whether to 
+#' @param dfspec Logical (\code{TRUE/FALSE}) that specifies whether to 
 #' specify degrees of freedoms for the location, scale, and shape parameters
 #' for the distribution specified with \code{dist_fam}.
 #' Default value is \code{NULL}.
-#' @param d_f_m - Numeric value that specifies the degrees of freedom for the cubic spline specified for the mean parameter of the distribution specified according to \code{dist_fam}
-#' @param ptr_m - Numeric value that specifies the power transformation of time variable. Default value is 1.
-#' @param d_f_s - Numeric value that specifies the degrees of freedom for the cubic spline specified for the scale parameter of the distribution specified according to \code{dist_fam}
-#' @param d_f_n - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\nu} parameter, of the distribution specified according to \code{dist_fam}
-#' @param d_f_t - Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\tau} parameter, of the distribution specified according to \code{dist_fam}
+#' @param d_f_m  Numeric value that specifies the degrees of freedom for the cubic spline specified for the mean parameter of the distribution specified according to \code{dist_fam}
+#' @param ptr_m  Numeric value that specifies the power transformation of time variable. Default value is 1.
+#' @param d_f_s  Numeric value that specifies the degrees of freedom for the cubic spline specified for the scale parameter of the distribution specified according to \code{dist_fam}
+#' @param d_f_n  Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\nu} parameter, of the distribution specified according to \code{dist_fam}
+#' @param d_f_t  Numeric value that specifies the degrees of freedom for the cubic spline specified for the shape parameter, specifically the \eqn{\tau} parameter, of the distribution specified according to \code{dist_fam}
 #' @param \dots Passed down to \code{gamlss}
 #' 
 #' @return Returns a gamlss object as described in \code{\link{gamlss}}
@@ -154,7 +154,8 @@ fitrefgamlss <- function(
                                  data = na.omit(train_post),
                                  cent=c(25,75), plot=FALSE)
     }
-    iqrfull$iqr<-iqrfull$C75-iqrfull$C25
+    # iqrfull$iqr<-iqrfull$C75-iqrfull$C25
+    iqrfull$iqr<-iqrfull[[3]]-iqrfull[[2]]
 
     # - - - - - - - - - - - - - - - - - - - - - # 
     # Return the reference (ref) fit and iqr

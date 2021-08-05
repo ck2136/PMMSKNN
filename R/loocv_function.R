@@ -104,19 +104,21 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
     # FIT REFERENCE GAMLSS MODEL
     # - - - - - - - - - - - - - - - - - - - - - # 
 
-    ref <- fitrefgamlss(
-                        dist_fam = dist_fam, # for gamlss distribution
-                        train_post=train_post, 
-                        test_post=test_post, 
-                        outcome=outcome, time_elapsed=time_elapsed, 
-                        time_window=time_window,
-                        cs=cs,
-                        dfspec=dfspec,
-                        d_f_m=d_f_m, ptr_m=ptr_m,
-                        d_f_s=d_f_s,
-                        d_f_n=d_f_n,
-                        d_f_t=d_f_t,
-                        ...) 
+    ref <- invisible(
+        fitrefgamlss(
+            dist_fam = dist_fam, # for gamlss distribution
+            train_post=train_post, 
+            test_post=test_post, 
+            outcome=outcome, time_elapsed=time_elapsed, 
+            time_window=time_window,
+            cs=cs,
+            dfspec=dfspec,
+            d_f_m=d_f_m, ptr_m=ptr_m,
+            d_f_s=d_f_s,
+            d_f_n=d_f_n,
+            d_f_t=d_f_t,
+            ...) 
+    )
 
     # - - - - - - - - - - - - - - - - - - - - - # 
     # NEAREST NEIGHBOR MATCHING
@@ -204,7 +206,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                     opt_n <- perfdf %>%
                         arrange(perfdf$totscore)  %>%
                         head(1) %>%
-                        .[,"nearest_n"] 
+                        .[,"nearest_n"] %>% .[[1]]
                     
                     
                 } else if(perfrank=="cov"){
@@ -222,7 +224,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                     opt_n <- perfdf %>%
                         arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"] 
+                        .[,"nearest_n"]  %>% .[[1]]
                     
                     
                 } else if(perfrank=="bias"){
@@ -238,13 +240,14 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                     opt_n <- perfdf %>%
                         arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"] 
+                        .[,"nearest_n"]  %>% .[[1]]
                     
                 }
                 
-                if(length(opt_n) > 1){
-                    opt_n <- opt_n[1] # select first one
-                } 
+                # select first n if they are all the same
+                # if(length(opt_n) > 1){
+                #     opt_n <- opt_n[1] # select first one
+                # } 
                 
                 opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                 
