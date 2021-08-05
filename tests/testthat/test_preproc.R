@@ -8,65 +8,65 @@
 # }}}
 context("Preprocessing Data")
 
-# Load data and wrangel {{{
-data("ChickWeight")
-
-## Wrangle Steup {{{
-# load only the TUG dataset
-full  <- ChickWeight
-
-# need to exclude the above patients
-# exclude also time > 200
-full <- full %>%
-    #filter(!patient_id %in% exclude$patient_id & time < 200)
-    filter(Time < 200) 
-
-set.seed(1234)
-full %<>%
-  mutate(
-    Chick = as.numeric(as.character(Chick)),
-    train_test = ifelse(Chick %in% c(1,2,20, 30, 40), 2, 1),
-    Diet = as.numeric(as.character(Diet))
-  ) %>% 
-  # Need to have distinct patient id's for the full data
-  distinct(Chick, Time, .keep_all=TRUE)
+test_that(
+  "preproc() works using ChickWeight Data",
+  {
+    data("ChickWeight") 
     
-
-## }}}
-
-# }}}
-
-# baselinemk() {{{
-set.seed(1234)
-full <- PMMSKNN:::baselinemk(full, "Chick", "Time")
-test_that("baseline column created" , {
-             expect_true(any(grepl("baseline", colnames(full))))
-             expect_identical(max(full$baseline),1)
-             expect_lte(min(full$baseline),0)
-})
-# }}}
-
-# preproc() {{{
-test_proc <- preproc(
-                dff=full,                 # specify full dataset name
-                split_var = 'train_test', # train test split variable
-                trainval = 1,             # training set value
-                testval = 2,              # test set value
-                knots_exp = c(0, 4, 8, 16), # Specify broken stick knots
-                out_time = 16,            # specify which timepoint to use 
-                outcome = "weight",          # specify outcome variable name
-                time_var = "Time",        # specify time variable name
-                pat_id = "Chick",    # specify patient id variable name
-                varlist = c("Diet") # specify list of covariates for pmm
-                # filter_exp = "time > 3"   # Filter observations that will be included
+    set.seed(1234)
+    
+    ## Select 50% as training set
+    cid <- ChickWeight %>% 
+      as.data.frame %>%
+      distinct(Chick) %>%
+      pull() %>%
+      sample(.,size = {.[] %>% length}*0.5)
+    
+    ## Create new data to input into loocv_function*()
+    full <- ChickWeight %>%
+      mutate(
+        train_test = ifelse(Chick %in% cid, 1, 2),
+      ) %>%
+      ## Specify baseline weight
+      left_join(
+        ChickWeight %>%
+          group_by(Chick) %>%
+          filter(row_number() == 1) %>%
+          dplyr::select(weight, Chick) %>%
+          rename(b_weight = weight)
+      ) %>%
+      # Set Time == 0 observations as baseline = 1; 0 otherwise
+      mutate(
+        baseline = ifelse(Time == 0, 1, 0),
+        Chick = as.numeric(as.character(Chick))
+      ) 
+    
+    test_proc <- preproc(
+      dff=full,                 # specify full dataset name
+      split_var = 'train_test', # train test split variable
+      trainval = 1,             # training set value
+      testval = 2,              # test set value
+      knots_exp = c(0, 7, 14, 21), # Specify broken stick knots
+      out_time = 21,            # specify which timepoint to use 
+      outcome = "weight",          # specify outcome variable name
+      time_var = "Time",        # specify time variable name
+      pat_id = "Chick",    # specify patient id variable name
+      baseline_var = "baseline",
+      m = 20,
+      varlist = c("b_weight") # specify list of covariates for pmm
+    )
+    
+    test_proc %>%
+      expect_type("list") %>%
+      expect_length(8) 
+      
+    expect_that(test_proc, is.list) 
+    expect_is(test_proc$reg_obj, "lm")
+    expect_true(any(grepl("test_post", names(test_proc))))
+    expect_true(any(grepl("test_o", names(test_proc))))
+    expect_true(any(grepl("train_o", names(test_proc))))
+    expect_true(any(grepl("train_post", names(test_proc))))
+  }
 )
 
-test_that("preproc() contains appropriate data" , {
-             expect_that(test_proc, is.list)
-             expect_is(test_proc$reg_obj, "lm")
-             expect_true(any(grepl("test_post", names(test_proc))))
-             expect_true(any(grepl("test_o", names(test_proc))))
-             expect_true(any(grepl("train_o", names(test_proc))))
-             expect_true(any(grepl("train_post", names(test_proc))))
-})
 # }}}
