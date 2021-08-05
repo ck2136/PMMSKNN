@@ -14,16 +14,7 @@
 #' The number of nearest_n should be within the range of number of individuals
 #' That are in the data. For example if there are 500 individuals in the data,
 #' one could do \code{nearest_n <- 10:100}
-#' @param train_post  Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
-#' @param ord_data Data frame. Specifically, training data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
-#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
-#' then \code{x$train_o} would be used for this parameter.
-#' @param test_post Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
-#' @param test_o  Data frame. Specifically, testing data with patient_id ordered based on fitted distal outcome value using predicted mean matching.
-#' Generated using \code{\link{preproc}}. Example, \code{x <- preproc()}, 
-#' then \code{x$test_o} would be used for this parameter.
-#' @param bs_obj        Brokenstick object outputted from \code{\link{preproc}}
-#' @param outcome     Name of the outcomes variable (type=string)
+#' @param preproc  Preprocessed object as an ouput from \code{preproc()} function. The object contains preprocessed training and testing data.frame formatted as a list component that was generated from the \code{\link{preproc}} function
 #' @param plot  Logical (\code{TRUE/FALSE}) that specifies whether to output individual precision plots
 #' @param matchprobweight  Logical (\code{TRUE/FALSE}) that specifies whether to utilize probability sampling
 #'  when doing the mean matching. If TRUE, matches nearest n weighted on differnce in 
@@ -58,12 +49,8 @@
 # - - - - - - - - - - - - - - - - - - - -#
 # now using that we need to come up with the right number of matches that will give us the best bias and coverage.
 loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play with 
-                           train_post, 
-                           ord_data, 
-                           test_post, 
-                           test_o,  # datasets
-                           bs_obj, # broken stick object
-                           outcome, plot = FALSE,
+                              preproc = preproc,
+                           plot = FALSE,
                            matchprobweight=FALSE,
                            time_window=NULL,
                            interval=NULL,
@@ -94,15 +81,15 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
     # PMMSKNN Prediction Code -------------------------------------------------
     message("Initiating PMMSKNN Prediction Process")
     traintestmatchdf <- matchTestDataGen(
-                                         test_o=test_o, 
-                                         ord_data=ord_data, 
+                                         test_o=preproc$test_o, 
+                                         ord_data=preproc$train_o, 
                                          mtype=mtype
     )
     # Specify if we'll be skipping on predicting some patients in the training set
     if(is.null(interval)){
-        patlistint <- seq(1,length(ord_data$id))
+        patlistint <- seq(1,length(preproc$train_o$id))
     } else {
-        patlistint <- seq(1,length(ord_data$id), by=interval)
+        patlistint <- seq(1,length(preproc$train_o$id), by=interval)
     }
     
     if(!is.null(parallel)) {
@@ -126,26 +113,50 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         predreslist <- future_lapply(patlistint , function(nthind) {
                             
                             # identify current training id 
-                            curid <- ord_data$id[nthind]
+                            curid <- preproc$train_o$id[nthind]
                             
                             # identify matches for the curid
-                            matches <- matchIdExtract(ord_data, mtype, loocv, n, m, nthind) 
+                            matches <- matchIdExtract(preproc$train_o, mtype, loocv, n, m, nthind) 
                             # extract the time  component of the curid participants
-                            time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
+                            time_curid <- preproc$train_post[preproc$train_post[[preproc$varname[3]]] %in% curid, preproc$varname[2]] %>% unlist %>% as.vector
+                            
+                            # extrat df of matched patients
+                            matchpostdf = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% matches) 
+                            
+                            tempdf1 <- expand.grid(patient_id = matchpostdf %>% distinct(!!sym(preproc$varname[3])) %>% unlist , 
+                                        time = time_curid) 
+                            
+                            colnames(tempdf1)[1] = preproc$varname[3]
+                            colnames(tempdf1)[2] = preproc$varname[2]
+                            
+                            tempdf1 <- tempdf1 %>%arrange(!!sym(preproc$varname[3]))
+                            
+                            matchpostdf <- matchpostdf %>%
+                                bind_rows(
+                                    tempdf1 %>% 
+                                        left_join(
+                                            matchpostdf %>%
+                                                dplyr::distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+                                                dplyr::select(-!!sym(preproc$varname[2]),-!!sym(preproc$varname[1])),
+                                            by = preproc$varname[3]
+                                        )
+                                )
+                            
                             
                             # using the match ids get predicted values of matches
-                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
-                                summarise(
-                                    y_hat_avg = mean(.data$yhat), 
-                                    y_sd = sd(.data$yhat)
+                            predvaldf <- predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>% dplyr::filter(!!sym(preproc$varname[2]) %in% time_curid) %>% dplyr::group_by(!!sym(preproc$varname[2])) %>% 
+                            # predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
+                                dplyr::summarise(
+                                    y_hat_avg = mean(.data$.pred), 
+                                    y_sd = sd(.data$.pred)
                                 ) 
                             
                             # get obs value for curid
                             # calculate confidence intervals using t dist
                             data.frame(
-                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                                obsvals =train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
+                                patient_id = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                                time = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                                obsvals =preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
                                 upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
@@ -176,7 +187,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     }
                 )
                 
-                message("Finished LOOCV: compiling results for ", max(nearest_n) ," matches")
+                message("Generating training set performance results")
                 
                 perfdf = data.table::rbindlist(
                     lapply(loocv_test_result, function(x) {
@@ -209,31 +220,35 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"]
+                            .[,"nearest_n"] %>%
+                        .[[1]]
                     } else {
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"]
+                            .[,"nearest_n"] %>%
+                        .[[1]]
                     }
                     
                 } else if(perfrank=="cov"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(.data$cov - .data$opt_cov), perf_round_by)
+                            covdiff = round(abs(.data$cov - opt_cov), perf_round_by)
                         ) %>%
                         arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"]
+                        .[,"nearest_n"] %>%
+                        .[[1]]
                 } else if(perfrank=="bias"){
                     opt_n <- perfdf %>%
                         mutate(
-                            covdiff = round(abs(.data$cov - .data$opt_cov), perf_round_by),
+                            covdiff = round(abs(.data$cov - opt_cov), perf_round_by),
                             rmse = round(.data$rmse, perf_round_by)
                         ) %>%
                         arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"]
+                        .[,"nearest_n"] %>%
+                        .[[1]]
                 }
                 
                 
@@ -250,10 +265,10 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # Run the Test Prediction Now ----------------
             
             message("Compiling results for test data")
-            predict_test_result <- future_lapply(1:nrow(ord_data), function(nthind) {
+            predict_test_result <- future_lapply(1:nrow(preproc$train_o), function(nthind) {
                 
                 # identify current training id 
-                curid <- ord_data$id[nthind]
+                curid <- preproc$train_o$id[nthind]
                 
                 # extract the multiple potential test ids
                 matched_test_ids <- traintestmatchdf %>% 
@@ -262,24 +277,54 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, loocv = FALSE, opt_n, m, nthind) 
+                matches <- matchIdExtract(preproc$train_o, mtype, loocv = FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
-                nest_pred <- test_post %>%
-                    filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-.data$patient_id) %>%
+                nest_pred <- preproc$test_post %>%
+                    filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
+                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
                     mutate(
                         times = lapply(.data$data, function(data) {
                             data %>% 
                                 dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
                         predval = lapply(.data$times, function(times) {
-                            predict(bs_obj, x=times, ids=matches) %>% 
-                                filter(.data$x %in% times) %>% 
-                                group_by(.data$x) %>% 
+                            
+                                # create prediction data.frame
+                                # extract matched patients
+                                matchpostdf = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% matches) 
+                                
+                                tempdf1 <- expand.grid(patient_id = matchpostdf %>% distinct(!!sym(preproc$varname[3])) %>% unlist , 
+                                                       time = times) 
+                                
+                                colnames(tempdf1)[1] = preproc$varname[3]
+                                colnames(tempdf1)[2] = preproc$varname[2]
+                                
+                                tempdf1 <- tempdf1 %>%arrange(!!sym(preproc$varname[3]))
+                                
+                                matchpostdf <- matchpostdf %>%
+                                    bind_rows(
+                                        tempdf1 %>% 
+                                            left_join(
+                                                matchpostdf %>%
+                                                    dplyr::distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+                                                    dplyr::select(-!!sym(preproc$varname[2]),-!!sym(preproc$varname[1])),
+                                                by = preproc$varname[3]
+                                            )
+                                    )
+                                
+                                # using the match ids get predicted values of matches
+                            
+                            # predict(preproc$bs_obj, x=times, ids=matches) %>% 
+                            # predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>%
+                            #     filter(.data$x %in% times) %>% 
+                            #     group_by(.data$x) %>% 
+                                predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>% 
+                                    filter(!!sym(preproc$varname[2]) %in% times) %>%
+                                    group_by(!!sym(preproc$varname[2])) %>% 
                                 summarise(
-                                    y_hat_avg = mean(.data$yhat), 
-                                    y_sd = sd(.data$yhat)
+                                    y_hat_avg = mean(.data$.pred), 
+                                    y_sd = sd(.data$.pred)
                                 ) 
                         })
                     )
@@ -290,9 +335,9 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                    obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
+                    patient_id = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                    time = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                    obsvals = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
                     upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
@@ -351,33 +396,58 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             }
             
             message("Compiling results for test data")
-            predict_test_result <- lapply(1:nrow(ord_data), function(nthind) {
+            predict_test_result <- lapply(1:nrow(preproc$train_o), function(nthind) {
                 
                 # identify current training id 
-                curid <- ord_data$id[nthind]
+                curid <- preproc$train_o$id[nthind]
                 
                 # extract the multiple potential test ids
                 matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, loocv=FALSE, opt_n, m, nthind) 
+                matches <- matchIdExtract(preproc$train_o, mtype, loocv=FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
-                nest_pred <- test_post %>%
-                    filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-.data$patient_id) %>%
+                nest_pred <- preproc$test_post %>%
+                    filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
+                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
                     mutate(
                         time_vals = lapply(.data$data, function(data) {
                             data %>% 
                                 dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
                         predval = lapply(.data$time_vals, function(time_vals) {
-                            predict(bs_obj, x=time_vals, ids=matches) %>% 
-                                filter(.data$x %in% time_vals) %>% 
-                                group_by(.data$x) %>% 
+                            
+                                # create prediction data.frame
+                                # extract matched patients
+                                matchpostdf = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% matches) 
+                                
+                                tempdf1 <- expand.grid(patient_id = matchpostdf %>% distinct(!!sym(preproc$varname[3])) %>% unlist , 
+                                                       time = times) 
+                                
+                                colnames(tempdf1)[1] = preproc$varname[3]
+                                colnames(tempdf1)[2] = preproc$varname[2]
+                                
+                                tempdf1 <- tempdf1 %>%arrange(!!sym(preproc$varname[3]))
+                                
+                                matchpostdf <- matchpostdf %>%
+                                    bind_rows(
+                                        tempdf1 %>% 
+                                            left_join(
+                                                matchpostdf %>%
+                                                    dplyr::distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+                                                    dplyr::select(-!!sym(preproc$varname[2]),-!!sym(preproc$varname[1])),
+                                                by = preproc$varname[3]
+                                            )
+                                    )
+                                
+                                # using the match ids get predicted values of matches
+                                predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>% 
+                                    filter(!!sym(preproc$varname[2]) %in% times) %>%
+                                    group_by(!!sym(preproc$varname[2])) %>% 
                                 summarise(
-                                    y_hat_avg = mean(.data$yhat), 
-                                    y_sd = sd(.data$yhat)
+                                    y_hat_avg = mean(.data$.pred), 
+                                    y_sd = sd(.data$.pred)
                                 ) 
                         })
                     )
@@ -388,9 +458,9 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # calculate confidence intervals using t dist
                 # get obs value for curid
                 data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                    obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
+                    patient_id = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                    time = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                    obsvals = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
                     upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
@@ -430,7 +500,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
     } else {
         # Non Parallel -----------------------
         message("Initiating Non Parallel Process")
-        # If Lenght of the nearest_n checking is more than 1 then go ahead and do the loocv probably
+        # If Length of the nearest_n checking is more than 1 then go ahead and do the loocv probably
         if(length(nearest_n) != 1){
             
             # LOOCV on Training --------------------------
@@ -446,27 +516,54 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         predreslist <- lapply(patlistint , function(nthind) {
                             
                             # identify current training id 
-                            curid <- ord_data$id[nthind]
+                            curid <- preproc$train_o$id[nthind]
                             
                             # identify matches for the curid
-                            matches <- matchIdExtract(ord_data, mtype, loocv, n, m, nthind) 
+                            matches <- matchIdExtract(preproc$train_o, mtype, loocv, n, m, nthind) 
                             # extract the time  component of the curid participants
-                            time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
+                            time_curid <- preproc$train_post[preproc$train_post[[preproc$varname[3]]] %in% curid, "time"] %>% unlist %>% as.vector
+                            
+                            # create prediction data.frame
+                            # extrat df of matched patients
+                            matchpostdf = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% matches) 
+                            
+                            tempdf1 <- expand.grid(patient_id = matchpostdf %>% distinct(!!sym(preproc$varname[3])) %>% unlist , 
+                                        time = time_curid) 
+                            
+                            colnames(tempdf1)[1] = preproc$varname[3]
+                            colnames(tempdf1)[2] = preproc$varname[2]
+                            
+                            tempdf1 <- tempdf1 %>%arrange(!!sym(preproc$varname[3]))
+                            
+                            matchpostdf <- matchpostdf %>%
+                                bind_rows(
+                                    tempdf1 %>% 
+                                        left_join(
+                                            matchpostdf %>%
+                                                dplyr::distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+                                                dplyr::select(-!!sym(preproc$varname[2]),-!!sym(preproc$varname[1])),
+                                            by = preproc$varname[3]
+                                        )
+                                )
                             
                             # using the match ids get predicted values of matches
-                            predvaldf <- predict(bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
+                            # predvaldf <- predict(preproc$bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
+                            predvaldf <- predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>% 
+                                filter(!!sym(preproc$varname[2]) %in% time_curid) %>%
+                                group_by(!!sym(preproc$varname[2])) %>% 
+                                
                                 summarise(
-                                    y_hat_avg = mean(.data$yhat), 
-                                    y_sd = sd(.data$yhat)
+                                    y_hat_avg = mean(.data$.pred), 
+                                    y_sd = sd(.data$.pred)
                                 ) 
                             
                             # get obs value for curid
                             # calculate confidence intervals using t dist
                             
                             data.frame(
-                                patient_id = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                                time = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                                obsvals = train_post %>% filter(.data$patient_id %in% curid) %>% dplyr::select_(outcome) %>% unlist %>% as.vector,
+                                patient_id = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                                time = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                                obsvals = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% curid) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
                                 predvals = predvaldf$y_hat_avg,
                                 lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
                                 upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
@@ -497,7 +594,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     }
                 )
                 
-                message("Finished compiling results for ", max(nearest_n) ," matches")
+                message("Generating training set performance results")
                 
                 perfdf = data.table::rbindlist(
                     lapply(loocv_test_result, function(x) {
@@ -531,12 +628,14 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"]
+                            .[,"nearest_n"] %>%
+                        .[[1]]
                     } else {
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"]
+                            .[,"nearest_n"] %>%
+                        .[[1]]
                     }
                     
                 } else if(perfrank=="cov"){
@@ -546,7 +645,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         ) %>%
                         arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"]
+                        .[,"nearest_n"] %>%
+                        .[[1]]
                 } else {
                     # assume bias as default
                     opt_n <- perfdf %>%
@@ -555,7 +655,8 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                         ) %>%
                         arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                         head(1) %>%
-                        .[,"nearest_n"]
+                        .[,"nearest_n"] %>%
+                        .[[1]]
                 }
             } else {
                 # case when loocv is not going to run....
@@ -570,56 +671,93 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             # Run the Test Prediction Now ----------------
             
             message("Compiling results for test data")
-            predict_test_result <- lapply(1:nrow(ord_data), function(nthind) {
+            predict_test_result <- lapply(1:nrow(preproc$train_o), function(nthind) {
+                
                 
                 # identify current training id 
-                curid <- ord_data$id[nthind]
+                curid <- preproc$train_o$id[nthind]
                 
-                # extract the multiple potential test ids
-                matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
-                
-                # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, loocv=FALSE, opt_n, m, nthind) 
-                
-                # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
-                nest_pred <- test_post %>%
-                    filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-.data$patient_id) %>%
-                    mutate(
-                        times = lapply(.data$data, function(data) {
-                            data %>% 
-                                dplyr::select(.data$time) %>% 
-                                unlist %>% as.vector}),
-                        predval = lapply(.data$times, function(times) {
-                            predict(bs_obj, x=times, ids=matches) %>% 
-                                filter(.data$x %in% times) %>% 
-                                group_by(.data$x) %>% 
-                                summarise(
-                                    y_hat_avg = mean(.data$yhat), 
-                                    y_sd = sd(.data$yhat)
-                                ) 
-                        })
+                # Check that trainid exists in the ordered traintestmatchdf, if not then don't do nay computation
+                if(any(traintestmatchdf$train_id %in% curid)){
+                    
+                    # extract the multiple potential test ids
+                    matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
+                    # identify training matches for the curid based on opt_n chosen above
+                    matches <- matchIdExtract(preproc$train_o, mtype, loocv=FALSE, opt_n, m, nthind) 
+                    
+                    # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
+                    nest_pred <- preproc$test_post %>%
+                        filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
+                        tidyr::nest(-!!sym(preproc$varname[3])) %>%
+                        mutate(
+                            times = lapply(.data$data, function(data) {
+                                data %>% 
+                                    dplyr::select(!!sym(preproc$varname[2])) %>% 
+                                    unlist %>% as.vector}),
+                            predval = lapply(.data$times, function(times) {
+                                
+                                # create prediction data.frame
+                                # extract matched patients
+                                matchpostdf = preproc$train_post %>% filter(!!sym(preproc$varname[3]) %in% matches) 
+                                
+                                tempdf1 <- expand.grid(patient_id = matchpostdf %>% distinct(!!sym(preproc$varname[3])) %>% unlist , 
+                                                       time = times) 
+                                
+                                colnames(tempdf1)[1] = preproc$varname[3]
+                                colnames(tempdf1)[2] = preproc$varname[2]
+                                
+                                tempdf1 <- tempdf1 %>%arrange(!!sym(preproc$varname[3]))
+                                
+                                matchpostdf <- matchpostdf %>%
+                                    bind_rows(
+                                        tempdf1 %>% 
+                                            left_join(
+                                                matchpostdf %>%
+                                                    dplyr::distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+                                                    dplyr::select(-!!sym(preproc$varname[2]),-!!sym(preproc$varname[1])),
+                                                by = preproc$varname[3]
+                                            )
+                                    )
+                                
+                                # using the match ids get predicted values of matches
+                                # predvaldf <- predict(preproc$bs_obj, x=time_curid, ids=matches) %>% filter(.data$x %in% time_curid) %>% group_by(.data$x) %>% 
+                                predict(preproc$bs_obj, new_data=matchpostdf, x="knots", strip_data = FALSE) %>% 
+                                    filter(!!sym(preproc$varname[2]) %in% times) %>%
+                                    group_by(!!sym(preproc$varname[2])) %>% 
+                                    
+                                    summarise(
+                                        y_hat_avg = mean(.data$.pred), 
+                                        y_sd = sd(.data$.pred)
+                                    ) 
+                                
+                            })
+                        )
+                    
+                    predvaldf <- nest_pred %>%
+                        tidyr::unnest(.data$predval) 
+                    
+                    # calculate confidence intervals using t dist
+                    # get obs value for curid
+                    
+                    data.frame(
+                        patient_id = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                        time = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                        obsvals = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
+                        predvals = predvaldf$y_hat_avg,
+                        lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
+                        upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
                     )
+                    
+                } else {
+                    
+                }
                 
-                predvaldf <- nest_pred %>%
-                    tidyr::unnest(.data$predval) 
                 
-                # calculate confidence intervals using t dist
-                # get obs value for curid
-                
-                data.frame(
-                    patient_id = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                    obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
-                    predvals = predvaldf$y_hat_avg,
-                    lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
-                    upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))
-                )
                 
             })
             message("Finished compiling results for test data")
             
-            predict_test_result =predict_test_result[lapply(predict_test_result,nrow)>0] ## you can use sapply,rapply
+            # predict_test_result =predict_test_result[lapply(predict_test_result,nrow)>0] ## you can use sapply,rapply
             # rbind all
             predresdf <- data.table::rbindlist(predict_test_result)
             # generate rmse, cov, and prec 
@@ -659,28 +797,28 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
             }
             
             message("Compiling results for test data")
-            predict_test_result <- lapply(1:nrow(ord_data), function(nthind) {
+            predict_test_result <- lapply(1:nrow(preproc$train_o), function(nthind) {
                 
                 # identify current training id 
-                curid <- ord_data$id[nthind]
+                curid <- preproc$train_o$id[nthind]
                 
                 # extract the multiple potential test ids
                 matched_test_ids <- traintestmatchdf %>% filter(train_id == curid) %>% dplyr::select(test_id) %>% unlist %>% as.vector 
                 
                 # identify training matches for the curid based on opt_n chosen above
-                matches <- matchIdExtract(ord_data, mtype, loocv = FALSE, opt_n, m, nthind) 
+                matches <- matchIdExtract(preproc$train_o, mtype, loocv = FALSE, opt_n, m, nthind) 
                 
                 # time_curid <- train_post[train_post$patient_id %in% curid, "time"] %>% unlist %>% as.vector
-                nest_pred <- test_post %>%
-                    filter(.data$patient_id %in% matched_test_ids) %>%
-                    tidyr::nest(-.data$patient_id) %>%
+                nest_pred <- preproc$test_post %>%
+                    filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
+                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
                     mutate(
                         time_vals = lapply(.data$data, function(data) {
                             data %>% 
                                 dplyr::select(.data$time) %>% 
                                 unlist %>% as.vector}),
                         predval = lapply(.data$time_vals, function(time_vals) {
-                            predict(bs_obj, x=time_vals, ids=matches) %>% 
+                            predict(preproc$bs_obj, x=time_vals, ids=matches) %>% 
                                 filter(.data$x %in% time_vals) %>% 
                                 group_by(.data$x) %>% 
                                 summarise(
@@ -697,9 +835,9 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 # get obs value for curid
                 
                 data.frame(
-                    patiet_id  = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$patient_id) %>% unlist %>% as.vector,
-                    time = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(.data$time) %>% unlist %>% as.vector,
-                    obsvals = test_post %>% filter(.data$patient_id %in% matched_test_ids) %>% dplyr::select(outcome) %>% unlist %>% as.vector,
+                    patiet_id  = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[3])) %>% unlist %>% as.vector,
+                    time = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[2])) %>% unlist %>% as.vector,
+                    obsvals = preproc$test_post %>% filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>% dplyr::select(!!sym(preproc$varname[1])) %>% unlist %>% as.vector,
                     predvals = predvaldf$y_hat_avg,
                     lower95 = predvaldf$y_hat_avg - (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches)),
                     upper95 = predvaldf$y_hat_avg + (qt(0.975, length(matches) - 1) * predvaldf$y_sd)/sqrt(length(matches))

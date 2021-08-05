@@ -146,7 +146,7 @@ preproc <- function(dff,
         full_join(
                   dff %>% 
                       filter(.data$baseline ==1) %>%
-                      distinct_(pat_id, .keep_all =TRUE) %>%
+                      distinct(!!sym(pat_id), .keep_all =TRUE) %>%
                       dplyr::select(!!sym(pat_id), !!sym(outcome)) %>% 
                       dplyr::rename("p_outcome" = !!sym(outcome)),
                   by = c(pat_id)
@@ -203,7 +203,7 @@ preproc <- function(dff,
 
     # est1 <- predict(fit, post_train_df, at="knots")
     # est1 <- predict(fit, post_train_df, x="knots", shape="wide")
-    est1 <- predict(fit, post_train_df, x="knots", shape="long") %>% select(!!sym(pat_id), !!sym(time_var), .pred) 
+    est1 <- predict(fit, post_train_df, x="knots", shape="long") %>% dplyr::select(!!sym(pat_id), !!sym(time_var), .pred) 
     
     alldf <- left_join(
                        est1[round(est1[[time_var]], 3) == round(out_time,3),] %>%
@@ -306,7 +306,8 @@ preproc <- function(dff,
                 reg_obj = pmm,
                 test_post = post_test_df, 
                 test_o =  test_ordered,
-                bs_obj = fit
+                bs_obj = fit,
+                varname = c(outcome, time_var, pat_id, baseline_var)
                 )
     )
 }

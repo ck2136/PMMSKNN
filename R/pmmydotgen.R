@@ -72,22 +72,22 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                       # 6. Randomly sample one from 3 smallest
                                       # - - - - - - - - - - - - - - - - - - - - - #
                                       df[-x,] %>%
-                                          dplyr::select_("id", paste0(formula[2])) %>%
+                                          dplyr::select(id, !!sym(paste0(formula[2]))) %>%
                                           mutate("id = as.integer(id)") %>%
                                           filter(.data$id %in% (df[-x,] %>% 
-                                                          dplyr::select("id") %>%
+                                                          dplyr::select(id) %>%
                                                           mutate("id = as.integer(id)") %>%
                                                           bind_cols(
                                                                     # find delta
                                                                     diff = as.vector(abs(Yobs - Ymis[1]))
                                                                     ) %>% 
                                                           arrange(diff) %>%
-                                                          dplyr::select("id") %>%
+                                                          dplyr::select(id) %>%
                                                           # sample 5
                                                           head(n=5) %>% unlist %>% as.vector %>%
                                                           sample(., 1))
                                           ) %>%
-                                          dplyr::select(paste0(formula[2])) %>% unlist %>% as.vector
+                                          dplyr::select(!!sym(paste0(formula[2]))) %>% unlist %>% as.vector
            })
                        })
 
@@ -144,22 +144,22 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                       # 6. Randomly sample one from 3 smallest
                                       # - - - - - - - - - - - - - - - - - - - - - #
                                       df %>%
-                                          dplyr::select_("id", paste0(formula[2])) %>%
+                                          dplyr::select(id, !!sym(paste0(formula[2]))) %>%
                                           mutate("id = as.integer(id)") %>%
                                           filter(.data$id %in% (df %>% 
-                                                          dplyr::select("id") %>%
+                                                          dplyr::select(id) %>%
                                                           mutate("id = as.integer(id)") %>%
                                                           bind_cols(
                                                                     # find delta
                                                                     diff = as.vector(abs(Yobs - Ymis[1]))
                                                                     ) %>% 
                                                           arrange(diff) %>%
-                                                          dplyr::select("id") %>%
+                                                          dplyr::select(id) %>%
                                                           # sample 3
                                                           head(n=5) %>% unlist %>% as.vector %>%
                                                           sample(., 1))
                                           ) %>%
-                                          dplyr::select_(paste0(formula[2])) %>% unlist %>% as.vector
+                                          dplyr::select(!!sym(paste0(formula[2]))) %>% unlist %>% as.vector
            })
                        })
 
