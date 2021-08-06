@@ -146,7 +146,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                 train_post=preproc$train_post, ord_data=preproc$train_o, 
                                                 test_post=preproc$test_post, test_o=preproc$test_o,  # datasets
                                                 traintestmatchdf=traintestmatchdf,
-                                                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
+                                                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], idname=preproc$varname[3],
                                                 plot = plot,matchprobweight=matchprobweight,
                                                 time_window=time_window, interval=interval,
                                                 cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -263,7 +263,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                               train_post=preproc$train_post, ord_data=preproc$train_o, 
                                               test_post=preproc$test_post, test_o=preproc$test_o,  # datasets
                                               traintestmatchdf=traintestmatchdf,
-                                              outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
+                                              outcome=preproc$varname[1], time_elapsed=preproc$varname[2], idname=preproc$varname[3],
                                               plot = plot,matchprobweight=matchprobweight,
                                               time_window=time_window, interval=interval,
                                               cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -300,7 +300,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                 train_post=preproc$train_post, ord_data=preproc$train_o, 
                                                 test_post=preproc$test_post, test_o=preproc$test_o,  # datasets
                                                 traintestmatchdf=traintestmatchdf,
-                                                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
+                                                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], idname=preproc$varname[3],
                                                 plot = plot,matchprobweight=matchprobweight,
                                                 time_window=time_window, interval=interval,
                                                 cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -325,7 +325,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                   train_post=preproc$train_post, ord_data=preproc$train_o, 
                                                   test_post=preproc$test_post, test_o=preproc$test_o,  # datasets
                                                   traintestmatchdf=traintestmatchdf,
-                                                  outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
+                                                  outcome=preproc$varname[1], time_elapsed=preproc$varname[2], idname=preproc$varname[3],
                                                   plot = plot,matchprobweight=matchprobweight,
                                                   time_window=time_window, interval=interval,
                                                   cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -360,7 +360,7 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
                                                   train_post=preproc$train_post, ord_data=preproc$train_o, 
                                                   test_post=preproc$test_post, test_o=preproc$test_o,  # datasets
                                                   traintestmatchdf=traintestmatchdf,
-                                                  outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
+                                                  outcome=preproc$varname[1], time_elapsed=preproc$varname[2], idname=preproc$varname[3],
                                                   plot = plot,matchprobweight=matchprobweight,
                                                   time_window=time_window, interval=interval,
                                                   cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
