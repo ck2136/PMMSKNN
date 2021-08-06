@@ -13,8 +13,9 @@
 #' @param test_post Idem, component \code{test_post}
 #' @param loocv - Logical indicating whether or not to predict for train or test set.
 #' @param time_elapsed  Name of the time variable. (type=string)
+#' @param idname  Name of the Id variable. (type=string)
 #' @param outcome       Name of the outcomes variable
-#' @param i             Patient id indicator.
+#' @param i             Id indicator.
 #' \code{TRUE} will result int zscores from the training set, otherwise zscores from test set
 #' will be generated.
 #' 
@@ -30,7 +31,7 @@ predZsc <- function(
                     test_post=test_post, 
                     loocv=loocv,
                     time_elapsed=time_elapsed,
-                    outcome = outcome,
+                    outcome = outcome, idname=idname,
                     i=i
                  ){
     if(!loocv){
@@ -49,22 +50,22 @@ predZsc <- function(
                                                          xname=time_elapsed,
                                                          data=matchmodel,
                                                          xvalues=test_post %>%
-                                                             filter(.data$patient_id %in% x) %>%
-                                                             dplyr::select(.data$time) %>%
+                                                             dplyr::filter(!!sym(idname)%in% x) %>%
+                                                             dplyr::select(!!sym(time_elapsed)) %>%
                                                              unlist %>% as.vector,
                                                          yval=test_post %>%
-                                                             filter(.data$patient_id %in% x) %>%
-                                                             dplyr::select_(outcome) %>%
+                                                             dplyr::filter(!!sym(idname)%in% x) %>%
+                                                             dplyr::select(!!sym(outcome)) %>%
                                                              unlist %>% as.vector
                                                          ),
                                      test_id = rep(x, length(test_post %>%
-                                                             filter(.data$patient_id %in% x) %>%
-                                                             dplyr::select(.data$time) %>%
+                                                             dplyr::filter(!!sym(idname)%in% x) %>%
+                                                             dplyr::select(!!sym(time_elapsed)) %>%
                                                              unlist %>% as.vector
                                                          )),
                                      time = test_post %>%
-                                         filter(.data$patient_id %in% x) %>%
-                                         dplyr::select(.data$time) %>%
+                                         dplyr::filter(!!sym(idname)%in% x) %>%
+                                         dplyr::select(!!sym(time_elapsed)) %>%
                                          unlist %>% as.vector
                                      ))
         }
@@ -174,11 +175,11 @@ predZsc <- function(
                                zsc = centiles.pred(plmr, type="z-scores",
                                                    xname=time_elapsed,
                                                    data=matchmodel,
-                                                   xvalues=train_post[train_post$patient_id %in% ord_data$id[c(i)],time_elapsed][[1]],
-                                                   yval=train_post[train_post$patient_id %in% ord_data$id[c(i)],outcome][[1]]),
-                               train_id = rep(ord_data$id[c(i)], length(train_post[train_post$patient_id %in% ord_data$id[c(i)],time_elapsed][[1]]))
+                                                   xvalues=train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed][[1]],
+                                                   yval=train_post[train_post[[idname]] %in% ord_data$id[c(i)],outcome][[1]]),
+                               train_id = rep(ord_data$id[c(i)], length(train_post[train_post[[idname]]  %in% ord_data$id[c(i)],time_elapsed][[1]]))
                                ,
-                               time = train_post[train_post$patient_id %in% ord_data$id[c(i)],time_elapsed][[1]]
+                               time = train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed][[1]]
         )
         return(trainzsc)
 

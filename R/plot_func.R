@@ -10,27 +10,27 @@
 #'   observed outcomes at several predicted values. Separate plots
 #'   are made for the training and test data.}
 #'   
-#' @param plotobj   - An object produced by \code{\link{loocv_function}}
-#' @param test_proc - Preprocessed object from \code{\link{preproc}}
-#' @param train     - Logical indicating whether or not to generate
+#' @param plotobj   An object produced by \code{\link{loocv_function}}
+#' @param test_proc Preprocessed object from \code{\link{preproc}}
+#' @param train     Logical indicating whether or not to generate
 #' calibration plot for training set. Default is \code{TRUE}.
-#' @param outcome   - Name of the outcomes variable (type=string)
+#' @param outcome   Name of the outcomes variable (type=string)
 #' @param filt Logical (\code{TRUE/FALSE}) indicating whether or not to
 #' filter the data in terms of performance values. This would be useful
 #' if the user would want to exclude certain values in presenting the data
-#' @param filter_exp - String. For filtering possible values of bias, precision, and coverage values that are out of range. (e.g. \code{"bias < 1.5"})
-#' @param pred_sum  - String value representing the summary used to depict
+#' @param filter_exp  String. For filtering possible values of bias, precision, and coverage values that are out of range. (e.g. \code{"bias < 1.5"})
+#' @param pred_sum  String value representing the summary used to depict
 #' the predictions within the calibration. Usually \code{pred_sum = 'mean'} 
 #' or \code{pred_sum = 'median'} would be a good choice to depict the 
 #' summary statistic of predicted values across the deciles of observed values
-#' @param obs_dist - String value representing the summary used to depict
+#' @param obs_dist String value representing the summary used to depict
 #' the observed value within the calibration plot. 
 #' Usually \code{pred_sum = 'median'} woud be a good choice to depict the 
 #' deciles of observed values in the calibration plot.
-#' @param iqrfull - Dataframe containing gamlss predictions which triggers the plotting of 
+#' @param iqrfull Dataframe containing gamlss predictions which triggers the plotting of 
 #' reference model prediction on the same plot as that of the patient like me 
 #' predictions.
-#' @param \dots   - For specifying plotting options.
+#' @param \dots   For specifying plotting options.
 #' 
 #' @return An object of class \code{ggplot} that outputs a calibration plot of observed vs. deciles of predicted values for training or testing data depending on \code{train=}.
 #' 
@@ -79,7 +79,7 @@ plot_func <- function(plotobj = plotobj,
     filtdf <- temp %>%
       bind_cols(
         dec = temp %>% 
-          dplyr::select_(val) %>%
+          dplyr::select(c50) %>%
           as.data.frame() %>%
           ntile(., 10)# create deciles
       ) %>%
@@ -87,7 +87,7 @@ plot_func <- function(plotobj = plotobj,
         temp %>%
           bind_cols(
             dec = temp %>% 
-              dplyr::select_(val) %>%
+              dplyr::select(c50) %>%
               as.data.frame() %>%
               ntile(., 10)# create deciles
           ) %>%
@@ -104,7 +104,7 @@ plot_func <- function(plotobj = plotobj,
     pred_tug <- temp  %>%
       bind_cols(
         dec = temp %>% 
-          dplyr::select_(val) %>%
+          dplyr::select(c50) %>%
           as.data.frame() %>%
           ntile(., 10)# create deciles
       ) %>%
@@ -150,17 +150,21 @@ plot_func <- function(plotobj = plotobj,
       maxc <- ceiling(max(plotdf$ul, plotdf$avg_val, na.rm=TRUE)) 
       
     } else { # for observed value as median and 95%CI for median
+      
       dffitmed <- filtdf %>%
         group_by(.data$dec) %>%
-        do(fitmed = MedianCI(.[,outcome][[1]], conf.level= 0.95,
-                             method = "exact", R = 10000))
-      #do(fitpois = glm(tug ~ 1, data= .))
+        # group_by(.data$dec) %>%
+        summarise(fitmed = MedianCI(!!sym(outcome), conf.level= 0.95,
+                                    method = "exact", R = 10000)) 
       
-      
-      dfmedcoef <- tidy(dffitmed, fitmed)
+      dfmedcoef <- dffitmed %>%
+        ungroup() %>%
+        mutate(id = rep(c("median","lwr.ci","upr.ci"), length.= nrow(dffitmed))) %>%
+        tidyr::pivot_wider(names_from = id, values_from = fitmed)
       
       plotdf <- pred_tug %>%
-        left_join(spread(dfmedcoef, .data$names, -.data$dec), by = "dec") %>%
+        # left_join(spread(dfmedcoef, .data$names, -.data$dec), by = "dec") %>%
+        left_join(dfmedcoef, by = "dec") %>%
         rename(ul = .data$upr.ci,
                ll = .data$lwr.ci)
       # set minimum and maximum based on the range of predicted and observed TUG values
@@ -235,7 +239,7 @@ plot_func <- function(plotobj = plotobj,
     
     # correlation
     traincor <- cor(temp %>% 
-                      dplyr::select_(outcome, "c50") %>%
+                      dplyr::select(!!sym(outcome), c50) %>%
                       as.matrix, method="spearman") %>%
       .[1,2] %>%
       round(3) %>%
@@ -253,7 +257,7 @@ plot_func <- function(plotobj = plotobj,
         
         # Create Reference Plot 
         cptrainrefdf <- test_proc$train_post %>%
-          dplyr::select_("patient_id", outcome, "time") %>% 
+          dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
           left_join(
             iqrfull ,
             by="time"
@@ -263,7 +267,7 @@ plot_func <- function(plotobj = plotobj,
           summarise_(avg_val =  paste0("avg_val = ", pred_sum, "(C50)")) %>%
           left_join(
             test_proc$train_post %>%
-              dplyr::select_("patient_id", outcome, "time") %>% 
+              dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
               left_join(
                 iqrfull ,
                 by="time"
@@ -271,7 +275,7 @@ plot_func <- function(plotobj = plotobj,
               mutate(dec= ntile(.data$C50, 10)
               ) %>% left_join(
                 test_proc$train_post %>%
-                  dplyr::select_("patient_id", outcome, "time") %>% 
+                  dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
                   left_join(
                     iqrfull ,
                     by="time"
@@ -465,19 +469,19 @@ plot_func <- function(plotobj = plotobj,
     } else {
       
       dffitmed <- filtdf %>%
-        #dplyr::select(-train_id) %>%
-        #dplyr::rename(
-          #patient_id = test_id
-          #) %>%
         group_by(.data$dec) %>%
-        do(fitmed = MedianCI(.[,outcome][[1]], conf.level= 0.95,
-                             method = "boot", R = 10000, na.rm = TRUE))
-      #do(fitpois = glm(tug ~ 1, data= .))
+        # group_by(.data$dec) %>%
+        summarise(fitmed = MedianCI(!!sym(outcome), conf.level= 0.95,
+                                    method = "exact", R = 10000)) 
       
-      dfmedcoef <- tidy(dffitmed, fitmed)
+      dfmedcoef <- dffitmed %>%
+        ungroup() %>%
+        mutate(id = rep(c("median","lwr.ci","upr.ci"), length.= nrow(dffitmed))) %>%
+        tidyr::pivot_wider(names_from = id, values_from = fitmed)
       
       plotdf <- pred_tug %>%
-        left_join(spread(dfmedcoef, .data$names, -.data$dec), by = "dec") %>%
+        # left_join(spread(dfmedcoef, .data$names, -.data$dec), by = "dec") %>%
+        left_join(dfmedcoef, by = "dec") %>%
         rename(ul = .data$upr.ci,
                ll = .data$lwr.ci)
       # set minimum and maximum based on the range of predicted and observed TUG values
@@ -577,7 +581,7 @@ plot_func <- function(plotobj = plotobj,
         print("creating reference plot")
         # Create Reference Plot 
         cptestrefdf <- test_proc$test_post %>%
-          dplyr::select_("patient_id", outcome, "time") %>% 
+          dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
           left_join(
             iqrfull ,
             by="time"
@@ -587,7 +591,7 @@ plot_func <- function(plotobj = plotobj,
           summarise_(avg_val =  paste0("avg_val = ", pred_sum, "(C50)")) %>%
           left_join(
             test_proc$test_post %>%
-              dplyr::select_("patient_id", outcome, "time") %>% 
+              dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
               left_join(
                 iqrfull ,
                 by="time"
@@ -595,7 +599,7 @@ plot_func <- function(plotobj = plotobj,
               mutate(dec= ntile(.data$C50, 10)
               ) %>% left_join(
                 test_proc$test_post %>%
-                  dplyr::select_("patient_id", outcome, "time") %>% 
+                  dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
                   left_join(
                     iqrfull ,
                     by="time"

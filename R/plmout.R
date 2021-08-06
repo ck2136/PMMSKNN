@@ -22,8 +22,9 @@
 #' then \code{x$train_o} would be used for this parameter.
 #' @param train_post - Data frame that contains the post-baseline observations from the training dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
 #' @param test_post Data frame that contains the post-baseline observations from the testing dataset. Typically this would be the \code{train_post} list component that was generated from the \code{\link{preproc}} function
-#' @param outcome    - Name of the outcomes variable (type=string)
-#' @param thresh_val - Numeric value indicating value of bias to ignore (not include in output) in terms of the leave-one-out cross validation process. The default is set to \code{thresh_val = 10000}
+#' @param outcome    Name of the outcomes variable (type=string)
+#' @param idname    Name of the id variable (type=string)
+#' @param thresh_val Numeric value indicating value of bias to ignore (not include in output) in terms of the leave-one-out cross validation process. The default is set to \code{thresh_val = 10000}
 #' 
 #' @return An array of performance measures for each individuals in the training and testing set 
 #' 
@@ -37,7 +38,7 @@ plmout <- function(
                    i=i, time_window=time_window, mint,maxt,
                    loocv=loocv,matchmodel=matchmodel,
                    traintestmatchdf=traintestmatchdf,
-                   outcome=outcome, time_elapsed=time_elapsed, 
+                   outcome=outcome,idname=idname, time_elapsed=time_elapsed, 
                    ord_data=ord_data, train_post=train_post, 
                    test_post=test_post, thresh_val = thresh_val
                    ) {
@@ -74,7 +75,7 @@ plmout <- function(
                        test_post=test_post, 
                        loocv=loocv,
                        time_elapsed=time_elapsed,
-                       outcome = outcome,
+                       outcome = outcome, idname=idname,
                        i=i
         )
 
@@ -125,10 +126,12 @@ plmout <- function(
         #-- Precision
         # perfout$precisionvec[[i]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
         #-- Store the Test Predicted Values (i.e.C50)
-        perfout$dfList_test[[i]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25=iqr$`25`, c75=iqr$`75`)
+        colnames(iqrdf1)[1] = time_elapsed
+        perfout$dfList_test[[i]] <- test_post[which(test_post[[idname]] %in% targetid), c(idname,time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) ,
-                      by = "time"
+                      iqrdf1 ,
+                      by = time_elapsed
             )
 
         # #-- Store the Train Predicted Values
@@ -161,7 +164,7 @@ plmout <- function(
                        test_post=test_post, 
                        loocv=loocv,
                        time_elapsed=time_elapsed,
-                       outcome = outcome,
+                       outcome = outcome, idname=idname,
                        i=i
         )
         if(!is.data.frame(zsc)) {
@@ -224,10 +227,12 @@ plmout <- function(
         #     )
 
         #-- Train Predicted Values
-        perfout$dfList[[i]] <- train_post[which(train_post$patient_id %in% ord_data$id[c(i)]), c("patient_id",time_elapsed,outcome)] %>%
+        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25=iqr$`25`, c75=iqr$`75`)
+        colnames(iqrdf1)[1] = time_elapsed
+        perfout$dfList[[i]] <- train_post[which(train_post[[idname]] %in% ord_data$id[c(i)]), c(idname,time_elapsed,outcome)] %>%
             left_join(
-                      data.frame(time=iqr[,1],c50 = iqr$`50`, c25=iqr$`25`, c75=iqr$`75`) ,
-                      by = "time"
+                      iqrdf1 ,
+                      by = time_elapsed
             )
 
         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB

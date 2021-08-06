@@ -44,7 +44,7 @@
 #' @param userchoose - Int value indicating the choice that the user wants to use for the number of nearest matches 
 #' @param seed - Seed for probability sampling of the nearest matches
 #' @param parallel - Number of cores used for the leave-one-out cross validation process. Default = 1
-#' @param patid         Column name indicating patient id.
+#' @param patid   Column name indicating patient id.
 #' @param loocv - Logical (\code{TRUE/FALSE}) that specifies whether 
 #' or not to perform leave-one-out cross validation or just output 
 #' predictions without hyperparameter tuning. If \code{loocv=FALSE}, then
@@ -109,9 +109,9 @@ pat_level_func_sknn <- function(
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         
         loocvres <- foreach(n=nearest,
-                            .export=c("train_post", "test_post","spl","ptr_m", "d_f_m", "d_f_s", "train","test", "gamlss_dist",
+                            .export=c("train_post", "test_post","spl","ptr_m", "d_f_m", "d_f_s", "train","test", "gamlss_dist","patid",
                                       "d_f_n", "d_f_t", "dist_fam", "spls","spln","splt",
-                                      "outcome","time_elapsed", "plot", "matchprobweight","time_window",
+                                      "outcome","time_elapsed","plot", "matchprobweight","time_window",
                                       "interval","thresh_val","printtrace","userchoose", "ref",
                                       "loocv","mint","maxt", "traintestmatchdf"),                                                                                                              .packages=c("dplyr","gamlss"),
                             #.combine=list,
@@ -247,25 +247,25 @@ pat_level_func_sknn <- function(
                                             bind_rows(
                                                 data.frame(
                                                     zsc = centiles.pred(plmr, type="z-scores",
-                                                                        xname="time",
+                                                                        xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select(.data$time) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select_(outcome) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                filter(.data$patient_id %in% x) %>%
-                                                                                dplyr::select(.data$time) %>%
+                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        filter(.data$patient_id %in% x) %>%
-                                                        dplyr::select(.data$time) %>%
+                                                        dplyr::filter(!!sym(patid) %in% x) %>%
+                                                        dplyr::select(!!sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -290,10 +290,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct_(.dots="patient_id") %>%
+                                              distinct(!!sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct_(.dots="patient_id") %>%
+                                                      distinct(!!sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -301,25 +301,25 @@ pat_level_func_sknn <- function(
                                             bind_rows(
                                                 data.frame(
                                                     zsc = centiles.pred(plmr, type="z-scores",
-                                                                        xname="time",
+                                                                        xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select(.data$time) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select_(outcome) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                filter(.data$patient_id %in% x) %>%
-                                                                                dplyr::select(.data$time) %>%
+                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        filter(.data$patient_id %in% x) %>%
-                                                        dplyr::select(.data$time) %>%
+                                                        dplyr::filter(!!sym(patid) %in% x) %>%
+                                                        dplyr::select(!!sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -361,10 +361,10 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct_(.dots="patient_id") %>%
+                            distinct(!!sym(patid)) %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
-                                    distinct_(.dots="patient_id") %>%
+                                    distinct(!!sym(patid)) %>%
                                     .[i,] %>% unlist %>% as.vector}
                             ),]  %>% unlist %>% as.vector
                         
@@ -402,7 +402,7 @@ pat_level_func_sknn <- function(
                         iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
                         colnames(iqrdf1)[1] = time_elapsed
                         
-                        dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                        dfList_test[[cnt]] <- test_post[which(test_post[[patid]] %in% targetid), c(patid,time_elapsed,outcome)] %>%
                             left_join(
                                 iqrdf1,
                                 by = time_elapsed
@@ -430,11 +430,11 @@ pat_level_func_sknn <- function(
                                         zsc = centiles.pred(plmr, type="z-scores",
                                                             xname=time_elapsed,
                                                             data=matchmodel,
-                                                            xvalues=train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]],
-                                                            yval=train_post[train_post$patient_id %in% train[i, patid][[1]],outcome][[1]]),
-                                        train_id = rep(train[i, patid][[1]], length(train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]]))
+                                                            xvalues=train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]],
+                                                            yval=train_post[train_post[[patid]] %in% train[i, patid][[1]],outcome][[1]]),
+                                        train_id = rep(train[i, patid][[1]], length(train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]]))
                                         ,
-                                        time = train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]]
+                                        time = train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]]
                                     )
                                     return(trainzsc)
                                     
@@ -455,11 +455,11 @@ pat_level_func_sknn <- function(
                                         zsc = centiles.pred(plmr, type="z-scores",
                                                             xname=time_elapsed,
                                                             data=matchmodel,
-                                                            xvalues=train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]],
-                                                            yval=train_post[train_post$patient_id %in% train[i, patid][[1]],outcome][[1]]),
-                                        train_id = rep(train[i, patid][[1]], length(train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]]))
+                                                            xvalues=train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]],
+                                                            yval=train_post[train_post[[patid]] %in% train[i, patid][[1]],outcome][[1]]),
+                                        train_id = rep(train[i, patid][[1]], length(train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]]))
                                         ,
-                                        time = train_post[train_post$patient_id %in% train[i, patid][[1]],time_elapsed][[1]]
+                                        time = train_post[train_post[[patid]] %in% train[i, patid][[1]],time_elapsed][[1]]
                                     )
                                     return(trainzsc)
                                     #return(NULL)
@@ -538,7 +538,7 @@ pat_level_func_sknn <- function(
                         iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
                         colnames(iqrdf1)[1] = time_elapsed
                         
-                        dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
+                        dfList[[cnt]] <- train_post[which(train_post[[patid]] %in% train[i, patid][[1]]), c(patid,time_elapsed,outcome)] %>%
                             left_join(
                                iqrdf1,
                                 by = time_elapsed
@@ -663,12 +663,12 @@ pat_level_func_sknn <- function(
                 if(loocv){
                     
                     matchmodel <- train_post %>%
-                        filter(.data$patient_id %in% (traintestmatchdf$nnarraytrain[,i] %>%
+                        filter(!!sym(patid) %in% (traintestmatchdf$nnarraytrain[,i] %>%
                                                           head(n=n)))
                 } else {
                     
                     matchmodel <- train_post %>%
-                        filter(.data$patient_id %in% c(train[[patid]][i], traintestmatchdf$nnarraytrain[,i] %>%
+                        filter(!!sym(patid) %in% c(train[[patid]][i], traintestmatchdf$nnarraytrain[,i] %>%
                                                           head(n=(n-1))))
                     
                 }
@@ -759,10 +759,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct_(.dots="patient_id") %>%
+                                              distinct(!!sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct_(.dots="patient_id") %>%
+                                                      distinct(!!sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -773,22 +773,22 @@ pat_level_func_sknn <- function(
                                                                         xname="time",
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select(.data$time) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select_(outcome) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                filter(.data$patient_id %in% x) %>%
-                                                                                dplyr::select(.data$time) %>%
+                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        filter(.data$patient_id %in% x) %>%
-                                                        dplyr::select(.data$time) %>%
+                                                        dplyr::filter(!!sym(patid) %in% x) %>%
+                                                        dplyr::select(!!sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -816,10 +816,10 @@ pat_level_func_sknn <- function(
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     
                                     for(x in (test_post %>%
-                                              distinct_(.dots="patient_id") %>%
+                                              distinct(!!sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct_(.dots="patient_id") %>%
+                                                      distinct(!!sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -827,25 +827,25 @@ pat_level_func_sknn <- function(
                                             bind_rows(
                                                 data.frame(
                                                     zsc = centiles.pred(plmr, type="z-scores",
-                                                                        xname="time",
+                                                                        xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select(.data$time) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            filter(.data$patient_id %in% x) %>%
-                                                                            dplyr::select_(outcome) %>%
+                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                filter(.data$patient_id %in% x) %>%
-                                                                                dplyr::select(.data$time) %>%
+                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        filter(.data$patient_id %in% x) %>%
-                                                        dplyr::select(.data$time) %>%
+                                                        dplyr::filter(!!sym(patid) %in% x) %>%
+                                                        dplyr::select(!!sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -889,10 +889,10 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct_(.dots="patient_id") %>%
+                            distinct(!!sym(patid)) %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
-                                    distinct_(.dots="patient_id") %>%
+                                    distinct(!!sym(patid)) %>%
                                     .[i,] %>% unlist %>% as.vector}
                             ),]  %>% unlist %>% as.vector
                         # targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data
@@ -927,7 +927,7 @@ pat_level_func_sknn <- function(
                         iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
                         colnames(iqrdf1)[1] = time_elapsed
                         #-- store Testing C50
-                        dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
+                        dfList_test[[cnt]] <- test_post[which(test_post[[patid]] %in% targetid), c(patid,time_elapsed,outcome)] %>%
                             #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
                             left_join(
                                 iqrdf1 ,
@@ -965,11 +965,11 @@ pat_level_func_sknn <- function(
                                         zsc = centiles.pred(plmr, type="z-scores",
                                                             xname=time_elapsed,
                                                             data=matchmodel,
-                                                            xvalues=train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]],
-                                                            yval=train_post[train_post$patient_id %in% train[i,patid][[1]],outcome][[1]]),
-                                        train_id = rep(train[i,patid][[1]], length(train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]]))
+                                                            xvalues=train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]],
+                                                            yval=train_post[train_post[[patid]] %in% train[i,patid][[1]],outcome][[1]]),
+                                        train_id = rep(train[i,patid][[1]], length(train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]]))
                                         ,
-                                        time = train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]]
+                                        time = train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]]
                                     )
                                     return(trainzsc)
                                     
@@ -990,11 +990,11 @@ pat_level_func_sknn <- function(
                                         zsc = centiles.pred(plmr, type="z-scores",
                                                             xname=time_elapsed,
                                                             data=matchmodel,
-                                                            xvalues=train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]],
-                                                            yval=train_post[train_post$patient_id %in% train[i,patid][[1]],outcome][[1]]),
-                                        train_id = rep(train[i,patid][[1]], length(train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]]))
+                                                            xvalues=train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]],
+                                                            yval=train_post[train_post[[patid]] %in% train[i,patid][[1]],outcome][[1]]),
+                                        train_id = rep(train[i,patid][[1]], length(train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]]))
                                         ,
-                                        time = train_post[train_post$patient_id %in% train[i,patid][[1]],time_elapsed][[1]]
+                                        time = train_post[train_post[[patid]] %in% train[i,patid][[1]],time_elapsed][[1]]
                                     )
                                     return(trainzsc)
                                     
