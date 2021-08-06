@@ -8,7 +8,7 @@
 #'                        summarise summarise_ arrange arrange_ 
 #'                        rename rename_ bind_cols full_join ntile do 
 #'                        if_else row_number group_by_ slice ungroup
-#'                        tibble mutate_ top_n pull
+#'                        tibble mutate_ top_n pull sym
 #'@importFrom data.table  data.table rbindlist 
 #'@importFrom cowplot     plot_grid get_legend
 #'@importFrom DescTools   MedianCI
