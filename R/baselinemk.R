@@ -27,8 +27,8 @@ baselinemk <- function(dftotf,
                   dftotf %>%
                       select_(pat_id, time_var) %>%
                       filter_(paste0(time_var, "<= 0")) %>%
-                      arrange_(pat_id, paste0("desc(",time_var,")")) %>%
-                      group_by_(pat_id) %>%
+                      arrange(!!sym(pat_id), desc(!!sym(time_var))) %>%
+                      group_by(!!sym(pat_id)) %>%
                       mutate(baseline = if_else(row_number() == 1, 1, -1)) ,
                   by = c(pat_id, time_var)
                   ) %>%
