@@ -288,17 +288,9 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Change patient_id column for LOOCV function use
     # - - - - - - - - - - - - - - - - - - - - - - #
-    post_train_df <- post_train_df %>%
-        rename(
-          patient_id = !!sym(pat_id),
-          time = !!sym(time_var)
-          )
+    post_train_df <- post_train_df 
 
-    post_test_df <- post_test_df %>%
-        rename(
-          patient_id = !!sym(pat_id),
-          time = !!sym(time_var)
-          )
+    post_test_df <- post_test_df 
 
     return(list(train_post = post_train_df, 
                 train_o =  train_ordered,
@@ -307,7 +299,7 @@ preproc <- function(dff,
                 test_post = post_test_df, 
                 test_o =  test_ordered,
                 bs_obj = fit,
-                varname = c(outcome, time_var, pat_id, baseline_var)
+                varname = c(outcome, time_var, pat_id, baseline_var, split_var)
                 )
     )
 }
