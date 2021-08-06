@@ -66,6 +66,10 @@ test_that(
     expect_true(any(grepl("test_o", names(test_proc))))
     expect_true(any(grepl("train_o", names(test_proc))))
     expect_true(any(grepl("train_post", names(test_proc))))
+    expect_true(any(grepl("reg_df", names(test_proc))))
+    expect_true(any(grepl("reg_obj", names(test_proc))))
+    expect_true(any(grepl("bs_obj", names(test_proc))))
+    expect_true(any(grepl("varname", names(test_proc))))
   }
 )
 

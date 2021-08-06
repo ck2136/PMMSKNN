@@ -68,12 +68,7 @@ test_that(
       # specify number or vector of numbers from {1,...,total number of patients in training data} 
       nearest_n = c(13:15),
       # enter training and testing post operative and fitted y90 dataset
-      train_post = test_proc$train_post,
-      ord_data = test_proc$train_o,
-      test_post = test_proc$test_post,
-      test_o = test_proc$test_o,
-      # Specify outcome variable and time variable name
-      outcome = "weight",
+      preproc=test_proc,
       # interval = 10,
       mtype=0,
       # Specify use of cubic spline or not
