@@ -390,7 +390,7 @@ pat_level_func_sknn <- function(
                         # coveragevec[cnt]<-mean(bias$coverage)
                         
                         
-                        if(any(iqr$C50 > thresh_val)){
+                        if(any(iqr$`50` > thresh_val)){
                             crazymatch[[cnt]] <- matchmodel
                         } else {
                             crazymatch[[cnt]] <- NA
@@ -399,10 +399,13 @@ pat_level_func_sknn <- function(
                         #-- precision
                         # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
                         #-- store Testing C50
+                        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
+                        colnames(iqrdf1)[1] = time_elapsed
+                        
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
+                                iqrdf1,
+                                by = time_elapsed
                             )
                         
                         # #-- store Training C50
@@ -531,11 +534,14 @@ pat_level_func_sknn <- function(
                         #         by = "time"
                         #     )
                         
-                        #-- store Training C50
+                        #-- store Training c50
+                        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
+                        colnames(iqrdf1)[1] = time_elapsed
+                        
                         dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i, patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
+                               iqrdf1,
+                                by = time_elapsed
                             )
                         
                         #-- precision potentially remove later because this is 7.5mb per n so 7.5*14 ~ 100MB
@@ -909,7 +915,7 @@ pat_level_func_sknn <- function(
                         # store mean of the n coverage in vector
                         # coveragevec[cnt]<-mean(bias$coverage)
                         
-                        if(any(iqr$C50 > thresh_val)){
+                        if(any(iqr$`50` > thresh_val)){
                             crazymatch[[cnt]] <- matchmodel
                         } else {
                             crazymatch[[cnt]] <- NA
@@ -917,12 +923,15 @@ pat_level_func_sknn <- function(
                         
                         #-- precision
                         # precisionvec[[cnt]] <-list(time= iqr[,time_elapsed], prec=iqr$iqr) 
+                        
+                        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
+                        colnames(iqrdf1)[1] = time_elapsed
                         #-- store Testing C50
                         dfList_test[[cnt]] <- test_post[which(test_post$patient_id %in% targetid), c("patient_id",time_elapsed,outcome)] %>%
                             #train <- post[train <- post$patient <- id == ord <- data$id[c(i)],c("patient <- id",time <- elapsed,outcome)] %>% 
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
+                                iqrdf1 ,
+                                by = time_elapsed
                             )
                         #left_join(
                         #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,patient_id]) ,
@@ -1069,10 +1078,13 @@ pat_level_func_sknn <- function(
                         #)
                         
                         #-- store Training C50
+                        iqrdf1 <- data.frame(time=iqr[,1],c50 = iqr$`50`, c25 = iqr$`25`, c75 = iqr$`75`) 
+                        colnames(iqrdf1)[1] = time_elapsed
+                        
                         dfList[[cnt]] <- train_post[which(train_post$patient_id %in% train[i,patid][[1]]), c("patient_id",time_elapsed,outcome)] %>%
                             left_join(
-                                data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, c25 = iqr$C25, c75 = iqr$C75) ,
-                                by = "time"
+                                iqrdf1,
+                                by = time_elapsed
                             )
                         #left_join(
                         #data.frame(time=iqr[,time_elapsed],c50 = iqr$C50, patient_id = iqr[,]) ,

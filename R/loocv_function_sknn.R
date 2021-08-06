@@ -1,28 +1,19 @@
-#' Calculate bias, coverage and CI width for neighbors-based prediction
+#' Calculate bias, coverage and precision for neighbors-based prediction
 #' 
 #' The function calculate three frequency-based parameters to 
 #' demonstate statistical quality of the neighbors-based prediction.
-#' The parameters are bias, coverage and the 50% prediction interval 
-#' width.
+#' The parameters are bias, coverage and precision (i.e., the 50% prediction interval) width.
 #' @param nearest_n Numeric vector with number of matches per scenario
 #' @param dist_fam  gamlss distribution specification
-#' @param fulldata - dataset, the full data typically the \code{train_post} list component 
-#' @param train_test    Column name indicating whether individual belongs to
-#' Training or Testing dataset. Train = 1, Test = 2 by default.
-#' @param patid         Column name indicating patient id.
+#' @param fulldata  Dataset, the full data typically the \code{train_post} list component in the \code{preproc()} processed object
 #' @param formula       Formula indicating the variables used for matching.
 #' (e.g. \code{ ~ var1 + var2 + var3 }).
-#' @param train_post - datasets, typically the \code{train_post} list component 
-#'  of the object produced by \code{\link{preproc}}.
-#' @param test_post Idem, component \code{test_post}
-#' @param outcome    Name of the outcomes variable
-#' @param time_elapsed - Name of the time variable. (type=string)
-#' @param plot - Logical that specifies whether to output individual precision plots
-#' @param matchprobweight - Logical that specifies whether to utilize probability sampling
+#' @param plot Logical that specifies whether to output individual precision plots
+#' @param matchprobweight Logical that specifies whether to utilize probability sampling
 #'  when doing the mean matching. If TRUE, matches nearest n weighted on differnce in 
 #'  predicted outcome.
-#' @param time_window - vector of numbers for `centiles.pred()`, `xvalues` argument 
-#' @param interval - Int value specifying the interval of individuals to skip 
+#' @param time_window vector of numbers for `centiles.pred()`, `xvalues` argument 
+#' @param interval Int value specifying the interval of individuals to skip 
 #' @param cs Logical that specifies whether to use cubic spline. 
 #'  The default \code{cs = FALSE} uses ...
 #' @param dfspec Logical that specifies whether to the user sets  
@@ -34,17 +25,17 @@
 #' @param d_f_n - 
 #' @param d_f_t -
 #' @param thresh_val -
-#' @param printtrace - Logical that specifies printing of gamlss parameter estimation
-#' @param userchoose - Int value indicating the choice that the user wants to use for the number of nearest matches 
-#' @param parallel - Number of cores used for parallel computing. Default = 1
-#' @param loocv - Whether or not to perform leave one out cross validation or just go straight to prediction. Should
+#' @param printtrace Logical that specifies printing of gamlss parameter estimation
+#' @param userchoose Int value indicating the choice that the user wants to use for the number of nearest matches 
+#' @param parallel Number of cores used for parallel computing. Default = 1
+#' @param loocv Whether or not to perform leave one out cross validation or just go straight to prediction. Should
 #'  have the userchoose value specified if `loocv=FALSE`
-#' @param biasm - Column indicating which bias score to use for choosing optimal n. Default
+#' @param biasm Column indicating which bias score to use for choosing optimal n. Default
 #' is \code{'raw'}. Options: \code{'raw','rmse','zsc'}.
-#' @param seed - Seed for probability sampling of the nearest matches
-#' @param perfrank - String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
-#' @param opt_cov - Float value indicating optimal coverage value used for `perfrank`. Defaults to 0.5
-#' @param perf_round_by - Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
+#' @param seed Seed for probability sampling of the nearest matches
+#' @param perfrank String indicating how to rank the performance of the LOOCV. Default is `perfrank == "cov"`, which prioritizes LOOCV based on prefering coverage values that are close to 0.5. Then the lowest `rmse` value then `prec` value is prefered,
+#' @param opt_cov Float value indicating optimal coverage value used for `perfrank`. Defaults to 0.5
+#' @param perf_round_by Integer value to indicate what decimal point will the performance values should be rounded by. Default is `perf_round_by = 4`, set to smaller value to be less coarse about ranking `nearest_n` values.
 #' @param \dots Passed down to \code{gamlss}
 #' 
 #' @return There are many possible return values 
@@ -57,12 +48,9 @@
 loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play with 
                            dist_fam = NULL, # for gamlss distribution
                            fulldata,
-                           train_test = "train_test",
-                           patid = "patient_id",
                            formula,
-                           train_post, 
-                           test_post, 
-                           outcome, time_elapsed="time", plot = FALSE,
+                           preproc,
+                           plot = FALSE,
                            matchprobweight=FALSE,
                            time_window=NULL,
                            interval=NULL,
@@ -88,13 +76,15 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
     # DATASET MANIPULATION
     # - - - - - - - - - - - - - - - - - - - - - # 
     train <- fulldata %>%
-        filter(train_test == 1) %>% 
-        distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(patid, all.vars(formula))
+        filter(!!sym(preproc$varname[5]) == 1) %>% 
+        distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+        # distinct_(.dots = patid, .keep_all=TRUE) %>%
+        dplyr::select(!!sym(preproc$varname[3]), all.vars(formula))
     test <- fulldata %>%
-        filter(train_test == 2) %>% 
-        distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(patid, all.vars(formula))
+        filter(!!sym(preproc$varname[5]) == 2) %>% 
+        distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+        # distinct_(.dots = patid, .keep_all=TRUE) %>%
+        dplyr::select(!!sym(preproc$varname[3]), all.vars(formula))
 
     # - - - - - - - - - - - - - - - - - - - - - # 
     # FIT REFERENCE GAMLSS MODEL
@@ -102,9 +92,9 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
 
     ref <- fitrefgamlss(
                         dist_fam = dist_fam, # for gamlss distribution
-                        train_post=train_post, 
-                        test_post=test_post, 
-                        outcome=outcome, time_elapsed=time_elapsed, 
+                        train_post=preproc$train_post, 
+                        test_post=preproc$test_post, 
+                        outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                         time_window=time_window,
                         cs=cs,
                         dfspec=dfspec,
@@ -128,8 +118,8 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
 
     traintestmatchdf <- matchIdExtractsknn(
                                data = fulldata,
-                               train_test = train_test,
-                               patid = patid,
+                               train_test = preproc$varname[5],
+                               patid = preproc$varname[3],
                                formula = formula
     )
     
@@ -156,13 +146,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 loocv_test_result <- pat_level_func_sknn(
                     ref=ref,nearest=nearest_n, # number to play with 
                     dist_fam = dist_fam, # for gamlss distribution
-                    patid = patid,
-                    train_post=train_post, 
-                    test_post=test_post, 
+                    patid = preproc$varname[3],
+                    train_post=preproc$train_post, 
+                    test_post=preproc$test_post, 
                     traintestmatchdf=traintestmatchdf,
                     train = train,
                     test = test,
-                    outcome=outcome, time_elapsed=time_elapsed, 
+                    outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                     plot = plot,matchprobweight=matchprobweight,
                     time_window=time_window, interval=interval,
                     cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -182,7 +172,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     opt_n_index <- which(nearest_n == userchoose)
                     perfdf <- loocv_perf(
                         loocv_test_result,
-                        outcome=outcome,
+                        outcome=preproc$varname[1],
                         nearest_n=nearest_n,
                         opt_cov = opt_cov,
                         perf_round_by=perf_round_by
@@ -200,7 +190,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         # 
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -209,14 +199,14 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"] %>% .[[1]]
                         
                     } else if(perfrank=="cov"){
                         
                         
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -225,14 +215,14 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"] %>% .[[1]] 
                         
                         
                     } else if(perfrank=="bias"){
                         
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -241,13 +231,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"]  %>% .[[1]]
                         
                         
                     } 
-                    if(length(opt_n) > 1){
-                        opt_n <- opt_n[1] # select first one
-                    } 
+                    # if(length(opt_n) > 1){
+                    #     opt_n <- opt_n[1] # select first one
+                    # } 
                     
                     opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                     
@@ -272,13 +262,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             predict_test_result <- pat_level_func_sknn(
                 nearest=nearest_n[opt_n_index], loocv=FALSE, ref=ref,
                 dist_fam = dist_fam, # for gamlss distribution
-                patid = patid,
-                train_post=train_post, 
-                test_post=test_post, 
+                patid = preproc$varname[3],
+                train_post=preproc$train_post, 
+                test_post=preproc$test_post, 
                 traintestmatchdf=traintestmatchdf,
                 train = train,
                 test = test,
-                outcome=outcome, time_elapsed=time_elapsed, 
+                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                 plot = plot,matchprobweight=matchprobweight,
                 time_window=time_window, interval=interval,
                 cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -291,7 +281,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             
             perfdf_test <- loocv_perf(
                 predict_test_result,
-                outcome=outcome,
+                outcome=preproc$varname[1],
                 nearest_n=nearest_n[opt_n_index],
                 opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
@@ -316,13 +306,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 loocv_test_result <- pat_level_func_sknn(
                     ref=ref,nearest=nearest_n, # number to play with 
                     dist_fam = dist_fam, # for gamlss distribution
-                    patid = patid,
-                    train_post=train_post, 
-                    test_post=test_post, 
+                    patid = preproc$varname[3],
+                    train_post=preproc$train_post, 
+                    test_post=preproc$test_post, 
                     traintestmatchdf=traintestmatchdf,
                     train = train,
                     test = test,
-                    outcome=outcome, time_elapsed=time_elapsed, 
+                    outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                     plot = plot,matchprobweight=matchprobweight,
                     time_window=time_window, interval=interval,
                     cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -334,7 +324,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     )
                 perfdf <- loocv_perf(
                     loocv_test_result,
-                    outcome=outcome,
+                    outcome=preproc$varname[1],
                     nearest_n=nearest_n,
                     opt_cov = opt_cov,
                     perf_round_by=perf_round_by
@@ -342,13 +332,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 predict_test_result <- pat_level_func_sknn(
                     ref=ref,nearest=nearest_n, # number to play with 
                     dist_fam = dist_fam, # for gamlss distribution
-                    patid = patid,
-                    train_post=train_post, 
-                    test_post=test_post, 
+                    patid = preproc$varname[3],
+                    train_post=preproc$train_post, 
+                    test_post=preproc$test_post, 
                     traintestmatchdf=traintestmatchdf,
                     train = train,
                     test = test,
-                    outcome=outcome, time_elapsed=time_elapsed, 
+                    outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                     plot = plot,matchprobweight=matchprobweight,
                     time_window=time_window, interval=interval,
                     cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -360,7 +350,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     )
                 perfdf_test <- loocv_perf(
                     predict_test_result,
-                    outcome=outcome,
+                    outcome=preproc$varname[1],
                     nearest_n=nearest_n,
                     opt_cov = opt_cov,
                     perf_round_by=perf_round_by,
@@ -382,13 +372,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                 predict_test_result <- pat_level_func_sknn(
                     nearest=nearest_n, ref=ref,
                     dist_fam = dist_fam, # for gamlss distribution
-                    patid = patid,
-                    train_post=train_post, 
-                    test_post=test_post, 
+                    patid = preproc$varname[3],
+                    train_post=preproc$train_post, 
+                    test_post=preproc$test_post, 
                     traintestmatchdf=traintestmatchdf,
                     train = train,
                     test = test,
-                    outcome=outcome, time_elapsed=time_elapsed, 
+                    outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                     plot = plot,matchprobweight=matchprobweight,
                     time_window=time_window, interval=interval,
                     cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -400,7 +390,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                     )
                 perfdf_test <- loocv_perf(
                     predict_test_result,
-                    outcome=outcome,
+                    outcome=preproc$varname[1],
                     nearest_n=nearest_n,
                     opt_cov = opt_cov,
                     perf_round_by=perf_round_by,
@@ -423,13 +413,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
         loocv_test_result <- pat_level_func_sknn(
             nearest=nearest_n, ref=ref,
             dist_fam = dist_fam, # for gamlss distribution
-            patid = patid,
-            train_post=train_post, 
-            test_post=test_post, 
+            patid = preproc$varname[3],
+            train_post=preproc$train_post, 
+            test_post=preproc$test_post, 
             traintestmatchdf=traintestmatchdf,
             train = train,
             test = test,
-            outcome=outcome, time_elapsed=time_elapsed, 
+            outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
             plot = plot,matchprobweight=matchprobweight,
             time_window=time_window, interval=interval,
             cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -470,7 +460,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -479,12 +469,12 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$totscore)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"]  %>% .[[1]]
                         
                     } else if(perfrank=="cov"){
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -492,13 +482,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$covdiff, .data$rmse, .data$prec)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"]  %>% .[[1]]
                         
                     } else if(perfrank=="bias"){
                         
                         perfdf <- loocv_perf(
                             loocv_test_result,
-                            outcome=outcome,
+                            outcome=preproc$varname[1],
                             nearest_n=nearest_n,
                             opt_cov = opt_cov,
                             perf_round_by=perf_round_by
@@ -507,13 +497,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
                         opt_n <- perfdf %>%
                             arrange(.data$rmse, .data$covdiff, .data$prec)  %>%
                             head(1) %>%
-                            .[,"nearest_n"] 
+                            .[,"nearest_n"]  %>% .[[1]]
                         
                     } 
                     
-                    if(length(opt_n) > 1){
-                        opt_n <- opt_n[1] # select first one
-                    } 
+                    # if(length(opt_n) > 1){
+                    #     opt_n <- opt_n[1] # select first one
+                    # } 
                     
                     opt_n_index <- which(perfdf[,"nearest_n"] == opt_n)
                 }
@@ -526,13 +516,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             predict_test_result <- pat_level_func_sknn(
                 nearest=nearest_n[opt_n_index], ref=ref,
                 dist_fam = dist_fam, # for gamlss distribution
-                patid = patid,
-                train_post=train_post, 
-                test_post=test_post, 
+                patid = preproc$varname[3],
+                train_post=preproc$train_post, 
+                test_post=preproc$test_post, 
                 traintestmatchdf=traintestmatchdf,
                 train = train,
                 test = test,
-                outcome=outcome, time_elapsed=time_elapsed, 
+                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                 plot = plot,matchprobweight=matchprobweight,
                 time_window=time_window, interval=interval,
                 cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -545,7 +535,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             
             perfdf_test <- loocv_perf(
                 predict_test_result,
-                outcome=outcome,
+                outcome=preproc$varname[1],
                 nearest_n=nearest_n[opt_n_index],
                 opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
@@ -564,13 +554,13 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             predict_test_result <- pat_level_func_sknn(
                 nearest=nearest_n, ref=ref,
                 dist_fam = dist_fam, # for gamlss distribution
-                patid = patid,
-                train_post=train_post, 
-                test_post=test_post, 
+                patid = preproc$varname[3],
+                train_post=preproc$train_post, 
+                test_post=preproc$test_post, 
                 traintestmatchdf=traintestmatchdf,
                 train = train,
                 test = test,
-                outcome=outcome, time_elapsed=time_elapsed, 
+                outcome=preproc$varname[1], time_elapsed=preproc$varname[2], 
                 plot = plot,matchprobweight=matchprobweight,
                 time_window=time_window, interval=interval,
                 cs=cs, dfspec=dfspec, d_f_m=d_f_m, ptr_m=ptr_m,
@@ -583,7 +573,7 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
             
             perfdf_test <- loocv_perf(
                 predict_test_result,
-                outcome=outcome,
+                outcome=preproc$varname[1],
                 nearest_n=nearest_n,
                 opt_cov = opt_cov,
                 perf_round_by=perf_round_by,
