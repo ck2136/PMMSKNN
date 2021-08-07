@@ -87,11 +87,11 @@ plot_NthP_plm <- function(
         geom_point(data = plotdf %>%
                                filter(.data$train_test == 1), 
                aes(x = eval(parse(text = "time")), y = eval(parse(text =outcome)), colour="Matches")) + 
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C50")))) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C25")), colour="50% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C75")), colour="50% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C10")), colour="80% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C90")), colour="80% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`50`")))) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`25`")), colour="50% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`75`")), colour="50% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`10`")), colour="80% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`90`")), colour="80% IQR")) +
         scale_colour_manual(name="", values=c("Patient"="orange", "50% IQR"="green",
                                               "80% IQR"="red", "Matches"="purple"
                                               ),
@@ -135,11 +135,11 @@ plot_NthP_plm <- function(
         geom_point(data = plotdf %>%
                                filter(.data$train_test == 1), 
                aes(x = eval(parse(text = "time")), y = eval(parse(text =outcome)), colour="Matches")) + 
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C50")))) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C25")), colour="50% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C75")), colour="50% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C10")), colour="80% IQR")) +
-        geom_line(data = iqrplm, aes(x = eval(parse(text = "time")), y = eval(parse(text="C90")), colour="80% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`50`")))) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`25`")), colour="50% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`75`")), colour="50% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`10`")), colour="80% IQR")) +
+        geom_line(data = iqrplm, aes(x = eval(parse(text = "x")), y = eval(parse(text="`90`")), colour="80% IQR")) +
         scale_colour_manual(name="", values=c("Patient"="orange", "50% IQR"="green",
                                               "80% IQR"="red", "Matches"="purple"
                                               ),
