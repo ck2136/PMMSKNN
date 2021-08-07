@@ -1,11 +1,12 @@
 
+# Predictive Mean Matched Sequential K-Nearest Neighbor
+
 <!-- badges: start -->
 
 [![Travis build
 status](https://app.travis-ci.com/ck2136/PMMSKNN.svg?branch=master)](https://travis-ci.com/ck2136/PMMSKNN)
+<!-- [![Codecov test coverage](https://codecov.io/gh//dplyr/branch/master/graph/badge.svg)](https://codecov.io/gh/tidyverse/dplyr?branch=master) -->
 <!-- badges: end -->
-
-# Predictive Mean Matched Sequential K-Nearest Neighbor
 
 ## Introduction
 
