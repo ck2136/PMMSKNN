@@ -2,6 +2,7 @@
 
 language: R
 cache: packages
+warnings_are_errors: false
 
 install:
   - Rscript -e "install.packages(c('devtools','reshape2','broom','gamlss','gamlss.dist','ggplot2','cowplot','DescTools','merTools','data.table','doParallel','doSNOW','future','future.apply','foreach','brokenstick'))"
