@@ -6,12 +6,12 @@ output: rmarkdown::github_document
 knitr::opts_chunk$set(collapse=TRUE, comment="##", fig.retina=2, fig.path = "README_figs/README-")
 ```
 
-<!-- badges: start -->
-  [![Travis build status](https://travis-ci.com/ck2136/PMMSKNN.svg?branch=master)](https://travis-ci.com/ck2136/PMMSKNN)
-<!-- badges: end -->
-
-
 # Predictive Mean Matched Sequential K-Nearest Neighbor 
+
+<!-- badges: start -->
+  [![Travis build status](https://app.travis-ci.com/ck2136/PMMSKNN.svg?branch=master)](https://travis-ci.com/ck2136/PMMSKNN)
+  <!-- [![Codecov test coverage](https://codecov.io/gh//dplyr/branch/master/graph/badge.svg)](https://codecov.io/gh/tidyverse/dplyr?branch=master) -->
+<!-- badges: end -->
 
 ## Introduction
 
@@ -60,25 +60,24 @@ data("ChickWeight") ## example tug data
 ### Wrangle ChickWeight data
 ```{r wrangledata}
 # load only the TUG dataset
-full  <- ChickWeight %>%
-  rename(
-    patient_id = 3,
-    time = 2
-  )
+full  <- ChickWeight 
 
 # Train and Test split for all weight outcome: create 
 set.seed(1234)
-full <- PMMSKNN:::baselinemk(full, "patient_id", "time")
+full <- PMMSKNN:::baselinemk(full, "Chick", "Time")
 
 # Select 10 first patients as the test case
 full %<>%
   mutate(
-    patient_id = as.numeric(as.character(patient_id)),
-    train_test = ifelse(patient_id %in% c(1,2,20, 30, 40), 2, 1),
-    Diet = as.numeric(as.character(Diet))
+    # Need to convert the Chick (id column) into character
+    Chick = as.numeric(as.character(Chick)),
+    # Convert diet into numeric
+    Diet = as.numeric(as.character(Diet)),
+    # Select training and testing observations
+    train_test = ifelse(Chick %in% c(1,2,10,13,14,18,20,22,25,28,30,33,37,39,40,43,47), 2, 1)
   ) %>% 
-  # Need to have distinct patient id's for the full data
-  distinct(patient_id, time, .keep_all=TRUE)
+  # Need to have distinct id's for the full data
+  distinct(Chick, Time, .keep_all=TRUE) 
   
 # Check the structure of the dataset
 full %>% str
@@ -95,8 +94,9 @@ test_proc <- preproc(
                 knots_exp = c(0, 4, 8, 16), # Specify broken stick knots
                 out_time = 16,            # specify which timepoint to use 
                 outcome = "weight",          # specify outcome variable name
-                time_var = "time",        # specify time variable name
-                pat_id = "patient_id",    # specify patient id variable name
+                time_var = "Time",        # specify time variable name
+                id = "Chick",    # specify id variable name
+                baseline_var = "baseline", # specify baseline variable
                 varlist = c("Diet") # specify list of covariates for pmm
                 #filter_exp = "Time > 2"   # Filter observations that will be included
 )
@@ -110,15 +110,9 @@ test_proc %>% str(max.level=1)
 res <- loocv_function(
   
   # specify number or vector of numbers from {1,...,total number of patients in training data} 
-  nearest_n = c(35:37),
-  # enter training and testing post operative and fitted y90 dataset
-  train_post = test_proc$train_post,
-  ord_data = test_proc$train_o,
-  test_post = test_proc$test_post,
-  test_o = test_proc$test_o,
-  # Specify outcome variable and time variable name
-  outcome = "weight",
-  time_elapsed = "time",
+  nearest_n = c(10,20,30),
+  # Specify the preprocessed object that contains the training and testing datasets
+  preproc=test_proc,
 
   # Specify number of cores for parallel processing
   parallel=3,
@@ -136,6 +130,7 @@ res <- loocv_function(
   
   # Specify distribution for location, scale and shape 
   dist_fam = gamlss.dist::NO)
+
 ```
 
 
@@ -167,16 +162,7 @@ plot_cal(plotobj = res,
          test_proc = test_proc, 
          obs_dist = "median",
          outcome = "weight",
-         filt=FALSE,
-         pred_sum="mean",
-         #plot_by=seq(10,150,5),
-         loocv=FALSE,
-         filter_exp = NULL,
-         plot_cal_zscore=FALSE,
-         wtotplot=FALSE,
-         plotvals=FALSE,
-         iqrfull=NULL,
-         bs=FALSE
+         loocv=FALSE
          )
 ```
 
