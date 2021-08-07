@@ -50,7 +50,7 @@ test_that(
       out_time = 21,            # specify which timepoint to use 
       outcome = "weight",          # specify outcome variable name
       time_var = "Time",        # specify time variable name
-      pat_id = "Chick",    # specify patient id variable name
+      id = "Chick",    # specify patient id variable name
       baseline_var = "baseline",
       m = 20,
       varlist = c("b_weight") # specify list of covariates for pmm
