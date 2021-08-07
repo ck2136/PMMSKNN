@@ -201,8 +201,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     ) 
                 
                 # Coverage calculation
-                ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
-                       {.data$covsc = 0},
+                # ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
+                #        {.data$covsc = 0},
+                #        {perfdf <- perfdf %>%
+                #            mutate(
+                #                covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
+                #            )
+                #        })
+                
+                ifelse((max(abs(perfdf$cov - opt_cov), na.rm=TRUE) - min(abs(perfdf$cov - opt_cov), na.rm=TRUE)) == 0, 
+                       {perfdf$covsc = 0},
                        {perfdf <- perfdf %>%
                            mutate(
                                covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
@@ -280,7 +288,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 
                 nest_pred <- preproc$test_post %>%
                     filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
-                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
+                    tidyr::nest(data = c(setdiff(colnames(preproc$test_post),preproc$varname[3]))) %>%
                     mutate(
                         times = lapply(.data$data, function(data) {
                             data %>% 
@@ -407,7 +415,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 
                 nest_pred <- preproc$test_post %>%
                     filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
-                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
+                    tidyr::nest(data = c(setdiff(colnames(preproc$test_post),preproc$varname[3]))) %>%
                     mutate(
                         time_vals = lapply(.data$data, function(data) {
                             data %>% 
@@ -607,8 +615,16 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     ) 
                 
                 # Coverage calculation
-                ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
-                       {.data$covsc = 0},
+                # ifelse((max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE)) == 0, 
+                #        {.data$covsc = 0},
+                #        {perfdf <- perfdf %>%
+                #            mutate(
+                #                covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
+                #            )
+                #        })
+                
+                ifelse((max(abs(perfdf$cov - opt_cov), na.rm=TRUE) - min(abs(perfdf$cov - opt_cov), na.rm=TRUE)) == 0, 
+                       {perfdf$covsc = 0},
                        {perfdf <- perfdf %>%
                            mutate(
                                covsc = (abs(.data$cov - opt_cov) - min(abs(.data$cov - opt_cov), na.rm =TRUE)) / (max(abs(.data$cov - opt_cov), na.rm=TRUE) - min(abs(.data$cov - opt_cov), na.rm=TRUE))
@@ -684,7 +700,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                     
                     nest_pred <- preproc$test_post %>%
                         filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
-                        tidyr::nest(-!!sym(preproc$varname[3])) %>%
+                        tidyr::nest(data = c(setdiff(colnames(preproc$test_post),preproc$varname[3]))) %>%
                         mutate(
                             times = lapply(.data$data, function(data) {
                                 data %>% 
@@ -806,7 +822,7 @@ loocv_function_bs <- function(nearest_n = seq(20,150,by=10), # number to play wi
                 
                 nest_pred <- preproc$test_post %>%
                     filter(!!sym(preproc$varname[3]) %in% matched_test_ids) %>%
-                    tidyr::nest(-!!sym(preproc$varname[3])) %>%
+                    tidyr::nest(data = c(setdiff(colnames(preproc$test_post),preproc$varname[3]))) %>%
                     mutate(
                         time_vals = lapply(.data$data, function(data) {
                             data %>% 
