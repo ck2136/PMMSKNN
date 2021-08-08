@@ -7,10 +7,6 @@
 # Modified by   : ck1
 # }}}
 
-## Load packages
-library('dplyr')
-library('brokenstick')
-
 # LOOCV: Non Parallel {{{
 context("Running LOOCV with BrokenStick Implementation using ChickWeight Data")
 

@@ -25,11 +25,11 @@ baselinemk <- function(dftotf,
     dftotf <- dftotf %>%
         left_join(
                   dftotf %>%
-                      select(!!dplyr::sym(pat_id), !!dplyr::sym(time_var)) %>%
-                      filter(!!dplyr::sym(time_var) <= 0) %>%
-                      arrange(!!dplyr::sym(pat_id), desc(!!dplyr::sym(time_var))) %>%
-                      group_by(!!dplyr::sym(pat_id)) %>%
-                      mutate(baseline = if_else(row_number() == 1, 1, -1)) ,
+                      dplyr::select(!!dplyr::sym(pat_id), !!dplyr::sym(time_var)) %>%
+                      dplyr::filter(!!dplyr::sym(time_var) <= 0) %>%
+                      dplyr::arrange(!!dplyr::sym(pat_id), dplyr::desc(!!dplyr::sym(time_var))) %>%
+                      dplyr::group_by(!!dplyr::sym(pat_id)) %>%
+                      dplyr::mutate(baseline = if_else(row_number() == 1, 1, -1)) ,
                   by = c(pat_id, time_var)
                   ) %>%
     mutate(baseline = if_else(is.na(.data$baseline), 0,.data$baseline))

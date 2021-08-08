@@ -50,22 +50,22 @@ predZsc <- function(
                                                          xname=time_elapsed,
                                                          data=matchmodel,
                                                          xvalues=test_post %>%
-                                                             dplyr::filter(!!sym(idname)%in% x) %>%
-                                                             dplyr::select(!!sym(time_elapsed)) %>%
+                                                             dplyr::filter(!!dplyr::sym(idname)%in% x) %>%
+                                                             dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                              unlist %>% as.vector,
                                                          yval=test_post %>%
-                                                             dplyr::filter(!!sym(idname)%in% x) %>%
-                                                             dplyr::select(!!sym(outcome)) %>%
+                                                             dplyr::filter(!!dplyr::sym(idname)%in% x) %>%
+                                                             dplyr::select(!!dplyr::sym(outcome)) %>%
                                                              unlist %>% as.vector
                                                          ),
                                      test_id = rep(x, length(test_post %>%
-                                                             dplyr::filter(!!sym(idname)%in% x) %>%
-                                                             dplyr::select(!!sym(time_elapsed)) %>%
+                                                             dplyr::filter(!!dplyr::sym(idname)%in% x) %>%
+                                                             dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                              unlist %>% as.vector
                                                          )),
                                      time = test_post %>%
-                                         dplyr::filter(!!sym(idname)%in% x) %>%
-                                         dplyr::select(!!sym(time_elapsed)) %>%
+                                         dplyr::filter(!!dplyr::sym(idname)%in% x) %>%
+                                         dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                          unlist %>% as.vector
                                      ))
         }

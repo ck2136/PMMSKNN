@@ -250,22 +250,22 @@ pat_level_func_sknn <- function(
                                                                         xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(time_elapsed)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(outcome)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                                dplyr::select(!!sym(time_elapsed)) %>%
+                                                                                dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        dplyr::filter(!!sym(patid) %in% x) %>%
-                                                        dplyr::select(!!sym(time_elapsed)) %>%
+                                                        dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                        dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -290,10 +290,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct(!!sym(patid)) %>%
+                                              distinct(!!dplyr::sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct(!!sym(patid)) %>%
+                                                      distinct(!!dplyr::sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -304,22 +304,22 @@ pat_level_func_sknn <- function(
                                                                         xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(time_elapsed)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(outcome)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                                dplyr::select(!!sym(time_elapsed)) %>%
+                                                                                dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        dplyr::filter(!!sym(patid) %in% x) %>%
-                                                        dplyr::select(!!sym(time_elapsed)) %>%
+                                                        dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                        dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -361,10 +361,10 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct(!!sym(patid)) %>%
+                            distinct(!!dplyr::sym(patid)) %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
-                                    distinct(!!sym(patid)) %>%
+                                    distinct(!!dplyr::sym(patid)) %>%
                                     .[i,] %>% unlist %>% as.vector}
                             ),]  %>% unlist %>% as.vector
                         
@@ -663,12 +663,12 @@ pat_level_func_sknn <- function(
                 if(loocv){
                     
                     matchmodel <- train_post %>%
-                        filter(!!sym(patid) %in% (traintestmatchdf$nnarraytrain[,i] %>%
+                        filter(!!dplyr::sym(patid) %in% (traintestmatchdf$nnarraytrain[,i] %>%
                                                           head(n=n)))
                 } else {
                     
                     matchmodel <- train_post %>%
-                        filter(!!sym(patid) %in% c(train[[patid]][i], traintestmatchdf$nnarraytrain[,i] %>%
+                        filter(!!dplyr::sym(patid) %in% c(train[[patid]][i], traintestmatchdf$nnarraytrain[,i] %>%
                                                           head(n=(n-1))))
                     
                 }
@@ -759,10 +759,10 @@ pat_level_func_sknn <- function(
                                     # get predicted values using centles.pred()
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     for(x in (test_post %>%
-                                              distinct(!!sym(patid)) %>%
+                                              distinct(!!dplyr::sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct(!!sym(patid)) %>%
+                                                      distinct(!!dplyr::sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -773,22 +773,22 @@ pat_level_func_sknn <- function(
                                                                         xname="time",
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(time_elapsed)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(outcome)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                                dplyr::select(!!sym(time_elapsed)) %>%
+                                                                                dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        dplyr::filter(!!sym(patid) %in% x) %>%
-                                                        dplyr::select(!!sym(time_elapsed)) %>%
+                                                        dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                        dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -816,10 +816,10 @@ pat_level_func_sknn <- function(
                                     # - - - - - - - - - - - - - - - - - - - - - - #
                                     
                                     for(x in (test_post %>%
-                                              distinct(!!sym(patid)) %>%
+                                              distinct(!!dplyr::sym(patid)) %>%
                                               .[which(traintestmatchdf$nnarraytest[1,]  == {
                                                   train_post %>%
-                                                      distinct(!!sym(patid)) %>%
+                                                      distinct(!!dplyr::sym(patid)) %>%
                                                       .[i,] %>% unlist %>% as.vector}
                                               ),]  %>% unlist %>% as.vector)){
                                         #message(paste0("PREDICTING FOR TEST = ",x))
@@ -830,22 +830,22 @@ pat_level_func_sknn <- function(
                                                                         xname=time_elapsed,
                                                                         data=matchmodel,
                                                                         xvalues=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(time_elapsed)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                             unlist %>% as.vector,
                                                                         yval=test_post %>%
-                                                                            dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                            dplyr::select(!!sym(outcome)) %>%
+                                                                            dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                            dplyr::select(!!dplyr::sym(outcome)) %>%
                                                                             unlist %>% as.vector
                                                     ),
                                                     test_id = rep(x, length(test_post %>%
-                                                                                dplyr::filter(!!sym(patid) %in% x) %>%
-                                                                                dplyr::select(!!sym(time_elapsed)) %>%
+                                                                                dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                                                dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                                                 unlist %>% as.vector
                                                     )),
                                                     time = test_post %>%
-                                                        dplyr::filter(!!sym(patid) %in% x) %>%
-                                                        dplyr::select(!!sym(time_elapsed)) %>%
+                                                        dplyr::filter(!!dplyr::sym(patid) %in% x) %>%
+                                                        dplyr::select(!!dplyr::sym(time_elapsed)) %>%
                                                         unlist %>% as.vector
                                                 ))
                                     }
@@ -889,10 +889,10 @@ pat_level_func_sknn <- function(
                         
                         # select the test id's that corresopnd to current train patient
                         targetid<-test_post %>%
-                            distinct(!!sym(patid)) %>%
+                            distinct(!!dplyr::sym(patid)) %>%
                             .[which(traintestmatchdf$nnarraytest[1,]  == {
                                 train_post %>%
-                                    distinct(!!sym(patid)) %>%
+                                    distinct(!!dplyr::sym(patid)) %>%
                                     .[i,] %>% unlist %>% as.vector}
                             ),]  %>% unlist %>% as.vector
                         # targetrec<-test_post[which(test_post$patient_id %in% targetid), ] # ge tthe trainging set post op data

@@ -1,6 +1,6 @@
 Package: PMMSKNN
 Title: Predictive Mean Matched Sequential K Nearest Neighbor (PMMSKNN) Algorithm: Curve Matching Validation Tools for Knee Surgery Outcomes
-Version: 0.2.0.9003
+Version: 0.3.0.9003
 Authors@R: c(
     person("Chong", "Kim", email = "chong.kim@ucdenver.edu", role = c("aut", "cre")),
     person("Kathryn", "Colborn", email = "katryn.colborn@ucdenver.edu", role = "aut"),
@@ -10,7 +10,7 @@ Authors@R: c(
 Description: This package provides tools for validating curve matching 
     methodology applied to predict trajectories of Knee Surgery Outcomes 
     for patients.
-Depends: R (>= 4.1.0)
+Depends: R (>= 3.6.0)
 Imports: reshape2,
          broom,
          brokenstick, 

@@ -105,7 +105,7 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Check for duplicated values in baseline and postoperative
     # - - - - - - - - - - - - - - - - - - - - - - #
-    if(any(dff %>% filter(.$baseline == 1) %>% dplyr::select(!!sym(idcol)) %>% unlist %>% duplicated)){
+    if(any(dff %>% filter(.$baseline == 1) %>% dplyr::select(!!dplyr::sym(idcol)) %>% unlist %>% duplicated)){
         warning("Duplicate baseline values exist within training and testing set! remove them before running preproc")
     }
   
@@ -114,12 +114,12 @@ preproc <- function(dff,
       # Training set duplicated?
       dff %>%
       dplyr::filter(.$train_test == 1 & .$baseline == 1) %>%
-      dplyr::select(!!sym(idcol)) %>%
+      dplyr::select(!!dplyr::sym(idcol)) %>%
       unlist %>% duplicated,
       # Test set duplicated?
       dff %>%
       dplyr::filter(.$train_test == 2 & .$baseline == 1) %>%
-      dplyr::select(!!sym(idcol)) %>%
+      dplyr::select(!!dplyr::sym(idcol)) %>%
       unlist %>% duplicated
     ))
   ){
@@ -143,13 +143,13 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     exclude <- dff %>% 
         filter(.data$baseline == 1) %>%
-        dplyr::select(!!sym(idcol), !!sym(outcome)) %>% 
+        dplyr::select(!!dplyr::sym(idcol), !!dplyr::sym(outcome)) %>% 
         full_join(
                   dff %>% 
                       filter(.data$baseline ==1) %>%
-                      distinct(!!sym(idcol), .keep_all =TRUE) %>%
-                      dplyr::select(!!sym(idcol), !!sym(outcome)) %>% 
-                      dplyr::rename("p_outcome" = !!sym(outcome)),
+                      distinct(!!dplyr::sym(idcol), .keep_all =TRUE) %>%
+                      dplyr::select(!!dplyr::sym(idcol), !!dplyr::sym(outcome)) %>% 
+                      dplyr::rename("p_outcome" = !!dplyr::sym(outcome)),
                   by = c(idcol)
                   ) %>%
         filter(is.na(.data$p_outcome) | is.na(.[outcome])) 
@@ -165,8 +165,8 @@ preproc <- function(dff,
 
     # df_train <-dff  %>% filter_(paste0(split_var, "==", trainval)) 
     # df_test <- dff %>% filter_(paste0(split_var, "==",testval))
-    df_train <-dff  %>% filter(!!sym(split_var) == trainval)
-    df_test <- dff %>% filter(!!sym(split_var) == testval)
+    df_train <-dff  %>% filter(!!dplyr::sym(split_var) == trainval)
+    df_test <- dff %>% filter(!!dplyr::sym(split_var) == testval)
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Split test/train by pre and post using baseline_var
@@ -174,8 +174,8 @@ preproc <- function(dff,
 
     # pre_train_df <- df_train %>% filter_(paste0(baseline_var,"== 1"))
     # pre_test_df <- df_test %>% filter_(paste0(baseline_var, "== 1"))
-    pre_train_df <- df_train %>% filter(!!sym(baseline_var) == 1)
-    pre_test_df <- df_test %>% filter(!!sym(baseline_var) == 1)
+    pre_train_df <- df_train %>% filter(!!dplyr::sym(baseline_var) == 1)
+    pre_test_df <- df_test %>% filter(!!dplyr::sym(baseline_var) == 1)
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # Filter out the post-baseline observations
@@ -183,8 +183,8 @@ preproc <- function(dff,
     
     # post_train_df <- df_train %>% filter_(paste0(baseline_var, "== 0"))
     # post_test_df <- df_test %>% filter_(paste0(baseline_var, "== 0"))
-    post_train_df <- df_train %>% filter(!!sym(baseline_var) == 0)
-    post_test_df <- df_test %>% filter(!!sym(baseline_var) == 0)
+    post_train_df <- df_train %>% filter(!!dplyr::sym(baseline_var) == 0)
+    post_test_df <- df_test %>% filter(!!dplyr::sym(baseline_var) == 0)
 
     # - - - - - - - - - - - - - - - - - - - - - - #
     # use brokenstick to predict values at knots_exp
@@ -204,11 +204,11 @@ preproc <- function(dff,
 
     # est1 <- predict(fit, post_train_df, at="knots")
     # est1 <- predict(fit, post_train_df, x="knots", shape="wide")
-    est1 <- predict(fit, post_train_df, x="knots", shape="long") %>% dplyr::select(!!sym(idcol), !!sym(time_var), .pred) 
+    est1 <- predict(fit, post_train_df, x="knots", shape="long") %>% dplyr::select(!!dplyr::sym(idcol), !!dplyr::sym(time_var), .pred) 
     
     alldf <- left_join(
                        est1[round(est1[[time_var]], 3) == round(out_time,3),] %>%
-                       dplyr::select(!!sym(idcol), .pred) %>%
+                       dplyr::select(!!dplyr::sym(idcol), .pred) %>%
                        setNames(c(idcol,"yhat")) %>%
                           # need to change id bc it is a factor when outputted through predict()
                           mutate(!!idcol := !!parse_quo(paste0("as.numeric(as.character(",idcol,"))"), env=rlang::caller_env()))
@@ -244,9 +244,9 @@ preproc <- function(dff,
     # Create dataset with fitted outcome at out_time for training patients
     # - - - - - - - - - - - - - - - - - - - - - - #
     train_ordered <- alldf %>%
-        dplyr::select(!!sym(idcol)) %>%
+        dplyr::select(!!dplyr::sym(idcol)) %>%
         cbind(pmm$fitted.values) %>%
-        dplyr::rename(id = !!sym(idcol),
+        dplyr::rename(id = !!dplyr::sym(idcol),
                Fitted=`pmm$fitted.values`) %>%
                #Fitted=`pmm$mu.fv`) %>%
         arrange(.data$Fitted)
@@ -267,13 +267,13 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     
     test_ordered <- pre_test_df %>% 
-        dplyr::select(!!sym(idcol)) %>%
+        dplyr::select(!!dplyr::sym(idcol)) %>%
         bind_cols(pred = predict(pmm, data=alldf, 
                                  newdata=pre_test_df %>% 
                                             .[,c(outcome, varlist)]
                              )
         ) %>%
-        rename(id = !!sym(idcol)) %>%
+        rename(id = !!dplyr::sym(idcol)) %>%
         arrange(.data$pred)
 
     test_ordered <- test_ordered %>%

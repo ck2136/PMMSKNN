@@ -154,7 +154,7 @@ plot_func <- function(plotobj = plotobj,
       dffitmed <- filtdf %>%
         group_by(.data$dec) %>%
         # group_by(.data$dec) %>%
-        summarise(fitmed = MedianCI(!!sym(outcome), conf.level= 0.95,
+        summarise(fitmed = MedianCI(!!dplyr::sym(outcome), conf.level= 0.95,
                                     method = "exact", R = 10000)) 
       
       dfmedcoef <- dffitmed %>%
@@ -239,7 +239,7 @@ plot_func <- function(plotobj = plotobj,
     
     # correlation
     traincor <- cor(temp %>% 
-                      dplyr::select(!!sym(outcome), c50) %>%
+                      dplyr::select(!!dplyr::sym(outcome), c50) %>%
                       as.matrix, method="spearman") %>%
       .[1,2] %>%
       round(3) %>%
@@ -257,7 +257,7 @@ plot_func <- function(plotobj = plotobj,
         
         # Create Reference Plot 
         cptrainrefdf <- test_proc$train_post %>%
-          dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+          dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
           left_join(
             iqrfull ,
             by="time"
@@ -267,7 +267,7 @@ plot_func <- function(plotobj = plotobj,
           summarise_(avg_val =  paste0("avg_val = ", pred_sum, "(C50)")) %>%
           left_join(
             test_proc$train_post %>%
-              dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+              dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
               left_join(
                 iqrfull ,
                 by="time"
@@ -275,7 +275,7 @@ plot_func <- function(plotobj = plotobj,
               mutate(dec= ntile(.data$C50, 10)
               ) %>% left_join(
                 test_proc$train_post %>%
-                  dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+                  dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
                   left_join(
                     iqrfull ,
                     by="time"
@@ -471,7 +471,7 @@ plot_func <- function(plotobj = plotobj,
       dffitmed <- filtdf %>%
         group_by(.data$dec) %>%
         # group_by(.data$dec) %>%
-        summarise(fitmed = MedianCI(!!sym(outcome), conf.level= 0.95,
+        summarise(fitmed = MedianCI(!!dplyr::sym(outcome), conf.level= 0.95,
                                     method = "exact", R = 10000)) 
       
       dfmedcoef <- dffitmed %>%
@@ -581,7 +581,7 @@ plot_func <- function(plotobj = plotobj,
         print("creating reference plot")
         # Create Reference Plot 
         cptestrefdf <- test_proc$test_post %>%
-          dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+          dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
           left_join(
             iqrfull ,
             by="time"
@@ -591,7 +591,7 @@ plot_func <- function(plotobj = plotobj,
           summarise_(avg_val =  paste0("avg_val = ", pred_sum, "(C50)")) %>%
           left_join(
             test_proc$test_post %>%
-              dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+              dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
               left_join(
                 iqrfull ,
                 by="time"
@@ -599,7 +599,7 @@ plot_func <- function(plotobj = plotobj,
               mutate(dec= ntile(.data$C50, 10)
               ) %>% left_join(
                 test_proc$test_post %>%
-                  dplyr::select(!!sym(test_proc$varname[3]), !!sym(test_proc$varname[1]), !!sym(test_proc$varname[2])) %>% 
+                  dplyr::select(!!dplyr::sym(test_proc$varname[3]), !!dplyr::sym(test_proc$varname[1]), !!dplyr::sym(test_proc$varname[2])) %>% 
                   left_join(
                     iqrfull ,
                     by="time"

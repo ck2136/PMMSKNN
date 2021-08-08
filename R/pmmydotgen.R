@@ -72,7 +72,7 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                       # 6. Randomly sample one from 3 smallest
                                       # - - - - - - - - - - - - - - - - - - - - - #
                                       df[-x,] %>%
-                                          dplyr::select(id, !!sym(paste0(formula[2]))) %>%
+                                          dplyr::select(id, !!dplyr::sym(paste0(formula[2]))) %>%
                                           mutate("id = as.integer(id)") %>%
                                           filter(.data$id %in% (df[-x,] %>% 
                                                           dplyr::select(id) %>%
@@ -87,7 +87,7 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                                           head(n=5) %>% unlist %>% as.vector %>%
                                                           sample(., 1))
                                           ) %>%
-                                          dplyr::select(!!sym(paste0(formula[2]))) %>% unlist %>% as.vector
+                                          dplyr::select(!!dplyr::sym(paste0(formula[2]))) %>% unlist %>% as.vector
            })
                        })
 
@@ -144,7 +144,7 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                       # 6. Randomly sample one from 3 smallest
                                       # - - - - - - - - - - - - - - - - - - - - - #
                                       df %>%
-                                          dplyr::select(id, !!sym(paste0(formula[2]))) %>%
+                                          dplyr::select(id, !!dplyr::sym(paste0(formula[2]))) %>%
                                           mutate("id = as.integer(id)") %>%
                                           filter(.data$id %in% (df %>% 
                                                           dplyr::select(id) %>%
@@ -159,7 +159,7 @@ pmmydotgen <- function(df,  # df should be with id column and all other covariat
                                                           head(n=5) %>% unlist %>% as.vector %>%
                                                           sample(., 1))
                                           ) %>%
-                                          dplyr::select(!!sym(paste0(formula[2]))) %>% unlist %>% as.vector
+                                          dplyr::select(!!dplyr::sym(paste0(formula[2]))) %>% unlist %>% as.vector
            })
                        })
 

@@ -75,7 +75,10 @@ loocv_perf <- function(loocv_res,
             mutate(
                 covdiff = round(abs(.data$cov - opt_cov), perf_round_by),
                 rsc = (.data$rmse - min(.data$rmse, na.rm=TRUE)) / (max(.data$rmse, na.rm=TRUE) - min(.data$rmse, na.rm=TRUE)),
-                covsc = if((max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE)) == 0) { return(0)} else { (.data$covdiff - min(.data$covdiff, na.rm =TRUE)) / (max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE))},
+                # covsc = if((max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE)) == 0) { return(0)} else { (.data$covdiff - min(.data$covdiff, na.rm =TRUE)) / (max(.data$covdiff, na.rm=TRUE) - min(.data$covdiff, na.rm=TRUE))},
+                covscmax = max(.data$covdiff, na.rm=TRUE),
+                covscmin = min(.data$covdiff, na.rm=TRUE),
+                covsc = ifelse(covscmax - covscmin == 0,0,(.data$covdiff - covscmin) / (covscmax - covscmin)),
                 presc = (.data$prec - min(.data$prec, na.rm=TRUE)) / (max(.data$prec, na.rm=TRUE) - min(.data$prec, na.rm=TRUE)),
             ) %>%
             bind_cols(
@@ -83,7 +86,8 @@ loocv_perf <- function(loocv_res,
                     c(x$dropped_cases)
                 })
             ) %>%
-            mutate(totscore = .data$rsc + .data$covsc + .data$presc + .data$dcase)  
+            mutate(totscore = .data$rsc + .data$covsc + .data$presc + .data$dcase) %>%
+            dplyr::select(-covscmax, -covscmin)
         
         
     } else {

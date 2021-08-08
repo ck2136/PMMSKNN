@@ -76,15 +76,15 @@ loocv_function_sknn <- function(nearest_n = seq(20,150,by=10), # number to play 
     # DATASET MANIPULATION
     # - - - - - - - - - - - - - - - - - - - - - # 
     train <- fulldata %>%
-        filter(!!sym(preproc$varname[5]) == 1) %>% 
-        distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+        filter(!!dplyr::sym(preproc$varname[5]) == 1) %>% 
+        distinct(!!dplyr::sym(preproc$varname[3]), .keep_all=TRUE) %>%
         # distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(!!sym(preproc$varname[3]), all.vars(formula))
+        dplyr::select(!!dplyr::sym(preproc$varname[3]), all.vars(formula))
     test <- fulldata %>%
-        filter(!!sym(preproc$varname[5]) == 2) %>% 
-        distinct(!!sym(preproc$varname[3]), .keep_all=TRUE) %>%
+        filter(!!dplyr::sym(preproc$varname[5]) == 2) %>% 
+        distinct(!!dplyr::sym(preproc$varname[3]), .keep_all=TRUE) %>%
         # distinct_(.dots = patid, .keep_all=TRUE) %>%
-        dplyr::select(!!sym(preproc$varname[3]), all.vars(formula))
+        dplyr::select(!!dplyr::sym(preproc$varname[3]), all.vars(formula))
 
     # - - - - - - - - - - - - - - - - - - - - - # 
     # FIT REFERENCE GAMLSS MODEL
