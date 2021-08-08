@@ -10,7 +10,7 @@ Authors@R: c(
 Description: This package provides tools for validating curve matching 
     methodology applied to predict trajectories of Knee Surgery Outcomes 
     for patients.
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Imports: reshape2,
          broom,
          brokenstick, 
