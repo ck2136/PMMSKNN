@@ -2,7 +2,7 @@
 
 language: R
 r: 
-  - 4.1.0
+  - release
   
 cache: packages
 warnings_are_errors: false
