@@ -56,7 +56,7 @@ test_that(
       out_time = 21,            # specify which timepoint to use 
       outcome = "weight",          # specify outcome variable name
       time_var = "Time",        # specify time variable name
-      pat_id = "Chick",    # specify patient id variable name
+      id = "Chick",    # specify patient id variable name
       baseline_var = "baseline",
       m = 20,
       varlist = c("b_weight") # specify list of covariates for pmm
@@ -66,7 +66,7 @@ test_that(
     fin <- loocv_function(
       
       # specify number or vector of numbers from {1,...,total number of patients in training data} 
-      nearest_n = c(13:15),
+      nearest_n = c(10,30,50),
       # enter training and testing post operative and fitted y90 dataset
       preproc=test_proc,
       # interval = 10,

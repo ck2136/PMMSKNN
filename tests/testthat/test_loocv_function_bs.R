@@ -12,7 +12,7 @@ library('dplyr')
 library('brokenstick')
 
 # LOOCV: Non Parallel {{{
-context("Running LOOCV using ChickWeight Data")
+context("Running LOOCV with BrokenStick Implementation using ChickWeight Data")
 
 test_that(
   "loocv_function_bs() works using ChickWeight Data",
@@ -56,7 +56,7 @@ test_that(
       out_time = 21,            # specify which timepoint to use 
       outcome = "weight",          # specify outcome variable name
       time_var = "Time",        # specify time variable name
-      pat_id = "Chick",    # specify patient id variable name
+      id = "Chick",    # specify patient id variable name
       baseline_var = "baseline",
       m = 20,
       varlist = c("b_weight") # specify list of covariates for pmm
