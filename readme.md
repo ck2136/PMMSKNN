@@ -5,7 +5,8 @@
 
 [![Travis build
 status](https://app.travis-ci.com/ck2136/PMMSKNN.svg?branch=master)](https://travis-ci.com/ck2136/PMMSKNN)
-<!-- [![Codecov test coverage](https://codecov.io/gh//dplyr/branch/master/graph/badge.svg)](https://codecov.io/gh/tidyverse/dplyr?branch=master) -->
+[![Codecov test
+coverage](https://codecov.io/gh/ck2136/PMMSKNN/branch/master/graph/badge.svg)](https://codecov.io/gh/ck2136/PMMSKNN?branch=master)
 <!-- badges: end -->
 
 ## Introduction
