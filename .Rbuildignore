@@ -5,3 +5,6 @@ readme.*
 ^scripts/*
 .travis.yml
 ^\.travis\.yml$
+^.*\.Rproj$
+^\.Rproj\.user$
+^codecov\.yml$
