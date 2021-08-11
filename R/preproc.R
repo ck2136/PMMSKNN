@@ -65,9 +65,9 @@ preproc <- function(dff,
     # - - - - - - - - - - - - - - - - - - - - - - #
     # If baseline_var not  supplied, then stop
     # - - - - - - - - - - - - - - - - - - - - - - #
-    if(is.null(dff[,baseline_var])){
-        stop("baseline_var is NULL. 
-             Specify  baseline var as string. (e.g.baseline_var = 'baseline').
+    if(any(is.na(dff[,baseline_var]))){
+        stop("There are NA values in the baseline_var. 
+             Please check the baseline var and keep it as a complete variable. (e.g.baseline_var = 'baseline').
              Utility function baselinemk() may be used to create baseline variable.
              ")
     }
@@ -154,7 +154,33 @@ preproc <- function(dff,
                   ) %>%
         filter(is.na(.data$p_outcome) | is.na(.[outcome])) 
 
-    if(nrow(exclude) != 0){
+    # see who either doesn't have pre or post operative values
+    dff_prepostcheck <- expand.grid(
+      id = dff %>%
+        distinct(!!dplyr::sym(idcol), .keep_all = TRUE) %>%
+        pull(!!dplyr::sym(idcol)),
+      baseline = c(0,1)
+    ) 
+    colnames(dff_prepostcheck)[1] <- idcol
+    
+    dff_prepostcheck <- dff_prepostcheck %>% 
+      left_join(
+        dff %>%
+          group_by(!!dplyr::sym(idcol), baseline) %>%
+          summarise(n = n()) 
+      )
+    
+    exclude <- dff_prepostcheck %>%
+      filter(is.na(n)) %>%
+      pull(!!dplyr::sym(idcol))
+      
+    if(
+      any(
+        is.na(
+          dff_prepostcheck %>%
+          pull(n)
+        )
+      )){
         message(paste0("patients ", exclude," don't have post-operative values" ))
         stop("Not all patients have Post-Op values for LOOCV!")
     }
