@@ -93,11 +93,9 @@ loocv_perf <- function(loocv_res,
     } else {
 
         # For Testing Data aggregation ---------------------
-       if(is.null(loocv_res$pred_test)){
-          resdf <- rbindlist(loocv_res[[1]]$pred_test)
-       } else {
-          resdf <- rbindlist(loocv_res$pred_test)
-       }
+
+        resdf <- rbindlist(loocv_res$pred_test)
+
         prec <- c75 <- c25 <- cov <- NULL
         resdf[, cov := ifelse(get(outcome) >= c25 & get(outcome) <= c75, 1, 0)]
         resdf[, prec := c75 - c25]
