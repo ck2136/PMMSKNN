@@ -41,7 +41,7 @@ loocv_perf <- function(loocv_res,
                       )
                )
             }
-            resdf <- rbindlist(x$pred_train)
+            resdf <- rbindlist(x$pred_train)[rbindlist(x$pred_train) %>% complete.cases(.),]
             prec <- c75 <- c25 <- cov <- NULL
             resdf[, cov := ifelse(get(outcome) >= c25 & get(outcome) <= c75, 1, 0)]
             resdf[, prec := c75 - c25]

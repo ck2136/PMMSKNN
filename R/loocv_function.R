@@ -92,6 +92,8 @@ loocv_function <- function(nearest_n = seq(20,150,by=10), # number to play with
     # FIT REFERENCE GAMLSS MODEL
     # - - - - - - - - - - - - - - - - - - - - - # 
 
+    # Even if a time_window is specified, the entier training data will be used to estimate a model. THe time_window only specifies the prediction window that the user wants to capture. All other prediction time points will not be accounted for in the output. 
+    
     ref <- invisible(
         fitrefgamlss(
             dist_fam = dist_fam, # for gamlss distribution

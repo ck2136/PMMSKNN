@@ -54,7 +54,7 @@ plmout <- function(
                            data=matchmodel,
                            plot=FALSE)
     } else {
-        iqr<-centiles.pred(plmr, type="centiles",  xname = time_elapsed, xvalues=c(time_window[1]:time_window[2]),
+        iqr<-centiles.pred(plmr, type="centiles",  xname = time_elapsed, xvalues=c(time_window),
                            cent=c(2.5, 25,50,75, 97.5),
                            data=matchmodel,
                            plot=FALSE)
@@ -75,6 +75,7 @@ plmout <- function(
                        test_post=test_post, 
                        loocv=loocv,
                        time_elapsed=time_elapsed,
+                       time_window = time_window,
                        outcome = outcome, idname=idname,
                        i=i
         )
@@ -164,6 +165,7 @@ plmout <- function(
                        test_post=test_post, 
                        loocv=loocv,
                        time_elapsed=time_elapsed,
+                       time_window = time_window,
                        outcome = outcome, idname=idname,
                        i=i
         )

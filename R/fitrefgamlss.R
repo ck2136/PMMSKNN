@@ -150,7 +150,9 @@ fitrefgamlss <- function(
                                 data = na.omit(train_post),
                                 cent=c(25,75), plot=FALSE)
     } else {
-        iqrfull <- centiles.pred(ref, type="centiles", xname = time_elapsed, xvalues=c(time_window[1]:time_window[2]),
+        mint <- min(time_window)
+        maxt <- max(time_window)
+        iqrfull <- centiles.pred(ref, type="centiles", xname = time_elapsed, xvalues=time_window,
                                  data = na.omit(train_post),
                                  cent=c(25,75), plot=FALSE)
     }
