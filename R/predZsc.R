@@ -182,26 +182,25 @@ predZsc <- function(
             zsc = centiles.pred(plmr, type="z-scores",
                                 xname=time_elapsed,
                                 data=matchmodel,
-                                # xvalues=train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed],
-                                xvalues= train_post[train_post[[idname]] %in% ord_data$id[c(i)],] %>%
-                                    dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
-                                    dplyr::select(!!dplyr::sym(time_elapsed)) %>% 
-                                    unlist %>% as.vector,
+                                xvalues=train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed],
+                                # xvalues= train_post[train_post[[idname]] %in% ord_data$id[c(i)],] %>%
+                                #     dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
+                                #     dplyr::select(!!dplyr::sym(time_elapsed)) %>% 
+                                #     unlist %>% as.vector,
                                 # xvalues=train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed][[1]],
-                                yval = train_post[train_post[[idname]] %in% ord_data$id[c(i)],] %>%
-                                    dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
-                                    dplyr::select(!!dplyr::sym(outcome)) %>% 
-                                    unlist %>% as.vector),
-            # yval = train_post %>% dplyr::filter((!!dplyr::sym(idname) %in% ord_data$id[c(i)]) & (!!dplyr::sym(time_elapsed) %in% time_window)) %>% dplyr::select(!!sym(outcome)) %>% dplyr::pull()),
-                                # yval=train_post[train_post[[idname]] %in% ord_data$id[c(i)],outcome][[1]]),
+                                # yval = train_post[train_post[[idname]] %in% ord_data$id[c(i)],] %>%
+                                    # dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
+                                    # dplyr::select(!!dplyr::sym(outcome)) %>% 
+                                    # unlist %>% as.vector), # yval = train_post %>% dplyr::filter((!!dplyr::sym(idname) %in% ord_data$id[c(i)]) & (!!dplyr::sym(time_elapsed) %in% time_window)) %>% dplyr::select(!!sym(outcome)) %>% dplyr::pull()),
+                                yval=train_post[train_post[[idname]] %in% ord_data$id[c(i)],outcome]),
             # train_id = rep(ord_data$id[c(i)], length(train_post[train_post[[idname]]  %in% ord_data$id[c(i)],time_elapsed]))
             train_id = rep(ord_data$id[c(i)], length(train_post[train_post[[idname]] %in% ord_data$id[c(i)],] %>%
-                                    dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
+                                    # dplyr::filter(!!dplyr::sym(time_elapsed) %in% time_window) %>%
                                     dplyr::select(!!dplyr::sym(time_elapsed)) %>% 
                                     unlist %>% as.vector))
             ,
-            # time = train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed]
-            time = train_post %>% dplyr::filter((!!dplyr::sym(idname) %in% ord_data$id[c(i)]) & (!!dplyr::sym(time_elapsed) %in% time_window))
+            time = train_post[train_post[[idname]] %in% ord_data$id[c(i)],time_elapsed]
+            # time = train_post %>% dplyr::filter((!!dplyr::sym(idname) %in% ord_data$id[c(i)]) & (!!dplyr::sym(time_elapsed) %in% time_window))
         )
         return(trainzsc)
 
